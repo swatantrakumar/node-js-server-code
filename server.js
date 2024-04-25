@@ -4,6 +4,7 @@ const app = express();
 
 const { connectToDatabase } = require('./db/dbConnection');
 const dataRoutes = require('./routes/dataRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 // Middleware to parse JSON data
 app.use(express.json());
@@ -11,7 +12,8 @@ app.use(express.json());
 // Connect to the MongoDB server
 connectToDatabase().then(() => {
   // Use the data routes
-  app.use('/api', dataRoutes);
+  app.use('/api', dataRoutes);  
+  app.use('/auth', authRoutes); // Login route
 
   // Start the server
   app.listen(Config.PORT, () => {

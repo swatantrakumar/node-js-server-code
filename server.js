@@ -12,7 +12,7 @@ app.use(express.json());
 // Connect to the MongoDB server
 connectToDatabase().then(() => {
   // Use the data routes
-  app.use('/api', dataRoutes);  
+  app.use('/rest/rpts', dataRoutes);  
   app.use('/auth', authRoutes); // Login route
 
   // Start the server

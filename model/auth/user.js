@@ -1,6 +1,7 @@
 // Importing modules
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const BaseEntity = require("../baseEntity");
  
 // Creating user schema
 const UserSchema = mongoose.Schema({
@@ -47,5 +48,10 @@ UserSchema.methods.validPassword = function (password) {
     return this.hash === hash;
 };
  
-// Exporting module to allow it to be imported in other files
-const User = module.exports = mongoose.model('User', UserSchema);
+// Combine the base entity schema with the user schema
+const User =  mongoose.model('User', UserSchema,'app_user');
+
+// Extend the User model with methods from the base entity
+User.prototype = Object.assign(User.prototype, BaseEntity);
+
+module.exports = User;

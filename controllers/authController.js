@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { secretKey } = require('../utils/jwtUtils');
 // Importing User Schema
-const User = require('../model/user');
+const User = require('../model/auth/user');
 
 const login = async (req, res) =>  {
     // Find user with requested email
@@ -51,7 +51,8 @@ const signUp = async (req, res) => {
  
     // Initialize newUser object with request data
     newUser.name = req.body.name, 
-    newUser.email = req.body.email
+    newUser.email = req.body.email,
+    newUser.createdBy = req.body.email,
  
     // Call setPassword function to hash password
     newUser.setPassword(req.body.password);

@@ -83,15 +83,18 @@ const app = express();
 const { connectToDatabase } = require('./db/dbConnection');
 const dataRoutes = require('./routes/dataRoutes');
 const authRoutes = require('./routes/authRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
+const authenticateJWT = require('/middleware/authenticateJWT');
 
 // Middleware to parse JSON data
 app.use(express.json());
 
 // Connect to the MongoDB server
 connectToDatabase().then(() => {
-  app.use('/auth', authRoutes); // Login route
-  app.use('/rest/rpts', dataRoutes);  // Use the data routes
-  app.use('/rest/ins', dataRoutes);  // Use the data routes
+  // Custom middleware to handle text/plain requests
+  app.use('/auth',authMiddleware, authRoutes); // Login route
+  app.use('/rest/rpts',authenticateJWT, dataRoutes);  // Use the data routes
+  app.use('/rest/ins',authenticateJWT, dataRoutes);  // Use the data routes
   
 
   // Start the server

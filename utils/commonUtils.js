@@ -4,3 +4,8 @@ async function getModel(filePath) {
     const model = await import(absolutePath);
     return model.default;
 }
+function decodeBase64(encodeData){
+    return JSON.parse(Buffer.from(encodeData, 'base64').toString('utf-8'));
+}
+
+module.exports = {decodeBase64};

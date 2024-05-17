@@ -1,4 +1,5 @@
 const { getDb } = require('../db/dbConnection');
+const { getModel }  = require('../utils/commonUtils');
 
 const getData = async (req, res) => {
   try {
@@ -15,8 +16,8 @@ const getData = async (req, res) => {
 };
 
 const postData = async (req, res) => {
-  try {   
-    const db = getDb(); 
+  try {  
+    const model = "";
     const newData = req.body;
     var collectionName = "";
     var pageSize = 25;
@@ -34,19 +35,21 @@ const postData = async (req, res) => {
         if(newData.pageNo){
             pageNumber = newData.pageNo;
         }
-    }    
+    }  
+    if(collectionName != ""){
+      model = await getModel("model/auth/user.js");
+    }  
     var query = getQuery();  
-    if(collectionName != ""){   
-        let collection =  db.collection(collectionName);      
-        data = await collection.countDocuments(query)
+    if(model != ""){  
+        data = await User.countDocuments(query)
                 .then(count =>{
                     dataSize = count;                        
-                    return getDataFromDb(collection,query,pageNumber,pageSize);                        
+                    return getDataFromDb(model,query,pageNumber,pageSize);                        
                 })    
     }
     res.json(createResponse(data,dataSize));
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to Get data ' + req.body.value });
+  } catch (er) {
+    res.status(500).json({ error: 'Failed to Get data ' + req.body.value  + er});
   }
 };
 
@@ -61,7 +64,7 @@ function getDataFromDb(collection,query,pageNumber,pageSize){
     return collection.find(query)
                     .skip(skipAmount)
                     .limit(pageSize)
-                    .toArray();
+                    .exec();
 }
 function createResponse(data, dataSize) {
     return {

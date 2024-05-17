@@ -36,10 +36,14 @@ const signUp = async (req, res) => {
     // Creating empty user object
     let newUser = new User();
  
-    // Initialize newUser object with request data
-    newUser.name = req.body.name, 
-    newUser.email = req.body.email,
-    newUser.createdBy = req.body.email,
+    // Initialize newUser object with request data    
+    newUser.createdBy = req.body.email;
+    newUser.createdByName = req.body.name;
+    if(req.body && Object.keys(req.body).length > 0){
+        Object.keys(req.body).forEach(key => {
+            newUser[key] = req.body[key];
+        });
+    }
  
     // Call setPassword function to hash password
     newUser.setPassword(req.body.password);

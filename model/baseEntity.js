@@ -8,8 +8,10 @@ const BaseEntitySchema = mongoose.Schema({
     refCode: String,
     createdBy:String,
     createdDate : { type: Date, default: Date.now },
+    createdByName:String,
     updatedBy : String,
-    updateDate : { type: Date, default: Date.now }
+    updatedDate : { type: Date },
+    updatedByName : String
 });
 
 

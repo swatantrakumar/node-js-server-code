@@ -84,7 +84,7 @@ const { connectToDatabase } = require('./db/dbConnection');
 const dataRoutes = require('./routes/dataRoutes');
 const authRoutes = require('./routes/authRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
-const authenticateJWT = require('/middleware/authenticateJWT');
+const authenticateJWT = require('./middleware/authenticateJWT');
 
 // Middleware to parse JSON data
 app.use(express.json());

@@ -14,7 +14,8 @@ const UserSchema = mongoose.Schema({
         required: true
     },
     hash: String,
-    salt: String
+    salt: String,
+    ...BaseEntity.schema.obj
 });
  
 // Method to set salt and hash the password for a user
@@ -47,11 +48,14 @@ UserSchema.methods.validPassword = function (password) {
         this.salt, 1000, 64, `sha512`).toString(`hex`);
     return this.hash === hash;
 };
+
+// Extend the schema with BaseEntity methods
+// Object.assign(UserSchema, BaseEntity);
  
 // Combine the base entity schema with the user schema
 const User =  mongoose.model('User', UserSchema,'app_user');
 
 // Extend the User model with methods from the base entity
-User.prototype = Object.assign(User.prototype, BaseEntity);
+// User.prototype = Object.assign(User.prototype, BaseEntity);
 
 module.exports = User;

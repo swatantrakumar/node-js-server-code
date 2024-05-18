@@ -1,5 +1,6 @@
 const { getDb } = require('../db/dbConnection');
-const { getModel }  = require('../utils/commonUtils');
+const CommonUtils  = require('../utils/commonUtils');
+const commonUtils = new CommonUtils();
 
 const getData = async (req, res) => {
   try {
@@ -17,7 +18,7 @@ const getData = async (req, res) => {
 
 const postData = async (req, res) => {
   try {  
-    const model = "";
+    let model = "";
     const newData = req.body;
     var collectionName = "";
     var pageSize = 25;
@@ -37,11 +38,13 @@ const postData = async (req, res) => {
         }
     }  
     if(collectionName != ""){
-      model = await getModel("model/auth/user.js");
+      const classPath = commonUtils.getModulePath(collectionName);
+      console.log(classPath);
+      model = await commonUtils.getModel("server/model/auth/user.js");
     }  
     var query = getQuery();  
     if(model != ""){  
-        data = await User.countDocuments(query)
+        data = await model.countDocuments(query)
                 .then(count =>{
                     dataSize = count;                        
                     return getDataFromDb(model,query,pageNumber,pageSize);                        

@@ -5,5 +5,5 @@ const loadServer = require('./server/server.js');
 // Connect to the MongoDB server
 connectToDatabase().then(() => {
   loadApi(); 
-  loadServer();  
+  // loadServer();  
 });

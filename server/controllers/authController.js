@@ -4,6 +4,7 @@ const secretKey  = require('../utils/jwtUtils');
 const User = require('../model/auth/user');
 const CommonUtils = require('../utils/commonUtils');
 
+
 const commonUtils = new CommonUtils();
 
 class AuthController {
@@ -50,7 +51,7 @@ class AuthController {
         }
     
         // Call setPassword function to hash password
-        newUser.setPassword(req.body.password);
+        newUser.setPassword(req.body.password);        
     
         // Save newUser object to database
         newUser.save((err, User) => {

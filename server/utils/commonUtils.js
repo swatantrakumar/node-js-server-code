@@ -1,24 +1,31 @@
 const path = require('path');
 const { pathToFileURL } = require('url');
 const cacheService = require('../cache/cacheService');
+const Config = require('../enum/config');
 
 
 class CommonUtils {
 // Function to dynamically import models based on path
-    async getModel(filePath) {
-        const projectRoot = process.cwd();
-        const absolutePath = path.resolve(projectRoot, filePath);
+    async getModel(collectionName) {
+        const modelPath = this.getModulePath(collectionName);
+        let model = null;
+        if(path){
+            const filePath = Config.PACKAGE_PATH + modelPath +'.js';
+            const projectRoot = process.cwd();
+            const absolutePath = path.resolve(projectRoot, filePath);
 
-        // Validate the file path and extension
-        if (!absolutePath.endsWith('.js') && !absolutePath.endsWith('.mjs')) {
-            throw new Error('The file path must end with .js or .mjs');
+            // Validate the file path and extension
+            if (!absolutePath.endsWith('.js') && !absolutePath.endsWith('.mjs')) {
+                throw new Error('The file path must end with .js or .mjs');
+            }
+
+            // Convert the absolute path to a file URL
+            const fileUrl = pathToFileURL(absolutePath).href;
+
+            const file = await import(fileUrl);
+            model =  file.default;
         }
-
-        // Convert the absolute path to a file URL
-        const fileUrl = pathToFileURL(absolutePath).href;
-
-        const model = await import(fileUrl);
-        return model.default;
+        return model;
     }
     decodeBase64(encodeData){
         return JSON.parse(Buffer.from(encodeData, 'base64').toString('utf-8'));

@@ -66,7 +66,7 @@ class CacheService {
                         });
                     }                    
                 });
-                // console.log(this.pojoMap);
+                console.log("Pojo master Prepared !!!");
             }
         } catch (error) {
            console.log("Error = " + error); 

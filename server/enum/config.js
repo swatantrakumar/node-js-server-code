@@ -16,7 +16,8 @@ const Config = {
     STATUS_ACTIVE: 'active',
     STATUS_INACTIVE: 'inactive',
     ROLE_ADMIN: 'admin',
-    ROLE_USER: 'user'
+    ROLE_USER: 'user',
+    PACKAGE_PATH : 'server/model/'
   };
   
   // Export the config object

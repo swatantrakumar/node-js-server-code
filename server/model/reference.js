@@ -1,7 +1,6 @@
-const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
-const ReferenceSchema = new mongoose.Schema({
+const ReferenceSchema = mongoose.Schema({
     code:String,
     _id: { type: String, required: true },
     name:String,
@@ -16,6 +15,6 @@ const ReferenceSchema = new mongoose.Schema({
     allSelected:Boolean,
     select:Boolean
 })
-const Reference =  mongoose.model('Reference', ReferenceSchema);
+const Reference = ReferenceSchema;
 
 module.exports = Reference;

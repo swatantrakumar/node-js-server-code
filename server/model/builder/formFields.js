@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
-const GridFields = require('./gridFields');
+// const GridFields = require('./gridFields');
 const APIReference = require('./apiReference');
 const FieldProperty = require('./fieldProperty');
 const GridColorSettings = require('./gridColorSettings');
+const mapOfStringObject = require('./mapOfString');
 
 // Creating user schema
 const FormFieldsSchema = mongoose.Schema({ 
@@ -31,7 +33,7 @@ const FormFieldsSchema = mongoose.Schema({
     is_mandatory:Boolean,
     datatype:String,
     ddn_field:String,
-    card_fields:[GridFields],
+    // card_fields:[GridFields],
     api_params:String,
     api_params_criteria:[String],
     call_back_field:String,
@@ -42,7 +44,7 @@ const FormFieldsSchema = mongoose.Schema({
     onchange_api_params_criteria:[String],
     treeViewKeys:[String],
     do_not_auto_trigger_on_edit:Boolean,
-    tree_view_object:FormFields,
+    tree_view_object:this,
     onchange_function:Boolean,
     onchange_function_param:String,
     onchange_function_param_criteria:[String],
@@ -50,9 +52,9 @@ const FormFieldsSchema = mongoose.Schema({
     field_class:String,
     show_if:String,
     onclick:APIReference,
-    list_of_fields:[FormFields],
+    list_of_fields:[this],
     single_select_grid:Boolean,
-    gridColumns:[GridFields],
+    // gridColumns:[GridFields],
     disable_on_update:Boolean,
     disable_on_add:Boolean,
     can_update_if:{type:Map},
@@ -78,7 +80,12 @@ const FormFieldsSchema = mongoose.Schema({
     draggable:Boolean,
     find_child_form:Boolean,
     publicFile:{type:Boolean,default:false},
-    fields:[{type:Map}],
+    fields:[
+        {
+        type : Map,
+        of : mapOfStringObject
+        }
+    ],
     api:String,
     api_call_name:String,
     grid_row_refresh_icon:Boolean,
@@ -131,9 +138,9 @@ const FormFieldsSchema = mongoose.Schema({
 });
 
 // Combine the base entity schema with the user schema
-const FormFields =  mongoose.model('FormFields', FormFieldsSchema,'el_grid_fields');
+// const FormFields =  mongoose.model('FormFields', FormFieldsSchema,'el_grid_fields');
 
 // Extend the User model with methods from the base entity
 // User.prototype = Object.assign(User.prototype, BaseEntity);
 
-module.exports = FormFields;
+module.exports = FormFieldsSchema;

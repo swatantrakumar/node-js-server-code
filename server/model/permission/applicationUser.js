@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
+const S3FolderData = require('../generic/S3FolderData');
 
 // Creating user schema
 const ApplicationUserSchema = mongoose.Schema({ 

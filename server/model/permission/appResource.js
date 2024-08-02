@@ -1,6 +1,7 @@
 // Importing modules
 const mongoose = require('mongoose');
 const Reference = require('../reference');
+const AppResourceCriteria = require('./appResourceCriteria');
 
 
 // Creating BaseEntity schema

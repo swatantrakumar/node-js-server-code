@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const AppRoleMetadataSchema = require('./appRoleMetadata');
-const AppActions = require('./appActions');
+// const AppActions = require('./appActions');
 const AppResourceModule = require('./appResourceModule');
 
 // Creating user schema
@@ -9,7 +9,7 @@ const AppRoleSchema = mongoose.Schema({
     ...BaseEntity.schema.obj,
     name:String,
     appMetaData:[AppRoleMetadataSchema],
-    appActionsList:[AppActions],
+    appActionsList:[String],
     appResourceList:{
         type: Map,
         of: AppResourceModule

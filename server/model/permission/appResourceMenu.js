@@ -7,7 +7,7 @@ const AppResourceMenu = mongoose.Schema({
     ...AppResource.schema.obj,
     submenus:{
         type: Map,
-        of: AppResourceMenu
+        of: this
     },
     templateTabs:{
         type: Map,

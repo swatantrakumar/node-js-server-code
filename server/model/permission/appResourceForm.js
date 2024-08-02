@@ -7,7 +7,7 @@ const AppResourceForm = mongoose.Schema({
     ...AppResource.schema.obj,
     forms:{
         type: Map,
-        of: AppResourceForm
+        of: this
     },
     grids:{
         type: Map,

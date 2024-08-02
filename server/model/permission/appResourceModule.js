@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const AppResource = require('./appResource');
+const AppResourceMenu = require('./appResourceMenu');
 
 // Creating user schema
 const AppResourceModule = mongoose.Schema({ 

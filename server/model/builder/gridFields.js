@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
-const FormFields = require('./formFields');
+const FormFieldsSchema = require('./formFields');
+const mapOfStringObject = require('./mapOfString');
 
 // Creating user schema
 const GridFieldsSchema = mongoose.Schema({ 
@@ -25,7 +26,7 @@ const GridFieldsSchema = mongoose.Schema({
     onchange_api_params:String,
     onchange_call_back_field:String,
     onchange_api_params_criteria:[String],
-    tree_view_object:FormFields,
+    tree_view_object:FormFieldsSchema,
     onchange_function:Boolean,
     onchange_function_param:String,
     display_name:String,
@@ -33,14 +34,19 @@ const GridFieldsSchema = mongoose.Schema({
     show_if:String,
     APIonclick:Reference,
     bulk_download:Boolean,
-    gridColumns:[GridFields],
+    gridColumns:[this],
     min_length:Number,
     max_length:Number,
     width:String,
     text_align:String,
     grid:Reference,
     form:Reference,
-    fields:[{type:Map}],
+    fields:[
+        {
+        type : Map,
+        of : mapOfStringObject
+        }
+    ],
     grid_cell_function:String,
     hide_in_inline_grid:String,
     data_template:String,
@@ -53,9 +59,9 @@ const GridFieldsSchema = mongoose.Schema({
 });
 
 // Combine the base entity schema with the user schema
-const GridFields =  mongoose.model('GridFields', GridFieldsSchema,'el_grid_fields');
+// const GridFields =  mongoose.model('GridFields', GridFieldsSchema,'el_grid_fields');
 
 // Extend the User model with methods from the base entity
 // User.prototype = Object.assign(User.prototype, BaseEntity);
 
-module.exports = GridFields;
+module.exports = GridFieldsSchema;

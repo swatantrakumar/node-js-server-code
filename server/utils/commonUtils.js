@@ -38,6 +38,14 @@ class CommonUtils {
         }
         return modulePath;
     }
+    getReference(obj){
+        let ref = {};
+        if(obj?._id) ref['_id'] = obj._id;
+        if(obj?.code) ref['code'] = obj.code;
+        if(obj?.serialId) ref['serialId'] = obj.serialId;
+        if(obj?.name) ref['name'] = obj.name;
+        return ref;
+    }
 }
 
 module.exports = CommonUtils;

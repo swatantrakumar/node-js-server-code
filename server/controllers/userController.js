@@ -11,10 +11,10 @@ class UserController {
         const result = {};      
         const roleName = req.params.roleName;         
         const user = await userPermissionHandler.getApplicationUser(req); 
-        const response =  permissionHandler.getPermissionLists(user,result,roleName);
+        const response =  await permissionHandler.getPermissionLists(user,result,roleName);
+        user['chart'] = permissionHandler.getMongoPermission();
         result['user'] = user;
         result['permission'] = response;
-        result['rollList'] = []
         res.send(result);      
     }
 }

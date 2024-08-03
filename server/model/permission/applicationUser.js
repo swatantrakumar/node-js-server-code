@@ -50,6 +50,17 @@ const ApplicationUserSchema = mongoose.Schema({
     serviceStatus:String,
     userDiscipline:String
 });
+// / Define the virtual field
+ApplicationUserSchema.virtual('chart')
+    .get(function () {
+        return this._chart;
+    })
+    .set(function (value) {
+        this._chart = value;
+    });
+// Ensure virtual fields are included when converting to JSON and objects
+ApplicationUserSchema.set('toJSON', { virtuals: true });
+ApplicationUserSchema.set('toObject', { virtuals: true });
 
 // Combine the base entity schema with the user schema
 const ApplicationUser =  mongoose.model('ApplicationUser', ApplicationUserSchema,'app_application_user');

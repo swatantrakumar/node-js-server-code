@@ -6,6 +6,7 @@ class CacheService {
         if (!CacheService.instance) {
             this.cache = new Map();
             this.pojoMap = new Map();
+            this.userIdWithAppRoleIds = new Map();
             CacheService.instance = this;
           }
       

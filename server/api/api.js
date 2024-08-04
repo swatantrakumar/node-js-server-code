@@ -8,16 +8,19 @@ const authenticateJWT = require('../middleware/authenticateJWT');
 const Config = require('../enum/config');
 const LoadCache = require('../cache/loadCache');
 const PermissionHandler = require('../handler/permissionHandler');
+const TemplateHandler = require('../handler/templateHandler');
 
 const permissionHandler = new PermissionHandler();
+const templateHandler = new TemplateHandler();
 
 const app = express();
 
-function loadApi (){
+async function loadApi (){
     // Middleware to parse JSON data
     app.use(express.json());
-    LoadCache.refreshCache();
-    permissionHandler.fetAppRoleAndAppRoleBindingAndAppUsersGroupAndProcessData();
+    await LoadCache.refreshCache();
+    await permissionHandler.fetAppRoleAndAppRoleBindingAndAppUsersGroupAndProcessData();
+    await templateHandler.prepareTemplates();
 
     // Custom middleware to handle text/plain requests
     app.use('/rest/login',authMiddleware, authRoutes); // Login route

@@ -7,17 +7,28 @@ const ApplicationUser = require("../model/permission/applicationUser");
 const AppRole = require("../model/permission/appRole");
 const CommonUtils = require("../utils/commonUtils");
 const cacheService = require('../cache/cacheService');
+const TemplateTab = require("../model/builder/templateTab");
+const TemplateHandler = require("./templateHandler");
+const ProjectModules = require("../model/builder/projectModules");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
+const templateHandler = new TemplateHandler()
 const keyExtractor = obj => obj.id;
-const mongoChart = false;
+let mongoChart = false;
 
 class PermissionHandler{
     
     async getPermissionLists(user,result,roleName){
-        const userid = user.appId + "#" + user.refCode + "#" + user._id;
+        const modules = new Map();
+        const templateTabIdSet = new Set();
+        const fevouriteTemplateTabIdSet = new Set();
+        mongoChart = false;
+        
         try {
+            // Get userId from current user
+            const userid = user.appId + "#" + user.refCode + "#" + user._id;
+
             if (cacheService.userIdWithAppRoleIds.has(userid)) {
                 // Create arrays and maps
                 const menuListWithSubMenu = [];
@@ -32,14 +43,70 @@ class PermissionHandler{
                 const templateTabMap = new Map();
                 const projectModuleMap = new Map(); 
 
+                // Fetching all TemplateTab From DB well from central env. at the starting of application
+                await this.getMergedTemplateTabDataWithCentral(templateTabList, templateTabMap);
+
+                // Fetching the module list from DB well from central env. and convert to map
+                await this.getMergedProjectModuleDataWithCentral(projectModuleMap);
+
+                // Fetching the MenuListWithSubMenu list from DB as well from central env. and convert to map
+                // await this.getMergedMenuWithSubMenuWithCentral(menuListWithSubMenu, menuMapWithSubMenuMap, subMenuList, subMenuMap);
+
+                // Fetching the MenuList list from DBas well from central env. and convert to map
+                // await this.getMergedMenuWithCentral(menuMap, menuList);
+
+                // Fetching the Template list from DB as well from central env. and convert to map
+                // await this.getMergedTemplateWithCentral(templateList, templateMap);
+
                 const appRoleList = await this.getAppRoles(userid);
                 const roleList = this.prepareRollList(appRoleList);
                 result["rollList"] = roleList;
+                console.timeLog('getPermission','validateToken request received.');
             }
         } catch (error) {
             console.log(error);
         }
     }
+    async getMergedTemplateTabDataWithCentral(templateTabList, templateTabMap) {
+        const templateTabs = await this.getListFromDatabase(TemplateTab, '_id name tab_name label grid_reference');
+        if(templateTabs && templateTabs.length > 0){
+            templateTabs.forEach(tab => {
+                templateTabList.push(tab);
+            })
+        }
+        // Add all entries from templateTabMap2 to templateTabMap1
+        this.getObjectMap(templateTabList, keyExtractor).forEach((value, key) => {
+            templateTabMap.set(key, value);
+        });
+        // templateTabList.addAll(templateHandler.getTabListForCentral());
+        // templateTabMap.putAll(templateHandler.getTabMapForCentral());
+        // console.log(templateTabList);
+        // console.log(templateTabMap);
+    }
+    async getMergedProjectModuleDataWithCentral(projectModuleMap) {
+        const projectModuleList = await this.fetchAllModuleListFromDbAndConvertToMap(templateHandler.getCoreModuleList());
+        this.getObjectMap(projectModuleList, keyExtractor).forEach((value, key) => {
+            projectModuleMap.set(key, value);
+        });;
+        // projectModuleMap.putAll(templateHandler.getProjectModuleMapForCentral());
+        
+        console.log(projectModuleMap);
+        // console.log(templateTabMap);
+    }
+    async fetchAllModuleListFromDbAndConvertToMap(coreModuleList) {
+        try {
+            // Assuming idList is an array of ObjectId or strings representing ObjectIds
+            const modules = await ProjectModules.find({
+                name: { $in: coreModuleList }
+            }).select('_id name title index imgPath menu_list mouseHover description status appId refCode');
+    
+            return modules;
+        } catch (error) {
+            console.error('Error finding app roles:', error);
+            throw error;
+        }
+    }
+
     getMongoPermission(){
         return mongoChart;
     }
@@ -54,6 +121,7 @@ class PermissionHandler{
         this.processAppRoleBindings(appRoleBindingList, appUsersGroupMap, applicationUserMap, appGroupOfGroupMap);
         const appRoleList = this.getListFromDatabase(AppRole, "_id name appResourceList appMetaData appId refCode");
         // processAppRoleCriteria(appRoleList);
+        console.log('role id list store use wise !!!');
     }
     getListFromDatabase(model,list){
         return collectionHandler.findAllDocuments(model,list);

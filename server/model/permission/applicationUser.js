@@ -59,8 +59,16 @@ ApplicationUserSchema.virtual('chart')
         this._chart = value;
     });
 // Ensure virtual fields are included when converting to JSON and objects
-ApplicationUserSchema.set('toJSON', { virtuals: true });
-ApplicationUserSchema.set('toObject', { virtuals: true });
+// ApplicationUserSchema.set('toJSON', { virtuals: true });
+// ApplicationUserSchema.set('toObject', { virtuals: true });
+    ApplicationUserSchema.set('toJSON', {
+        virtuals: true,
+        versionKey: false,  // remove __v
+        transform: function (doc, ret) {   
+        delete ret.id;   // remove `id` field
+        return ret;
+        }
+    });
 
 // Combine the base entity schema with the user schema
 const ApplicationUser =  mongoose.model('ApplicationUser', ApplicationUserSchema,'app_application_user');

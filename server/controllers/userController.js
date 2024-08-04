@@ -7,15 +7,21 @@ const permissionHandler = new PermissionHandler();
 
 class UserController {
 
-    static validateUser = async (req, res) =>  {  
+    static validateUser = async (req, res) =>  { 
+        console.time('getPermission');        
         const result = {};      
         const roleName = req.params.roleName;         
         const user = await userPermissionHandler.getApplicationUser(req); 
-        const response =  await permissionHandler.getPermissionLists(user,result,roleName);
-        user['chart'] = permissionHandler.getMongoPermission();
-        result['user'] = user;
-        result['permission'] = response;
-        res.send(result);      
+        try {
+            const response =  await permissionHandler.getPermissionLists(user,result,roleName);
+            user['chart'] = permissionHandler.getMongoPermission();
+            result['user'] = user;
+            result['permission'] = response;
+            console.timeEnd('getPermission');
+            res.send(result); 
+        } catch (error) {
+            console.log(error);
+        }      
     }
 }
 

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const AppResource = require('./appResource');
-const GridFieldsSchema = require('../builder/gridFields');
+const GridFieldsSchema = require('../builder/gridFieldsSchema');
 
 // Creating user schema
 const AppResourceGrid = mongoose.Schema({ 

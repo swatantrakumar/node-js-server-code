@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
-const FormFieldsSchema = require('./formFields');
+const FormFieldsSchema = require('./formFieldsSchema');
 const mapOfStringObject = require('./mapOfString');
 
 // Creating user schema

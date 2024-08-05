@@ -1,20 +1,6 @@
-const { getDb } = require('../db/dbConnection');
 const CommonUtils  = require('../utils/commonUtils');
 const commonUtils = new CommonUtils();
 
-const getData = async (req, res) => {
-  try {
-    const db = getDb();
-    const collectionName = "app_form_template";
-    const data = await db.collection(collectionName)
-                    .find({})
-                    .limit(25)
-                    .toArray();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch data' });
-  }
-};
 
 const getGridData = async (req, res) => {
   try {  
@@ -108,4 +94,4 @@ function createResponse(data, dataSize) {
 }
 
 
-module.exports = { getData, getGridData, getPublicData};
+module.exports = {  getGridData, getPublicData};

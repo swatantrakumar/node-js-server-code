@@ -26,6 +26,23 @@ const ProjectModulesSchema = mongoose.Schema({
     menus:[Reference],
 });
 
+ProjectModulesSchema.virtual('menu_list')
+    .get(function () {
+        return this._menu_list;
+    })
+    .set(function (value) {
+        this._menu_list = value;
+    });
+
+ProjectModulesSchema.set('toJSON', {
+        virtuals: true,
+        versionKey: false,  // remove __v
+        transform: function (doc, ret) {   
+        delete ret.id;   // remove `id` field
+        return ret;
+        }
+    });
+
 // Combine the base entity schema with the user schema
 const ProjectModules =  mongoose.model('ProjectModules', ProjectModulesSchema,'gnrc_module');
 

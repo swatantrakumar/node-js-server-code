@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
-const TemplateTab = require('./templateTab');
+const Reference = require('../reference');
+const TemplateTabSchema = require('./templateTabSchema');
 
 // Creating user schema
 const TemplateSchema = mongoose.Schema({ 
@@ -12,9 +13,9 @@ const TemplateSchema = mongoose.Schema({
     type:String,
     description:String,
     defaultTab:Reference,
-    filterTab:TemplateTab,
+    filterTab:TemplateTabSchema,
     filterReference:Reference,
-    templateTabs:[TemplateTab],
+    templateTabs:[TemplateTabSchema],
     tabs:[Reference]
 });
 

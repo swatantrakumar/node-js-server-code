@@ -10,6 +10,10 @@ const cacheService = require('../cache/cacheService');
 const TemplateTab = require("../model/builder/templateTab");
 const TemplateHandler = require("./templateHandler");
 const ProjectModules = require("../model/builder/projectModules");
+const Menu = require("../model/builder/menu");
+const Template = require("../model/builder/template");
+const UserPreference = require("../model/permission/userPreference");
+const Operators = require("../enum/operator");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
@@ -50,17 +54,39 @@ class PermissionHandler{
                 await this.getMergedProjectModuleDataWithCentral(projectModuleMap);
 
                 // Fetching the MenuListWithSubMenu list from DB as well from central env. and convert to map
-                // await this.getMergedMenuWithSubMenuWithCentral(menuListWithSubMenu, menuMapWithSubMenuMap, subMenuList, subMenuMap);
+                await this.getMergedMenuWithSubMenuWithCentral(menuListWithSubMenu, menuMapWithSubMenuMap, subMenuList, subMenuMap);
 
                 // Fetching the MenuList list from DBas well from central env. and convert to map
-                // await this.getMergedMenuWithCentral(menuMap, menuList);
+                await this.getMergedMenuWithCentral(menuMap, menuList);
 
                 // Fetching the Template list from DB as well from central env. and convert to map
-                // await this.getMergedTemplateWithCentral(templateList, templateMap);
+                await this.getMergedTemplateWithCentral(templateList, templateMap);
 
-                const appRoleList = await this.getAppRoles(userid);
+                let appRoleList = await this.getAppRoles(userid);
                 const roleList = this.prepareRollList(appRoleList);
                 result["rollList"] = roleList;
+                if(roleName){
+                    let roleListByRoleName = [];
+                    if(appRoleList && Array.isArray(appRoleList) && appRoleList.length > 0){
+                        for (let i = 0; i < appRoleList.length; i++) {
+                            const role = appRoleList[i];
+                            if(role && role.name === roleName){
+                                roleListByRoleName.push(role)
+                                break;
+                            }                            
+                        }
+                    }
+                    if(roleListByRoleName &&  roleListByRoleName.length > 0){
+                        appRoleList = roleListByRoleName;
+                    }
+                }
+                const menuSubMenuIds = new Set();
+                const tabNameWithPermissionActionsMap = new Map();
+                const favouriteMenuAndSubMenuIds = new Set();
+                const booleanFlag = false;
+
+                const userPreference = await collectionHandler.findAllDocumentsWithListQueryCriteria(UserPreference, [{fname:"userId._id",operator:Operators.EQUAL, value:user._id}], "index", 0, 0);
+
                 console.timeLog('getPermission','validateToken request received.');
             }
         } catch (error) {
@@ -87,24 +113,115 @@ class PermissionHandler{
         const projectModuleList = await this.fetchAllModuleListFromDbAndConvertToMap(templateHandler.getCoreModuleList());
         this.getObjectMap(projectModuleList, keyExtractor).forEach((value, key) => {
             projectModuleMap.set(key, value);
-        });;
+        });
         // projectModuleMap.putAll(templateHandler.getProjectModuleMapForCentral());
         
-        console.log(projectModuleMap);
+        // console.log(projectModuleMap);
         // console.log(templateTabMap);
     }
     async fetchAllModuleListFromDbAndConvertToMap(coreModuleList) {
         try {
             // Assuming idList is an array of ObjectId or strings representing ObjectIds
             const modules = await ProjectModules.find({
-                name: { $in: coreModuleList }
-            }).select('_id name title index imgPath menu_list mouseHover description status appId refCode');
-    
+                name: { $nin: coreModuleList }
+            }).select('_id name title index imgPath menu_list mouseHover description status appId refCode');    
             return modules;
         } catch (error) {
             console.error('Error finding app roles:', error);
             throw error;
         }
+    }
+    async getMergedMenuWithSubMenuWithCentral(menuListWithSubMenu,menuMapWithSubMenu,subMenuList,subMenuMap){
+        const menuWithSubList = await this.fetchAllMenuWithSubMenuListAndConvertToMap();
+        menuWithSubList.forEach(menu =>{menuListWithSubMenu.push(menu)});
+        // menuListWithSubMenu.addAll(templateHandler.getMenuWithSubMenuListForCentral());
+        this.getObjectMap(menuListWithSubMenu, keyExtractor).forEach((value, key) => {
+            menuMapWithSubMenu.set(key, value);
+        });
+        menuListWithSubMenu.filter(menu => menu !== null && Array.isArray(menu.submenu) && menu.submenu.length > 0)
+            .forEach(menu => {
+                menu.submenu
+                .filter(submenu => submenu !== null && submenu._id !== null && !subMenuMap.has(submenu._id))
+                .forEach(submenu => subMenuMap.set(submenu._id, submenu));
+            });
+        const subMenuArray = Array.from(subMenuMap.values());
+        if(subMenuArray && subMenuArray.length > 0){
+            subMenuArray.forEach(submenu =>{subMenuList.push(submenu)});
+        }
+    }
+    async fetchAllMenuWithSubMenuListAndConvertToMap() {
+        try {
+            // Assuming idList is an array of ObjectId or strings representing ObjectIds
+            const coreModuleList = templateHandler.getCoreModuleList();
+            const menus = await Menu.find({
+                module_name: { $nin: coreModuleList }
+            }).select('_id name label index submenu._id submenu.name submenu.label submenu.index module_name');    
+            return menus;
+        } catch (error) {
+            console.error('Error finding Menu:', error);
+            throw error;
+        }
+    }
+    async fetchAllMenuListFromDbAndConvertToMap() {
+        try {
+            // Assuming idList is an array of ObjectId or strings representing ObjectIds
+            const coreModuleList = templateHandler.getCoreModuleList();
+            const menus = await Menu.find({
+                module_name: { $nin: coreModuleList }
+            }).select('_id name label index');    
+            return menus;
+        } catch (error) {
+            console.error('Error finding Menu:', error);
+            throw error;
+        }
+    }
+    async getMergedMenuWithCentral(menuMap, menuList) {
+        const MenuList = await this.fetchAllMenuListFromDbAndConvertToMap();
+        MenuList.forEach(menu =>{menuList.push(menu)});
+        // menuList.addAll(templateHandler.getMenuListForCentral());
+        this.getObjectMap(MenuList, keyExtractor).forEach((value, key) => {
+            menuMap.set(key, value);
+        });
+    }
+    async getMergedTemplateWithCentral(templateList, templateMap) {
+        const tempList = await this.fetchAllTemplateFromDbAndConvertToMap(templateHandler.getMenuWithSubMenuListForCentral())
+        tempList.forEach(temp =>{templateList.push(temp);});     
+        // templateList.addAll(templateHandler.getTemplateForCentral());
+        this.getObjectMap(templateList, keyExtractor).forEach((value, key) => {
+            templateMap.set(key, value);
+        });
+    }
+    async fetchAllTemplateFromDbAndConvertToMap(menuWithSubMenuForCentral) {
+        try {
+            // Assuming idList is an array of ObjectId or strings representing ObjectIds
+            const combinedList = this.getAllMenuAndSubMenuNamesFromTheList(menuWithSubMenuForCentral);
+            const templates = await Template.find({
+                name: { $nin: combinedList }
+            }).select('_id name module label tabs');    
+            return templates;
+        } catch (error) {
+            console.error('Error finding Menu:', error);
+            throw error;
+        }
+    }
+    getAllMenuAndSubMenuNamesFromTheList(menuWithSubMenuForCentral) {
+        let combinedNames = [];
+        if(menuWithSubMenuForCentral && menuWithSubMenuForCentral.length > 0){
+            const isValidName = (name) => name && name.trim().length > 0;
+            const menuNames = menuWithSubMenuForCentral
+                .map(menu => menu.name)
+                .filter(name => isValidName(name));
+
+            const submenuNames = menuWithSubMenuForCentral
+                .filter(menu => Array.isArray(menu.submenu) && menu.submenu.length > 0)
+                .flatMap(menu => menu.submenu
+                    .map(submenu => submenu.name)
+                    .filter(name => isValidName(name))
+                );
+            // Combine and deduplicate the names
+            combinedNames = Array.from(new Set([...topLevelNames, ...submenuNames]));
+        }
+        return combinedNames;
     }
 
     getMongoPermission(){

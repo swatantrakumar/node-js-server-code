@@ -1,7 +1,7 @@
 // Enum for various constant values in your project
 const Config = {
     // MongoDB connection settings
-    MONGODB_URI: 'mongodb://localhost:27017',
+    MONGODB_URI: 'mongodb://127.0.0.1:27017',
     DATABASE_NAME: 'central-elabs-prod',
     COLLECTION_NAME: 'yourCollectionName',
     

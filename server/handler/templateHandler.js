@@ -34,6 +34,9 @@ class TemplateHandler{
     getCoreModuleList() {
         return cacheService.coreModuleList;
     }
+    getMenuWithSubMenuListForCentral(){
+        return [];
+    }
 }
 
 module.exports = TemplateHandler;

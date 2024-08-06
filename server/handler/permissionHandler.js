@@ -14,6 +14,7 @@ const Menu = require("../model/builder/menu");
 const Template = require("../model/builder/template");
 const UserPreference = require("../model/permission/userPreference");
 const Operators = require("../enum/operator");
+const QueryCriteria = require("./queryHandler/queryCriteria");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
@@ -84,14 +85,61 @@ class PermissionHandler{
                 const tabNameWithPermissionActionsMap = new Map();
                 const favouriteMenuAndSubMenuIds = new Set();
                 const booleanFlag = false;
-
-                const userPreference = await collectionHandler.findAllDocumentsWithListQueryCriteria(UserPreference, [{fname:"userId._id",operator:Operators.EQUAL, value:user._id}], "index", 0, 0);
-
+                const userPreference = await collectionHandler.findAllDocumentsWithListQueryCriteria(UserPreference, [QueryCriteria.createWithFieldOperatorAndValue('userId._id', Operators.EQUAL, user._id)], "index", 0, 0);
+                const favouriteMenus = new Map();
+                if (userPreference  && Array.isArray(userPreference) && userPreference.length > 0){
+                    console.log("userprefrence");
+                    // populateFavouriteModuleForUserPreference(favouriteMenus, userPreference.get(0));
+                } 
+                if (favouriteMenus.size > 0) {
+                    // prepareMyFavorite(favouriteMenus, tabNameWithPermissionActionsMap, modules, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, templateMap, menuSubMenuIds, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
+                }
+                if (appRoleList && Array.isArray(appRoleList) && appRoleList.length > 0) {
+                    appRoleList.forEach(appRole => {
+                        const appResourceModuleTreeMap = appRole.appResourceList;
+                        if (appResourceModuleTreeMap && appResourceModuleTreeMap.size > 0) {
+                            // console.log(appRole.name);
+                            this.getModuleMasterObjectAndProcess(appRole, appResourceModuleTreeMap, modules, tabNameWithPermissionActionsMap, projectModuleMap, menuMap, subMenuMap,templateTabMap, menuMapWithSubMenuMap, menuListWithSubMenu, templateTabIdSet, templateMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
+                        }
+                    });
+                }
+                // console.log(modules); 
+                if (modules.size > 0 && favouriteMenus.size > 0) {
+                    booleanFlag = false;
+                    // prepareMyFavorite(favouriteMenus, tabNameWithPermissionActionsMap, modules, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, templateMap, menuSubMenuIds, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
+                }
                 console.timeLog('getPermission','validateToken request received.');
             }
         } catch (error) {
             console.log(error);
         }
+    }
+    
+    getModuleMasterObjectAndProcess(appRole, appResourceModuleTreeMap, modules, tabNameWithPermissionActionsMap, projectModuleMap, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, menuListWithSubMenu, templateTabIdSet, templateMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
+        // Iterate over the Map using for...of and entries()
+        for (const [key, value] of appResourceModuleTreeMap.entries()) {
+            if(value && value.reference && value.reference._id){
+                const projectModule = projectModuleMap.get(value.reference._id);
+                if(projectModule && projectModule.name){
+                    const moduleName = projectModule.name;
+                    if(moduleName === 'MCH' && moduleName === 'MDM'){
+                        mongoChart = true;
+                    }
+                    const appResourceModule = (modules.has(moduleName)) ? modules.get(moduleName) : {};
+                    appResourceModule['details'] = projectModule;
+                    if(value.reference.allSelected){
+                        // prepareResponseForModuleAllSelected(projectModules, appResourceModule, appRole?.appActionsList, tabNameWithPermissionActionsMap, menuListWithSubMenu, menuMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
+                    }else{
+                        // prepareMenuMapForModuleMaster(appRole?.appActionsList, appResourceModule, value?.menus, tabNameWithPermissionActionsMap, menuMap, templateMap, templateTabMap, templateTabIdSet, menuMapWithSubMenuMap, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
+                    }
+                    // console.log(appResourceModule);
+                    if (appResourceModule?.menuMap && appResourceModule?.menuMap.size > 0 && moduleName) {
+                        modules.set(moduleName, appResourceModule);
+                    }
+                }
+            }
+        }         
+              
     }
     async getMergedTemplateTabDataWithCentral(templateTabList, templateTabMap) {
         const templateTabs = await this.getListFromDatabase(TemplateTab, '_id name tab_name label grid_reference');

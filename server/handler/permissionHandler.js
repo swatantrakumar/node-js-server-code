@@ -21,6 +21,7 @@ const commonUtil = new CommonUtils();
 const templateHandler = new TemplateHandler()
 const keyExtractor = obj => obj.id;
 let mongoChart = false;
+let favouriteMenuAndSubMenuIds;;
 
 class PermissionHandler{
     
@@ -83,7 +84,7 @@ class PermissionHandler{
                 }
                 const menuSubMenuIds = new Set();
                 const tabNameWithPermissionActionsMap = new Map();
-                const favouriteMenuAndSubMenuIds = new Set();
+                favouriteMenuAndSubMenuIds = new Set();
                 const booleanFlag = false;
                 const userPreference = await collectionHandler.findAllDocumentsWithListQueryCriteria(UserPreference, [QueryCriteria.createWithFieldOperatorAndValue('userId._id', Operators.EQUAL, user._id)], "index", 0, 0);
                 const favouriteMenus = new Map();
@@ -130,7 +131,7 @@ class PermissionHandler{
                     if(value.reference.allSelected){
                         // prepareResponseForModuleAllSelected(projectModules, appResourceModule, appRole?.appActionsList, tabNameWithPermissionActionsMap, menuListWithSubMenu, menuMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                     }else{
-                        // prepareMenuMapForModuleMaster(appRole?.appActionsList, appResourceModule, value?.menus, tabNameWithPermissionActionsMap, menuMap, templateMap, templateTabMap, templateTabIdSet, menuMapWithSubMenuMap, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
+                        this.prepareMenuMapForModuleMaster(appRole?.appActionsList, appResourceModule, value?.menus, tabNameWithPermissionActionsMap, menuMap, templateMap, templateTabMap, templateTabIdSet, menuMapWithSubMenuMap, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                     }
                     // console.log(appResourceModule);
                     if (appResourceModule?.menuMap && appResourceModule?.menuMap.size > 0 && moduleName) {
@@ -140,6 +141,51 @@ class PermissionHandler{
             }
         }         
               
+    }
+    prepareMenuMapForModuleMaster(appActionsList, appResourceModule, menus, tabNameWithPermissionActionsMap,
+        menuMap, templateMap, templateTabMap, templateTabIdSet, menuMapWithSubMenuMap,
+        subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
+        if (menus && menus.size > 0) {
+            const appResourceMenuTreeMap = (appResourceModule.menuMap && appResourceModule.menuMap.size > 0) ? appResourceModule.menuMap : new Map();
+            for (const [key, value] of menus.entries()) {
+                if (value && value.reference && value.reference._id) {
+                    const menu = menuMapWithSubMenuMap.get(value.reference._id);
+                    const menuName = menu.name;
+                    if (menu && menuName) {
+                        const appResourceMenu = (appResourceMenuTreeMap.has(menuName)) ? appResourceMenuTreeMap.get(menuName) : {};
+                        const clonedMenu = menuMap.get(menu._id);
+                        if (!booleanFlag && clonedMenu || favouriteMenuAndSubMenuIds.includes(clonedMenu._id)) clonedMenu['favourite'] = true;
+                        appResourceMenu['details'] = clonedMenu;
+                        if (!booleanFlag) favouriteMenuAndSubMenuIds.add(menu._id);
+                        if (value.reference.allSelected) {
+                            if (menu.submenus && menu.submenus.size > 0) {
+                                // prepareResponseForSubMenuAllSelected(appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menu, appResourceMenu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
+                            } else {
+                                // prepareResponseForMenuAllSelected(menu, appResourceMenu, appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
+                            }
+                        } else {
+                            if (menu.submenus && menu.submenus.size > 0) {
+                                // getAllSelectedSubMenuData(appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menuEntry, appResourceMenu, menu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
+                            } else {
+                                // prepareMenuMaster(appActionsList, appResourceMenu, value?.templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
+                                if (appResourceMenu?.templateTabMap && appResourceMenu.templateTabMap.size > 0 && (menuSubMenuIds.includes(menu._id) || booleanFlag)) {
+                                    appResourceMenuTreeMap.set(menuName, appResourceMenu);
+                                    menuSubMenuIds.add(menu._id);
+                                }
+                            }
+                        }
+
+                        if ((appResourceMenu.submenuMap && appResourceMenu.submenuMap.size > 0 || appResourceMenu.templateTabMap && appResourceMenu.templateTabMap.size > 0) && (menuSubMenuIds.includes(menu._id) || booleanFlag)) {
+                            appResourceMenuTreeMap.set(menuName, appResourceMenu);
+                            menuSubMenuIds.add(menu._id);
+                        }
+                    }
+                }
+            }
+            if (appResourceMenuTreeMap.size > 0) {
+                appResourceModule['menuMap'] = appResourceMenuTreeMap;
+            }
+        }
     }
     async getMergedTemplateTabDataWithCentral(templateTabList, templateTabMap) {
         const templateTabs = await this.getListFromDatabase(TemplateTab, '_id name tab_name label grid_reference');

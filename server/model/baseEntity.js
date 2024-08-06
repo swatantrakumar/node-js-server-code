@@ -32,6 +32,25 @@ const BaseEntitySchema = mongoose.Schema({
     updatedByName : String
 });
 
+BaseEntitySchema.virtual('favourite')
+    .get(function () {
+        return this._menuMap;
+    })
+    .set(function (value) {
+        this._menuMap = value;
+    });
+
+    BaseEntitySchema.set('toJSON', {
+        virtuals: true,
+        versionKey: false,  // remove __v
+        transform: function (doc, ret) {   
+            delete ret.id;   // remove `id` field
+            return ret;
+        }
+    });
+
+
+
     // Add a pre middleware to update the updatedAt field before saving
     BaseEntitySchema.pre('save', function(next) {
         this.set({ createdDate: Date.now() });

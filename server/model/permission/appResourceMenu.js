@@ -15,7 +15,7 @@ const AppResourceMenu = mongoose.Schema({
     }
 });
 
-AppResourceMenu.virtual('details')
+    AppResourceMenu.virtual('details')
     .get(function () {
         return this._details;
     })

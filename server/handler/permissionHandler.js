@@ -111,7 +111,12 @@ class PermissionHandler{
                     booleanFlag = false;
                     // prepareMyFavorite(favouriteMenus, tabNameWithPermissionActionsMap, modules, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, templateMap, menuSubMenuIds, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
                 }
-                result["permission"] = modules;
+                // console.log(modules);
+                const finalPermission = this.mapToObj(modules)
+                result["permission"] = finalPermission;
+                
+                // this.mapToObj(modules);
+                // console.log(finalPermission);
                 console.timeLog('getPermission','validateToken request received.');
             }
         } catch (error) {
@@ -119,6 +124,21 @@ class PermissionHandler{
         }
     }
     
+    // Function to recursively convert a Map to an Object
+ mapToObj(map) {
+    const obj = {};
+    for (let [key, value] of map.entries()) {
+      if (value instanceof Map) {
+        obj[key] = this.mapToObj(value);
+      } else if (Array.isArray(value)) {
+        obj[key] = value.map(item => (item instanceof Map ? this.mapToObj(item) : item));
+      } else {
+        obj[key] = value;
+      }
+    }
+    return obj;
+  }
+  
     getModuleMasterObjectAndProcess(appRole, appResourceModuleTreeMap, modules, tabNameWithPermissionActionsMap, projectModuleMap, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, menuListWithSubMenu, templateTabIdSet, templateMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
         // Iterate over the Map using for...of and entries()
         for (const [key, value] of appResourceModuleTreeMap.entries()) {
@@ -129,14 +149,14 @@ class PermissionHandler{
                     if(moduleName === 'MCH' && moduleName === 'MDM'){
                         mongoChart = true;
                     }
-                    const appResourceModule = (modules.has(moduleName)) ? modules.get(moduleName) : {};
-                    appResourceModule['details'] = projectModule;
+                    const appResourceModule = modules.has(moduleName) ? modules.get(moduleName) : new Map();
+                    appResourceModule.set('details', projectModule);
                     if(value.reference.allSelected){
                         this.prepareResponseForModuleAllSelected(projectModule, appResourceModule, appRole?.appActionsList, tabNameWithPermissionActionsMap, menuListWithSubMenu, menuMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                     }else{
                         this.prepareMenuMapForModuleMaster(appRole?.appActionsList, appResourceModule, value?.menus, tabNameWithPermissionActionsMap, menuMap, templateMap, templateTabMap, templateTabIdSet, menuMapWithSubMenuMap, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                     }
-                    if (appResourceModule?.menuMap && appResourceModule?.menuMap.size > 0 && moduleName) {
+                    if (appResourceModule.has('menuMap') && appResourceModule.get('menuMap').size > 0 && moduleName) {
                         modules.set(moduleName, appResourceModule);
                     }
                 }
@@ -147,21 +167,21 @@ class PermissionHandler{
     prepareResponseForModuleAllSelected(projectModules, appResourceModule, appActionsList, tabNameWithPermissionActionsMap, menuListWithSubMenu, menuMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
         const menuListForModule = this.getMenuMasterByModuleName(projectModules.name, menuListWithSubMenu);
         if (menuListForModule && Array.isArray(menuListForModule) && menuListForModule.length > 0) {
-            const permissionMenuMasterTreeMap = (appResourceModule?.menuMap && appResourceModule?.menuMap?.size > 0) ? appResourceModule.menuMap : new Map();
+            const permissionMenuMasterTreeMap = (appResourceModule.has('menuMap') && appResourceModule.get('menuMap').size > 0) ? appResourceModule.get('menuMap') : new Map();
             menuListForModule.forEach(menu => {
                 const menuName = menu?.name;
                 if (menu && menuName) {
-                    const appResourceMenu = (permissionMenuMasterTreeMap.has(menuName)) ? permissionMenuMasterTreeMap.get(menuName) : {};
+                    const appResourceMenu = permissionMenuMasterTreeMap.has(menuName) ? permissionMenuMasterTreeMap.get(menuName) : new Map();
                     const clonedMenu = JSON.parse(JSON.stringify(menuMap.get(menu._id)));
                     if (!booleanFlag && clonedMenu || favouriteMenuAndSubMenuIds.has(clonedMenu._id)) clonedMenu['favourite'] = true;
-                    appResourceMenu['details'] = clonedMenu;
+                    appResourceMenu.set('details', clonedMenu);
                     if (!booleanFlag) favouriteMenuAndSubMenuIds.add(clonedMenu._id);
                     if (menu?.submenu && menu?.submenu?.length > 0) {
                         this.prepareResponseForSubMenuAllSelected(appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menu, appResourceMenu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                     } else {
                         this.prepareResponseForMenuAllSelected(menu, appResourceMenu, appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
                     }
-                    if (((appResourceMenu.templateTabMap && appResourceMenu.templateTabMap.size > 0 ) && (menuSubMenuIds.has(menu._id) || booleanFlag)) || (appResourceMenu.submenuMap && appResourceMenu.submenuMap.size > 0)) {
+                    if (((appResourceMenu.has('templateTabMap') && appResourceMenu.get('templateTabMap').size > 0 ) || ((appResourceMenu.has('submenuMap') && appResourceMenu.get('submenuMap').size > 0))) && (menuSubMenuIds.has(menu._id) || booleanFlag) ) {
                         permissionMenuMasterTreeMap.set(menuName, appResourceMenu);
                         menuSubMenuIds.add(menu._id);
                     }
@@ -169,7 +189,7 @@ class PermissionHandler{
             });
 
             if (permissionMenuMasterTreeMap?.size > 0) {
-                appResourceModule['menuMap'] = permissionMenuMasterTreeMap;
+                appResourceModule.set('menuMap', permissionMenuMasterTreeMap);
             }
         }
     }
@@ -184,36 +204,36 @@ class PermissionHandler{
         menuMap, templateMap, templateTabMap, templateTabIdSet, menuMapWithSubMenuMap,
         subMenuMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
         if (menus && menus.size > 0) {
-            const appResourceMenuTreeMap = (appResourceModule.menuMap && appResourceModule.menuMap.size > 0) ? appResourceModule.menuMap : new Map();
+            const appResourceMenuTreeMap = (appResourceModule.has('menuMap') && appResourceModule.get('menuMap').size > 0) ? appResourceModule.get('menuMap') : new Map();
             for (const [key, value] of menus.entries()) {
                 if (value && value.reference && value.reference._id) {
                     const menu = menuMapWithSubMenuMap.get(value.reference._id);
                     const menuName = menu.name;
                     if (menu && menuName) {
-                        const appResourceMenu = (appResourceMenuTreeMap.has(menuName)) ? appResourceMenuTreeMap.get(menuName) : {};
+                        const appResourceMenu = (appResourceMenuTreeMap.has(menuName)) ? appResourceMenuTreeMap.get(menuName) : new Map();
                         const clonedMenu = menuMap.get(menu._id);
                         if (!booleanFlag && clonedMenu || favouriteMenuAndSubMenuIds.has(clonedMenu._id)) clonedMenu['favourite'] = true;
-                        appResourceMenu['details'] = clonedMenu;
+                        appResourceMenu.set('details', clonedMenu);
                         if (!booleanFlag) favouriteMenuAndSubMenuIds.add(menu._id);
                         if (value.reference.allSelected) {
-                            if (menu.submenus && menu.submenus.size > 0) {
+                            if (menu?.submenu && menu?.submenu?.length > 0) {
                                 this.prepareResponseForSubMenuAllSelected(appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menu, appResourceMenu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                             } else {
                                 this.prepareResponseForMenuAllSelected(menu, appResourceMenu, appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
                             }
                         } else {
-                            if (menu.submenus && menu.submenus.size > 0) {
+                            if (value && value.submenus && value.submenus?.size > 0) {
                                 this.getAllSelectedSubMenuData(appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, value, appResourceMenu, menu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet);
                             } else {
                                 this.prepareMenuMaster(appActionsList, appResourceMenu, value?.templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
-                                if (appResourceMenu?.templateTabMap && appResourceMenu.templateTabMap.size > 0 && (menuSubMenuIds.has(menu._id) || booleanFlag)) {
+                                if (appResourceMenu.has('templateTabMap') && appResourceMenu.get('templateTabMap').size > 0 && (menuSubMenuIds.has(menu._id) || booleanFlag)) {
                                     appResourceMenuTreeMap.set(menuName, appResourceMenu);
                                     menuSubMenuIds.add(menu._id);
                                 }
                             }
                         }
 
-                        if ((appResourceMenu.submenuMap && appResourceMenu.submenuMap.size > 0 || appResourceMenu.templateTabMap && appResourceMenu.templateTabMap.size > 0) && (menuSubMenuIds.has(menu._id) || booleanFlag)) {
+                        if (((appResourceMenu.has('submenuMap') && appResourceMenu.get('submenuMap').size > 0) || (appResourceMenu.has('templateTabMap') && appResourceMenu.get('templateTabMap').size > 0)) && (menuSubMenuIds.has(menu._id) || booleanFlag)) {
                             appResourceMenuTreeMap.set(menuName, appResourceMenu);
                             menuSubMenuIds.add(menu._id);
                         }
@@ -221,23 +241,23 @@ class PermissionHandler{
                 }
             }
             if (appResourceMenuTreeMap.size > 0) {
-                appResourceModule['menuMap'] = appResourceMenuTreeMap;
+                appResourceModule.set('menuMap', appResourceMenuTreeMap);
             }
         }
     }
     prepareResponseForSubMenuAllSelected(appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, subMenuMap, menu, appResourceMenu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
-        const appResourceSubMenuTreeMap = (appResourceMenu.submenuMap && appResourceMenu.submenuMap.size > 0) ? appResourceMenu.submenuMap : new Map();
+        const appResourceSubMenuTreeMap = appResourceMenu.has('submenuMap') && appResourceMenu.get('submenuMap').size > 0 ? appResourceMenu.get('submenuMap') : new Map();
         menu.submenu.forEach(subMenu => {
             const subMenuForMenu = subMenuMap.get(subMenu._id);
             const subMenuForMenuName = subMenuForMenu?.name;
             if (subMenuForMenu && subMenuForMenuName) {
-                const appResourceSubMenu = (appResourceSubMenuTreeMap.has(subMenuForMenuName)) ? appResourceSubMenuTreeMap.get(subMenuForMenuName) : {};
+                const appResourceSubMenu = (appResourceSubMenuTreeMap.has(subMenuForMenuName)) ? appResourceSubMenuTreeMap.get(subMenuForMenuName) : new Map();
                 const clonedMenu = JSON.parse(JSON.stringify(subMenuForMenu));
                 if (!booleanFlag && clonedMenu || favouriteMenuAndSubMenuIds.has(clonedMenu._id)) clonedMenu['favourite'] = true;
-                appResourceSubMenu['details'] = clonedMenu;
+                appResourceSubMenu.set('details', clonedMenu);
                 if (!booleanFlag) favouriteMenuAndSubMenuIds.add(clonedMenu._id);
                 this.prepareResponseForMenuAllSelected(subMenu, appResourceSubMenu, appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
-                if (appResourceSubMenu?.templateTabMap && appResourceSubMenu?.templateTabMap.size > 0  && (menuSubMenuIds.has(subMenuForMenu._id) || booleanFlag)) {
+                if (appResourceSubMenu.has('templateTabMap') && appResourceSubMenu.get('templateTabMap').size > 0  && (menuSubMenuIds.has(subMenuForMenu._id) || booleanFlag)) {
                     appResourceSubMenuTreeMap.set(subMenuForMenuName, appResourceSubMenu);
                     menuSubMenuIds.add(subMenuForMenu._id);
                 }
@@ -245,7 +265,7 @@ class PermissionHandler{
         });
 
         if (appResourceSubMenuTreeMap.size > 0) {
-            appResourceMenu['submenuMap'] = appResourceSubMenuTreeMap;
+            appResourceMenu.set('submenuMap', appResourceSubMenuTreeMap);
         }
     }
     prepareResponseForMenuAllSelected(menu, appResourceMenu, appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet) {
@@ -254,15 +274,15 @@ class PermissionHandler{
         if (template && template?.name && template.tabs && template?.tabs?.length > 0) {
             const tabIds = template?.tabs.map(tab => tab._id);
             if (tabIds && Array.isArray(tabIds) && tabIds.length > 0) {
-                const appResourceTemplateTabTreeMap = (appResourceMenu.templateTabMap && appResourceMenu.templateTabMap.size > 0) ? appResourceMenu.templateTabMap : new Map();
+                const appResourceTemplateTabTreeMap = (appResourceMenu.has('templateTabMap') && appResourceMenu.get('templateTabMap').size > 0) ? appResourceMenu.get('templateTabMap') : new Map();
                 tabIds.forEach(tabId => {
                     const templateTab = templateTabMap.get(tabId);
                     const tabName = templateTab?.tab_name;
                     const tempTabId = templateTab?._id
                     if (templateTab && tabName && (templateTabIdSet.has(tempTabId) || booleanFlag)) {
-                        const appResourceTemplateTab = (appResourceTemplateTabTreeMap.has(tabName)) ? appResourceTemplateTabTreeMap.get(tabName) : {};
-                        appResourceTemplateTab['access'] = this.mergePermissionActions(appActionsList, tabName, tabNameWithPermissionActionsMap);
-                        appResourceTemplateTab['label'] = templateTab?.label;
+                        const appResourceTemplateTab = appResourceTemplateTabTreeMap.has(tabName) ? appResourceTemplateTabTreeMap.get(tabName) : new Map();
+                        appResourceTemplateTab.set('access', this.mergePermissionActions(appActionsList, tabName, tabNameWithPermissionActionsMap));
+                        appResourceTemplateTab.set('label',templateTab?.label);
                         const gridId = templateTab?.grid_reference != null ? templateTab?.grid_reference?._id:null;
                         if(gridId != null){
                             // const grid = templateHandler.gridMap.get(gridId);
@@ -274,7 +294,7 @@ class PermissionHandler{
                         }
                         const clonedTab = {};
                         clonedTab['_id'] = tempTabId;
-                        appResourceTemplateTab['details'] = clonedTab;
+                        appResourceTemplateTab.set('details', clonedTab);
                         appResourceTemplateTabTreeMap.set(tabName, appResourceTemplateTab);
                         templateTabIdSet.add(tempTabId);
                         if (!booleanFlag) fevouriteTemplateTabIdSet.add(tempTabId);
@@ -282,29 +302,33 @@ class PermissionHandler{
                 });
 
                 if(appResourceTemplateTabTreeMap.size > 0) {
-                    appResourceMenu['templateTabMap'] = appResourceTemplateTabTreeMap;
+                    appResourceMenu.set('templateTabMap', appResourceTemplateTabTreeMap);
                 }
             }
         }
     }
     getAllSelectedSubMenuData(appActionsList, tabNameWithPermissionActionsMap, templateMap,templateTabMap, templateTabIdSet, subMenuMap, menuEntry,appResourceMenu, menu, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
-        const appResourceSubMenuTreeMap = (appResourceMenu.submenuMap && appResourceMenu.submenuMap.size > 0) ? appResourceMenu.submenuMap : new Map();
+        const appResourceSubMenuTreeMap = appResourceMenu.has('submenuMap') && appResourceMenu.get('submenuMap').size > 0 ? appResourceMenu.get('submenuMap') : new Map();
         for (const [key, value] of  menuEntry.submenus.entries()) {
             if (value && value.reference && value.reference._id) {
                 const subMenu = subMenuMap.get(value.reference._id);
                 const subMenuName = subMenu?.name;
+                if(value && value.templateTabs instanceof Object){
+                    // console.log(value.templateTabs)
+                }
+                // const templateTabsMap = ;
                 if (subMenu && subMenuName) {
-                    const appResourceSubMenu = (appResourceSubMenuTreeMap.has(subMenuName)) ? appResourceSubMenuTreeMap.get(subMenuName) :{};
+                    const appResourceSubMenu = (appResourceSubMenuTreeMap.has(subMenuName)) ? appResourceSubMenuTreeMap.get(subMenuName) : new Map();
                     const clonedMenu = JSON.parse(JSON.stringify(subMenu));
                     if (!booleanFlag && clonedMenu || favouriteMenuAndSubMenuIds.has(clonedMenu._id)) clonedMenu['favourite'] = true;
-                    appResourceSubMenu['details']=clonedMenu;
+                    appResourceSubMenu.set('details', clonedMenu);
                     if (!booleanFlag) favouriteMenuAndSubMenuIds.add(clonedMenu._id);
                     if (value?.reference?.allSelected) {
                         this.prepareResponseForMenuAllSelected(subMenu, appResourceSubMenu, appActionsList, tabNameWithPermissionActionsMap, templateMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
                     } else {
-                        this.prepareMenuMaster(appActionsList, appResourceSubMenu, value?.templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
+                        this.prepareMenuMasterObject(appActionsList, appResourceSubMenu, value?.templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
                     }
-                    if (appResourceSubMenu?.templateTabMap && appResourceSubMenu.templateTabMap?.size > 0 && (menuSubMenuIds.has(subMenu._id) || booleanFlag)) {
+                    if (appResourceSubMenu.has('templateTabMap') && appResourceSubMenu.get('templateTabMap').size > 0 && (menuSubMenuIds.has(subMenu._id) || booleanFlag)) {
                         appResourceSubMenuTreeMap.set(subMenuName, appResourceSubMenu);
                         menuSubMenuIds.add(subMenu._id);
                     }
@@ -312,19 +336,32 @@ class PermissionHandler{
             }
         }
         if(appResourceSubMenuTreeMap?.size > 0) {
-            appResourceMenu['submenuMap'] = appResourceSubMenuTreeMap;
+            appResourceMenu.set('submenuMap', appResourceSubMenuTreeMap);
         }
     }
-    prepareMenuMaster(appActionsList, appResourceMenu,templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet) {
+    prepareMenuMaster(appActionsList, appResourceMenu,templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet) {        
         if (templateTabs && templateTabs.size > 0) {
-            const tabRoleMap = (appResourceMenu?.templateTabMap && appResourceMenu?.templateTabMap?.size > 0) ? appResourceMenu.templateTabMap : new Map();
+            const tabRoleMap = appResourceMenu.has('templateTabMap') && appResourceMenu.get('templateTabMap').size > 0 ? appResourceMenu.get('templateTabMap') : new Map();
             for (const [key, value] of templateTabs.entries()) {
                 if (value && value.reference && value.reference._id) {
                     const templateTab= templateTabMap.get(value.reference._id);
-                    const tabName = templateTab?.name;
+                    const tabName = templateTab?.tab_name;
                     if (templateTab && tabName && (templateTabIdSet.has(templateTab._id) || booleanFlag)) {
-                        const appResourceTemplateTab = (tabRoleMap.has(tabName)) ? tabRoleMap.get(tabName) : {};
-                        appResourceTemplateTab['access'] = this.mergePermissionActions(appActionsList, tabName, tabNameWithPermissionActionsMap);
+                        const appResourceTemplateTab = (tabRoleMap.has(tabName)) ? tabRoleMap.get(tabName) : new Map();
+                        appResourceTemplateTab.set('access', this.mergePermissionActions(appActionsList, tabName, tabNameWithPermissionActionsMap));
+                        appResourceTemplateTab.set('label',templateTab?.label);
+                        const gridId = templateTab?.grid_reference != null ? templateTab?.grid_reference?._id:null;
+                        if(gridId != null){
+                            // const grid = templateHandler.gridMap.get(gridId);
+                            // if(grid && grid?.api_params_criteria) {
+                            //     const map = new Map();
+                            //     map.set("api_params_criteria", grid?.api_params_criteria);
+                            //     appResourceTemplateTab['grid'] = map;
+                            // }
+                        }
+                        const clonedTab = {};
+                        clonedTab['_id'] = templateTab._id;
+                        appResourceTemplateTab.set('details', clonedTab);
                         tabRoleMap.set(tabName, appResourceTemplateTab);
                         templateTabIdSet.add(templateTab._id);
                         if (!booleanFlag) fevouriteTemplateTabIdSet.add(templateTab._id);
@@ -332,7 +369,41 @@ class PermissionHandler{
                 }
             }
             if (tabRoleMap?.size > 0) {
-                appResourceMenu['templateTabMap'] = tabRoleMap;
+                appResourceMenu.set('templateTabMap', tabRoleMap);
+            }
+        }
+    }
+    prepareMenuMasterObject(appActionsList, appResourceMenu,templateTabs, tabNameWithPermissionActionsMap, templateTabMap, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet) {        
+        if (templateTabs && Object.keys(templateTabs).length > 0) {
+            const tabRoleMap = appResourceMenu.has('templateTabMap') && appResourceMenu.get('templateTabMap').size > 0 ? appResourceMenu.get('templateTabMap') : new Map();
+            for (const [key, value] of Object.entries(templateTabs)) {
+                if (value && value.reference && value.reference._id) {
+                    const templateTab= templateTabMap.get(value.reference._id);
+                    const tabName = templateTab?.tab_name;
+                    if (templateTab && tabName && (templateTabIdSet.has(templateTab._id) || booleanFlag)) {
+                        const appResourceTemplateTab = (tabRoleMap.has(tabName)) ? tabRoleMap.get(tabName) : new Map();
+                        appResourceTemplateTab.set('access', this.mergePermissionActions(appActionsList, tabName, tabNameWithPermissionActionsMap));
+                        appResourceTemplateTab.set('label',templateTab?.label);
+                        const gridId = templateTab?.grid_reference != null ? templateTab?.grid_reference?._id:null;
+                        if(gridId != null){
+                            // const grid = templateHandler.gridMap.get(gridId);
+                            // if(grid && grid?.api_params_criteria) {
+                            //     const map = new Map();
+                            //     map.set("api_params_criteria", grid?.api_params_criteria);
+                            //     appResourceTemplateTab['grid'] = map;
+                            // }
+                        }
+                        const clonedTab = {};
+                        clonedTab['_id'] = templateTab._id;
+                        appResourceTemplateTab.set('details', clonedTab);
+                        tabRoleMap.set(tabName, appResourceTemplateTab);
+                        templateTabIdSet.add(templateTab._id);
+                        if (!booleanFlag) fevouriteTemplateTabIdSet.add(templateTab._id);
+                    }
+                }
+            }
+            if (tabRoleMap?.size > 0) {
+                appResourceMenu.set('templateTabMap', tabRoleMap);
             }
         }
     }

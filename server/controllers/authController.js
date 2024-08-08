@@ -12,7 +12,7 @@ class AuthController {
     static login = async (req, res) =>  {
         const body = commonUtils.decodeBase64(req.body);
         // Find user with requested email
-        User.findOne({ email: body.email }, function (err, user) {
+        User.findOne({ email: body.userId }, function (err, user) {
             if (user === null) {
                 return res.status(400).send({
                     message: "User not found."

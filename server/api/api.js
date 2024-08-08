@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const dataRoutes = require('../routes/dataRoutes');
 const publicDataRoutes = require('../routes/publicDataRoutes');
 const authRoutes = require('../routes/authRoutes');
@@ -10,10 +11,13 @@ const LoadCache = require('../cache/loadCache');
 const PermissionHandler = require('../handler/permissionHandler');
 const TemplateHandler = require('../handler/templateHandler');
 
+
 const permissionHandler = new PermissionHandler();
 const templateHandler = new TemplateHandler();
 
 const app = express();
+// Use CORS middleware
+app.use(cors());
 
 async function loadApi (){
     // Middleware to parse JSON data

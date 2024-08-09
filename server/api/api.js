@@ -9,11 +9,10 @@ const authenticateJWT = require('../middleware/authenticateJWT');
 const Config = require('../enum/config');
 const LoadCache = require('../cache/loadCache');
 const PermissionHandler = require('../handler/permissionHandler');
-const TemplateHandler = require('../handler/templateHandler');
+const templateHandler = require('../handler/templateHandler');
 
 
 const permissionHandler = new PermissionHandler();
-const templateHandler = new TemplateHandler();
 
 const app = express();
 // Use CORS middleware

@@ -46,6 +46,23 @@ class CommonUtils {
         if(obj?.name) ref['name'] = obj.name;
         return ref;
     }
+    getExcludeColumns(excludeFields){
+        let selectString = '';
+        if(excludeFields && excludeFields.length > 0){
+            selectString = excludeFields.map(field => `-${field}`).join(' ');
+        }
+        return selectString;        
+    }
+    getSelectColumns(selectFields){
+        let selectString = '';
+        if(selectFields && selectFields.length > 0){
+            selectString = selectFields.map(field => `${field}`).join(' ');
+        }
+        return selectString;        
+    }
+    cloneObject(obj){
+        return JSON.parse(JSON.stringify(obj));
+    }
 }
 
 module.exports = CommonUtils;

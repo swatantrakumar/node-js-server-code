@@ -1,5 +1,10 @@
+const RetrievalQueryHandler = require('../handler/queryHandler/retrievalQueryHandler');
 const CommonUtils  = require('../utils/commonUtils');
+
+
+
 const commonUtils = new CommonUtils();
+const retrievalQueryHandler = new RetrievalQueryHandler();
 
 
 const getGridData = async (req, res) => {

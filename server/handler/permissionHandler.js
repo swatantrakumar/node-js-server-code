@@ -8,7 +8,7 @@ const AppRole = require("../model/permission/appRole");
 const CommonUtils = require("../utils/commonUtils");
 const cacheService = require('../cache/cacheService');
 const TemplateTab = require("../model/builder/templateTab");
-const TemplateHandler = require("./templateHandler");
+const templateHandler = require("./templateHandler");
 const ProjectModules = require("../model/builder/projectModules");
 const Menu = require("../model/builder/menu");
 const Template = require("../model/builder/template");
@@ -19,7 +19,6 @@ const AppActions = require("../model/permission/appActions");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
-const templateHandler = new TemplateHandler();
 const keyExtractor = obj => obj.id;
 const keyNameExtractor = obj =>obj.name;
 let mongoChart = false;
@@ -285,12 +284,12 @@ class PermissionHandler{
                         appResourceTemplateTab.set('label',templateTab?.label);
                         const gridId = templateTab?.grid_reference != null ? templateTab?.grid_reference?._id:null;
                         if(gridId != null){
-                            // const grid = templateHandler.gridMap.get(gridId);
-                            // if(grid && grid?.api_params_criteria) {
-                            //     const map = new Map();
-                            //     map.set("api_params_criteria", grid?.api_params_criteria);
-                            //     appResourceTemplateTab['grid'] = map;
-                            // }
+                            const grid = templateHandler.gridMap.get(gridId);
+                            if(grid && grid?.api_params_criteria && Array.isArray(grid.api_params_criteria) && grid.api_params_criteria.length > 0) {
+                                const map = new Map();
+                                map.set("api_params_criteria", grid?.api_params_criteria);
+                                appResourceTemplateTab.set('grid', map);
+                            }
                         }
                         const clonedTab = {};
                         clonedTab['_id'] = tempTabId;
@@ -352,12 +351,12 @@ class PermissionHandler{
                         appResourceTemplateTab.set('label',templateTab?.label);
                         const gridId = templateTab?.grid_reference != null ? templateTab?.grid_reference?._id:null;
                         if(gridId != null){
-                            // const grid = templateHandler.gridMap.get(gridId);
-                            // if(grid && grid?.api_params_criteria) {
-                            //     const map = new Map();
-                            //     map.set("api_params_criteria", grid?.api_params_criteria);
-                            //     appResourceTemplateTab['grid'] = map;
-                            // }
+                            const grid = templateHandler.gridMap.get(gridId);
+                            if(grid && grid?.api_params_criteria && Array.isArray(grid.api_params_criteria) && grid.api_params_criteria.length > 0) {
+                                const map = new Map();
+                                map.set("api_params_criteria", grid?.api_params_criteria);
+                                appResourceTemplateTab.set('grid', map);
+                            }
                         }
                         const clonedTab = {};
                         clonedTab['_id'] = templateTab._id;
@@ -386,12 +385,12 @@ class PermissionHandler{
                         appResourceTemplateTab.set('label',templateTab?.label);
                         const gridId = templateTab?.grid_reference != null ? templateTab?.grid_reference?._id:null;
                         if(gridId != null){
-                            // const grid = templateHandler.gridMap.get(gridId);
-                            // if(grid && grid?.api_params_criteria) {
-                            //     const map = new Map();
-                            //     map.set("api_params_criteria", grid?.api_params_criteria);
-                            //     appResourceTemplateTab['grid'] = map;
-                            // }
+                            const grid = templateHandler.gridMap.get(gridId);
+                            if(grid && grid?.api_params_criteria && Array.isArray(grid.api_params_criteria) && grid.api_params_criteria.length > 0) {
+                                const map = new Map();
+                                map.set("api_params_criteria", grid?.api_params_criteria);
+                                appResourceTemplateTab.set('grid', map);
+                            }
                         }
                         const clonedTab = {};
                         clonedTab['_id'] = templateTab._id;

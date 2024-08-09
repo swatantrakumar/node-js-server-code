@@ -8,6 +8,16 @@ const GridColorSettings = mongoose.Schema({
 });
 
 
+// / Define the virtual field
+GridColorSettings.virtual('typoGraphy')
+    .get(function () {
+        return this._typoGraphy;
+    })
+    .set(function (value) {
+        this._typoGraphy = value;
+    });
+
+
 // Extend the User model with methods from the base entity
 // User.prototype = Object.assign(User.prototype, BaseEntity);
 

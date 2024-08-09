@@ -1,10 +1,12 @@
 const RetrievalQueryHandler = require('../handler/queryHandler/retrievalQueryHandler');
+const UserPermissionHandler = require('../handler/userPermissionHandler');
 const CommonUtils  = require('../utils/commonUtils');
 
 
 
 const commonUtils = new CommonUtils();
 const retrievalQueryHandler = new RetrievalQueryHandler();
+const userPermissionHandler = new UserPermissionHandler()
 
 
 const getGridData = async (req, res) => {
@@ -46,37 +48,30 @@ const getGridData = async (req, res) => {
     res.status(500).json({ error: 'Failed to Get data ' + req.body.value  + er});
   }
 };
-const getPublicData = async (req, res) =>{
-  try { 
-    const newData = req.body;
-    var collectionName = "";
-    var pageSize = 25;
-    var pageNumber = 1;
-    var data = [];
-    if(newData){
-      if(newData.value){
-          collectionName = newData.value;
-      }
-      if(newData.pageSize){
-          pageSize = newData.pageSize;
-      }
-      if(newData.pageNo){
-          pageNumber = newData.pageNo;
-      }
-    } 
-    if(collectionName != ""){      
-      model = await commonUtils.getModel(collectionName);      
-      var query = getQuery();  
-      if(model){  
-          data = await getDataFromDb(model,query,pageNumber,pageSize);    
-      }else{
-        console.log("Model Not exits for this collection Name => "+ collectionName);
-      }
-    } 
-    res.json(data);
-  } catch (er) {
-    res.status(500).json({ error: 'Failed to Get data ' + req.body.value  + er});
+const genericSearch = async (req, res) =>{
+  try {
+    const sortBy = retrievalQueryHandler.getDefaultSortByString(req?.value);
+    const result = await genericSearchWithOrderBy(sortBy, req);
+		res.json(result); 
+  }catch (e) {
+    console.log("Error while Generic call 'sobj' : " + e.message);
+    // e.printStackTrace();
   }
+};
+ async function genericSearchWithOrderBy(orderBy, req){
+    let kvp = req.body;
+		try {
+			console.log("sobj call receved for {} from Ip {}, Crlist : {}", kvp.value, getClientIp(request),kvp.crList);
+			const employee = userPermissionHandler.getApplicationUser(req);
+			if(orderBy==null) {
+				orderBy = retrievalQueryHandler.getDefaultSortByString(kvp.value);
+			}
+			return await retrievalQueryHandler.processApplicationSobjCall(employee,orderBy, kvp);
+		}catch (e) {
+			console.log("Error while Generic call 'sobj' : " + e.message);
+			// e.printStackTrace();
+		}
+		return null;
 }
 function getQuery(queyrList){
     let query = {};
@@ -99,4 +94,4 @@ function createResponse(data, dataSize) {
 }
 
 
-module.exports = {  getGridData, getPublicData};
+module.exports = {  getGridData, genericSearch };

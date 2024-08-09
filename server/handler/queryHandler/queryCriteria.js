@@ -27,7 +27,7 @@ class QueryCriteria {
         return new QueryCriteria(field, null, operator, value);
     }
 
-    static createWithFieldFieldTypeOperatorAndValueOrList(field, fieldType, operator, valueOrList) {
+    static createWithFieldTypeOperatorAndValueOrList(field, fieldType, operator, valueOrList) {
         if (Array.isArray(valueOrList)) {
             const criteria = new QueryCriteria(field, fieldType, operator, null);
             criteria.listOfItems = valueOrList;

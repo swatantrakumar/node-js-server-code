@@ -2,6 +2,7 @@ const path = require('path');
 const { pathToFileURL } = require('url');
 const cacheService = require('../cache/cacheService');
 const Config = require('../enum/config');
+const moment = require('moment');
 
 
 class CommonUtils {
@@ -62,6 +63,38 @@ class CommonUtils {
     }
     cloneObject(obj){
         return JSON.parse(JSON.stringify(obj));
+    }
+    parseBoolean(value) {
+        return String(value).toLowerCase() === 'true';
+    }
+    convertStringToDate(strDate) {
+        const date = moment(strDate, "DD/MM/YYYY").toDate();
+        return date;
+    }
+    endOfDay(date) {
+        const endOfDayDate = new Date(date);        
+        // Set the time to 23:59:59.999
+        endOfDayDate.setHours(23, 59, 59, 999);        
+        return endOfDayDate;
+    }
+    setDateToMidnight(date) {
+        const midnightDate = new Date(date);        
+        // Set the time to 00:00:00.000
+        midnightDate.setHours(0, 0, 0, 0);        
+        return midnightDate;
+    }
+    getDateAfterDays(aDate, n) {
+        const newDate = new Date(aDate);        
+        // Add n days to the date (or subtract if n is negative)
+        newDate.setDate(newDate.getDate() + n);
+        
+        return newDate;
+    }
+    removeSpecialCharactersByWithSameCase(str, separator) {
+        if (str && str.trim() !== "") {
+            return str.replace(/[^0-9a-zA-Z]/g, separator);
+        }
+        return null;
     }
 }
 

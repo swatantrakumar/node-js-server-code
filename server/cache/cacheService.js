@@ -6,6 +6,7 @@ class CacheService {
         if (!CacheService.instance) {
             this.cache = new Map();
             this.pojoMap = new Map();
+            this.fieldMap = new Map();
             this.userIdWithAppRoleIds = new Map();
             this.coreModuleList = [];
             CacheService.instance = this;
@@ -58,6 +59,8 @@ class CacheService {
                 const ttl = 3600
                 const expiry = now + ttl * 1000;
                 collection.forEach(pojo => {
+                  const aliases = [];
+                  aliases.push(pojo.name.toLowerCase());
                     const name =pojo.get('name').toLowerCase();
                     if(name){
                         this.pojoMap.set(name, {pojo,expiry});
@@ -65,8 +68,16 @@ class CacheService {
                     if(pojo && pojo.aliasNames && pojo.aliasNames.length > 0){
                         pojo.aliasNames.forEach(colName => {
                             this.pojoMap.set(colName,{pojo,expiry});
+                            aliases.push(colName.toLowerCase());
                         });
-                    }                    
+                    }   
+                    if (pojo.listOfVariables && pojo.listOfVariables.length > 0) {
+                      pojo.listOfVariables.forEach(variable => {
+                          aliases.forEach(alias => {
+                              this.fieldMap.set(alias + "_" + variable.key, variable.type);
+                          });
+                      });
+                    }                 
                 });
                 console.log("Pojo master Prepared !!!");
             }
@@ -83,6 +94,9 @@ class CacheService {
             return null;
         }
         return collection;
+    }
+    getFieldMap() {
+      return this.fieldMap;
     }
     
   }

@@ -1,10 +1,15 @@
 const CommonUtils = require("../../utils/commonUtils");
+const CollectionHandler = require("../collectionHandler");
 const templateHandler = require("../templateHandler");
+const QueryHandler = require("./queryHandler");
+const cacheService = require('../../cache/cacheService');
 
 const commonUtils = new CommonUtils();
+const queryHandler = new QueryHandler()
+const collectionHandler = new CollectionHandler();
 
 class RetrievalQueryHandler{
-    processCoreSobjCall(employee, orderBy, kvp){
+    async processApplicationSobjCall(employee, orderBy, kvp){
         const result = null;
         const refCode = kvp.key;
         const appId = kvp.key2;
@@ -16,7 +21,7 @@ class RetrievalQueryHandler{
         const criteriaList = [];
         const clazz = null;
         try {
-            clazz = this.reportHandler.getClass(colName);
+            clazz = commonUtils.getModel(colName);
         } catch (error) {
             logger.info("Error while fetching class by colName {}", colName);
         }
@@ -31,23 +36,23 @@ class RetrievalQueryHandler{
         }
 
         /**** set flag if Call has to be thorugh Central Server ***/
-        const isCentralApplication = false;
-        const centralizedModule = null;
+        // const isCentralApplication = false;
+        // const centralizedModule = null;
 
-        if(kvp.module && colName) {
-            centralizedModule = cacheService.getApplicationProperties(CENTRAL_PREFIX+"_"+kvp.module +"_" + colName);
-            const iamCentral = cacheService.getApplicationProperties(IS_CENTRAL_APPLICATION);
-            isCentralApplication = iamCentral == null ? false : (iamCentral.equalsIgnoreCase(YES) ? true : false);
-            if(!isCentralApplication && centralizedModule && centralizedModule === 'YES' ){
-                // return serverCallHandler.commonPostToExternalServer(CENTRAL_USER, API_SOBJ , kvp);
-            }
-        }
+        // if(kvp.module && colName) {
+        //     centralizedModule = cacheService.getApplicationProperties(CENTRAL_PREFIX+"_"+kvp.module +"_" + colName);
+        //     const iamCentral = cacheService.getApplicationProperties(IS_CENTRAL_APPLICATION);
+        //     isCentralApplication = iamCentral == null ? false : (iamCentral.equalsIgnoreCase(YES) ? true : false);
+        //     if(!isCentralApplication && centralizedModule && centralizedModule === 'YES' ){
+        //         // return serverCallHandler.commonPostToExternalServer(CENTRAL_USER, API_SOBJ , kvp);
+        //     }
+        // }
 
         /** END - >  set flag if Call has to be thorugh Central Server ***/
 
         if(clazz) {
             enrichQueryWithDefaultCriteria(employee,colName,criteriaList,kvp);
-            reportHandler.enrichQuery( colName, kvp, criteriaList );
+            queryHandler.enrichQuery( colName, kvp, criteriaList );
             switch (colName) {
 //                case "menu":
 //                        criteriaList.add(new QueryCriteria("appId", "string", Operator.EQUAL, appId));
@@ -70,7 +75,8 @@ class RetrievalQueryHandler{
                     if(kvp.module && templateHandler.getCoreModuleList().includes(kvp.module)){
                         // templateList = this.getTemplateFromCentralData(criteriaList);
                     } else {
-                        templateList = queryHandler.asList(clazz, criteriaList, effectiveOrderBy, pageNumber, pageSize);
+                        templateList = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz, criteriaList, effectiveOrderBy, pageNumber, pageSize);
+                        
                     }
                     if (kvp.module && kvp.module == "MYFAV" && (templateList == null || templateList.length > 0)) {
                         // templateList = this.getTemplateFromCentralData(criteriaList);
@@ -160,6 +166,13 @@ class RetrievalQueryHandler{
             console.log("Query Execute for /sobj " + criteriaList.toString());
         }
         return result;
+    }
+    getDefaultSortByString(value) {
+        const sortBy = "name";
+        if (cacheService.getPojoFromCollection(value) && staticDataCache.getPojoFromCollection(value)?.defaultSortBy) {
+            sortBy = staticDataCache.getPojoFromCollection(value)?.defaultSortBy;
+        }
+        return sortBy;
     }
 }
 module.exports = RetrievalQueryHandler;

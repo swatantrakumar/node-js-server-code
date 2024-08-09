@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
+const ClassFields = require('./classFields');
 
 // Creating user schema
 const PojoMasterSchema = mongoose.Schema({ 
@@ -36,6 +37,9 @@ const PojoMasterSchema = mongoose.Schema({
     code_string:String,
     code_type:String,
     packagePath:String,
+    class_fields:[ClassFields],
+    listOfVariables:[ClassFields],
+    // fetch_criterias:[PojoFetchCriteria],
     imports:[String],
     defaultSortBy:{
         type:String,

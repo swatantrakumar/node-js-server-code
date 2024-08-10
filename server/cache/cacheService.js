@@ -8,6 +8,8 @@ class CacheService {
             this.pojoMap = new Map();
             this.fieldMap = new Map();
             this.userIdWithAppRoleIds = new Map();
+            this.userIdWithTemplateTabIdMap = new Map();
+            this.userIdWithFevouriteTemplateTabIdMap = new Map();
             this.coreModuleList = [];
             CacheService.instance = this;
           }

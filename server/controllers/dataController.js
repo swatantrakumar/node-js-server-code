@@ -49,29 +49,30 @@ const getGridData = async (req, res) => {
   }
 };
 const genericSearch = async (req, res) =>{
-  try {
-    const sortBy = retrievalQueryHandler.getDefaultSortByString(req?.value);
-    const result = await genericSearchWithOrderBy(sortBy, req);
-		res.json(result); 
-  }catch (e) {
-    console.log("Error while Generic call 'sobj' : " + e.message);
-    // e.printStackTrace();
-  }
-};
- async function genericSearchWithOrderBy(orderBy, req){
+    let result = [];
     let kvp = req.body;
+    let orderBy = req?.params?.orderBy;  
 		try {
-			console.log("sobj call receved for {} from Ip {}, Crlist : {}", kvp.value, getClientIp(request),kvp.crList);
-			const employee = userPermissionHandler.getApplicationUser(req);
-			if(orderBy==null) {
+			console.log("sobj call receved for {} from Ip {}, Crlist : {}", kvp.value, getClientIp(req),kvp.crList);
+			const employee = await userPermissionHandler.getApplicationUser(req);
+			if(!orderBy) {
 				orderBy = retrievalQueryHandler.getDefaultSortByString(kvp.value);
 			}
-			return await retrievalQueryHandler.processApplicationSobjCall(employee,orderBy, kvp);
+			result = await retrievalQueryHandler.processApplicationSobjCall(employee,orderBy, kvp);
 		}catch (e) {
 			console.log("Error while Generic call 'sobj' : " + e.message);
 			// e.printStackTrace();
 		}
-		return null;
+		res.json(result);
+}
+function getClientIp(req) {
+  let remoteAddr = req.headers['x-forwarded-for'];
+  
+  if (!remoteAddr) {
+      remoteAddr = req.connection.remoteAddress || req.socket.remoteAddress;
+  }
+  
+  return remoteAddr;
 }
 function getQuery(queyrList){
     let query = {};

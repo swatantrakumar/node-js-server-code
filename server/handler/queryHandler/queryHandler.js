@@ -188,7 +188,7 @@ class QueryHandler {
         return query;
     };
     enrichQuery(collection, keyValuePair, criteriaList) {
-		const fieldType = null;
+		let fieldType = null;
 		if (keyValuePair.crList && Array.isArray(keyValuePair.crList) && keyValuePair.crList.length > 0) {
 			const crList = keyValuePair.crList;
 			for (let crCount = 0; crCount < crList.length; crCount++) {
@@ -216,7 +216,7 @@ class QueryHandler {
 		}
 	}
     populateQuery(criteriaList, matchCriteria, field, value, fieldType) {
-		const values = null;
+		let values = null;
 		switch (matchCriteria) {
 			case "eq": this.eq(criteriaList, field, value, fieldType); break;
 			case "eqic": this.fieldTypeEqualIgnoreCase(criteriaList, field, value); break;

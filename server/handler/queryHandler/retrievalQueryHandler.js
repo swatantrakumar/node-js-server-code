@@ -3,14 +3,16 @@ const CollectionHandler = require("../collectionHandler");
 const templateHandler = require("../templateHandler");
 const QueryHandler = require("./queryHandler");
 const cacheService = require('../../cache/cacheService');
+const PermissionHandler = require("../permissionHandler");
 
 const commonUtils = new CommonUtils();
 const queryHandler = new QueryHandler()
 const collectionHandler = new CollectionHandler();
+const permissionHandler = new PermissionHandler();
 
 class RetrievalQueryHandler{
     async processApplicationSobjCall(employee, orderBy, kvp){
-        const result = null;
+        let result = null;
         const refCode = kvp.key;
         const appId = kvp.key2;
         const caseId = kvp.key3;
@@ -18,12 +20,13 @@ class RetrievalQueryHandler{
         const log = kvp.log;
         const pageSize = kvp.pageSize == 0 ? 50 : kvp.pageSize;
         const pageNumber = kvp.pageNo;
-        const criteriaList = [];
-        const clazz = null;
+        let criteriaList = [];
+        let templateList = [];
+        let clazz = null;
         try {
-            clazz = commonUtils.getModel(colName);
+            clazz = await commonUtils.getModel(colName);
         } catch (error) {
-            logger.info("Error while fetching class by colName {}", colName);
+            console.log("Error while fetching class by colName {}", colName);
         }
         if (clazz == null) {
             console.log("Getting Query for " + colName + " failed");
@@ -51,7 +54,7 @@ class RetrievalQueryHandler{
         /** END - >  set flag if Call has to be thorugh Central Server ***/
 
         if(clazz) {
-            enrichQueryWithDefaultCriteria(employee,colName,criteriaList,kvp);
+            // enrichQueryWithDefaultCriteria(employee,colName,criteriaList,kvp);
             queryHandler.enrichQuery( colName, kvp, criteriaList );
             switch (colName) {
 //                case "menu":
@@ -81,7 +84,7 @@ class RetrievalQueryHandler{
                     if (kvp.module && kvp.module == "MYFAV" && (templateList == null || templateList.length > 0)) {
                         // templateList = this.getTemplateFromCentralData(criteriaList);
                     }
-                    objList = [];
+                    let objList = [];
                     try {
                         const array = commonUtils.cloneObject(templateList);
                         for (let i = 0; i < array.length; i++) {
@@ -99,7 +102,7 @@ class RetrievalQueryHandler{
                                 // Iterate over the templateTabs to set isFavourite to true and then filter
                                 const updatedTabs = template1.templateTabs
                                 .map(tab => {
-                                    if (fevouriteTemplateTabIdSet.has(tab._id)) {
+                                    if (fevouriteTemplateTabIdSet && fevouriteTemplateTabIdSet.has(tab._id)) {
                                     tab['favourite'] = true; // Equivalent to a.setFavourite(true)
                                     return tab;
                                     }
@@ -109,15 +112,15 @@ class RetrievalQueryHandler{
                                 // Set the filtered and updated tabs back to template1
                                 template1.templateTabs = updatedTabs;                                
                                 objList.push(template1);
-                            } else if ( templateTabSet && templateTabSet.length > 0 && template &&  template.templateTabs && template.templateTabs.length >= 1 && template.tabs && template.tabs.length >= 1) {
+                            } else if ( templateTabSet && templateTabSet.size > 0 && template &&  template.templateTabs && template.templateTabs.length >= 1 && template.tabs && template.tabs.length >= 1) {
                                 template1.tabs = template1.tabs.filter(tab => templateTabSet.has(tab._id));
                                 // Iterate over the templateTabs to set isFavourite to true and then filter
                                 const updatedTabs = template1.templateTabs
                                 .map(tab => {
-                                    if (fevouriteTemplateTabIdSet.has(tab._id)) {
+                                    if (fevouriteTemplateTabIdSet && fevouriteTemplateTabIdSet.has(tab._id)) {
                                         tab['favourite'] = true; // Equivalent to a.setFavourite(true)                                    
                                     }
-                                    if(templateTabSet.includes(tab._id)){
+                                    if(templateTabSet.has(tab._id)){
                                         return tab;
                                     }
                                 }); // Filter out undefined entries (i.e., those not in the favourite set)
@@ -130,7 +133,7 @@ class RetrievalQueryHandler{
                             }
                         }
                     } catch (e) {
-                        e.printStackTrace();
+                        console.log("Query Execute for /sobj " + e.message);
                     }
                     result = objList;
                     break;
@@ -160,8 +163,9 @@ class RetrievalQueryHandler{
                 //         }
                 //     }
                 //     break;
-                default:
-                    result = queryHandler.asList(clazz,criteriaList,effectiveOrderBy, pageNumber, pageSize);
+                default:                     
+                     result = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz, criteriaList, effectiveOrderBy, pageNumber, pageSize);
+                     break;
             }
             console.log("Query Execute for /sobj " + criteriaList.toString());
         }
@@ -169,8 +173,8 @@ class RetrievalQueryHandler{
     }
     getDefaultSortByString(value) {
         const sortBy = "name";
-        if (cacheService.getPojoFromCollection(value) && staticDataCache.getPojoFromCollection(value)?.defaultSortBy) {
-            sortBy = staticDataCache.getPojoFromCollection(value)?.defaultSortBy;
+        if (cacheService.getPojoFromCollection(value) && cacheService.getPojoFromCollection(value)?.defaultSortBy) {
+            sortBy = cacheService.getPojoFromCollection(value)?.defaultSortBy;
         }
         return sortBy;
     }

@@ -121,6 +121,12 @@ class PermissionHandler{
         } catch (error) {
             console.log(error);
         }
+        if (templateTabIdSet.size > 0){
+            cacheService.userIdWithTemplateTabIdMap.set(user._id, templateTabIdSet);
+        }
+        if (fevouriteTemplateTabIdSet.size > 0){
+            cacheService.userIdWithFevouriteTemplateTabIdMap.set(user._id, fevouriteTemplateTabIdSet);
+        }
     }
     
     // Function to recursively convert a Map to an Object
@@ -705,6 +711,19 @@ class PermissionHandler{
             })
         }
         return modifyRollList;
+    }
+    getTemplateTabIdSet(current) {
+        if (current && current._id && cacheService.userIdWithTemplateTabIdMap.has(current._id)){
+            return cacheService.userIdWithTemplateTabIdMap.get(current._id);
+        }
+        return null;
+    }
+
+    getFevouriteTemplateTabIdSet(current) {
+        if (current && current._id && cacheService.userIdWithFevouriteTemplateTabIdMap.has(current._id)){
+            return cacheService.userIdWithFevouriteTemplateTabIdMap.get(current._id);
+        }
+        return null;
     }
     
 }

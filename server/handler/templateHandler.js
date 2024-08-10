@@ -138,7 +138,7 @@ class TemplateHandler{
                             const convertedField = this.getButtonFromField(button);
                             grid.action_buttons.push(convertedField);
                         }catch (e){
-                            logger.info("Error occured while preparing gridButton {}",button);
+                            console.log("Error occured while preparing gridButton {}",button);
                         }
                     });
                 }
@@ -274,6 +274,9 @@ class TemplateHandler{
     async getDataWithExcludeFields(model,fields){
         let list = collectionHandler.findAllDocuments(model,commonUtils.getExcludeColumns(fields));
         return list;
+    }
+    getTemplate(name) {
+        return this.templateMap.get(name);
     }
 }
 

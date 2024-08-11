@@ -45,7 +45,12 @@ class CollectionHandler {
             console.log(error);
         }
         return list;
-    }    
+    }  
+    async count(clazz, queryCriteriaList) {        
+        const query = queryHandler.buildMongoQuery(queryCriteriaList);
+        const count  = await clazz.countDocuments(query);
+        return count;
+    }  
     
     
 }

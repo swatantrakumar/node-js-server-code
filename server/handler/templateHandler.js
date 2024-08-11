@@ -155,9 +155,9 @@ class TemplateHandler{
     }
     prepareForm(formList, formMap) {
         formList.forEach(form => {            
-            if(form.field){
+            if(form.fields){
                 form['tableFields'] = [];
-                if(Array.isArray(form.field) && form.field.length > 0){
+                if(Array.isArray(form.fields) && form.fields.length > 0){
                     form.fields.forEach(field=>{
                         try {
                             this.removeStringFormAndGridFromField(field);
@@ -172,8 +172,8 @@ class TemplateHandler{
                             }
                             if(convertedField && convertedField.grid){
                                 const gridId = convertedField.grid?._id; 
-                                if(gridId && gridMap.has(gridId)){
-                                    const childGrid = gridMap.get(gridId);
+                                if(gridId && this.gridMap.has(gridId)){
+                                    const childGrid = this.gridMap.get(gridId);
                                     if(childGrid.gridColumns) convertedField['gridColumns'] = childGrid.gridColumns;
                                     if(childGrid.fields) convertedField['fields'] = childGrid.fields;
                                     if(childGrid.fields) convertedField['colorCriteria'] = childGrid.colorCriteria;
@@ -277,6 +277,9 @@ class TemplateHandler{
     }
     getTemplate(name) {
         return this.templateMap.get(name);
+    }
+    getTabNameMap() {
+        return this.tabNameMap;
     }
 }
 

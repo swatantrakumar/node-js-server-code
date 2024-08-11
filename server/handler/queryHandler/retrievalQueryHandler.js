@@ -19,7 +19,7 @@ class RetrievalQueryHandler{
         const colName = kvp.value;
         const log = kvp.log;
         const pageSize = kvp.pageSize == 0 ? 50 : kvp.pageSize;
-        const pageNumber = kvp.pageNo;
+        const pageNumber = kvp.pageNo ? kvp.pageNo : 1;
         let criteriaList = [];
         let templateList = [];
         let clazz = null;
@@ -177,6 +177,57 @@ class RetrievalQueryHandler{
             sortBy = cacheService.getPojoFromCollection(value)?.defaultSortBy;
         }
         return sortBy;
+    }
+    async processCoreMasterGridDataCall(employees, response_result, kvp, orderBy, colName){
+        const pageSize = kvp.pageSize == 0 ? 50 : kvp.gageSize;
+        const pageNumber = kvp.pageNo ? kvp.pageNo : 1;
+        const criteriaList = [];
+        let clazz=null;
+        try {
+            clazz = await commonUtils.getClass(colName);
+        }catch (e){
+            console.log("Error while fetching class by colName {}", colName);
+        }
+        if(clazz==null){
+            console.log("Getting Query for " + colName + " failed");
+        }else {
+            // enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
+            if (!orderBy) {
+                orderBy="-updateDate,-createdDate";
+            }
+            let data_size =0;
+            switch (colName){                
+                case "alert_notification":
+                    response_result.set('data', [])
+                    response_result.set('dataSize', 0)
+                    break;
+                default:
+                    enrichQueryAndGetResult(clazz,kvp, response_result, colName,orderBy, pageSize, pageNumber, criteriaList, data_size );
+            }
+            logger.info("Query Executed for /gd for {} : {}", colName, criteriaList.toString());
+        }
+        
+    }
+    enrichQueryAndGetResult(clazz, kvp, response_result, colName, orderBy, pageSize, pageNumber, criteriaList, data_size) {
+        let result;
+        reportHandler.enrichQuery(colName, kvp, criteriaList);
+
+        let templateTab = templateHandler.getTabNameMap().get(kvp.getTab());
+        let grid = templateTab != null && templateTab.getGrid() != null ? templateTab.getGrid() : null;
+        let dbName = grid != null && grid.getDbName()!= null && !grid.getDbName().isBlank() ? grid.getDbName() : null;
+        let count = dbName != null ? collectionHandler.count(clazz, criteriaList,dbName) : collectionHandler.count(clazz, criteriaList);
+        if(kvp.isCountOnly()){
+            response_result.put("data_size",count);
+            response_result.put("data", null);
+        }else {
+            response_result.put("data_size", count);
+            if (pageSize > 0) {
+                result = queryHandler.asList(clazz, criteriaList, orderBy, pageNumber, pageSize,dbName);
+            } else {
+                result = queryHandler.asList(clazz, criteriaList,dbName);
+            }
+            response_result.put("data", result);
+        }
     }
 }
 module.exports = RetrievalQueryHandler;

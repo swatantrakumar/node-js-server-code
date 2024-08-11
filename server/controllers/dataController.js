@@ -1,5 +1,7 @@
 const RetrievalQueryHandler = require('../handler/queryHandler/retrievalQueryHandler');
 const UserPermissionHandler = require('../handler/userPermissionHandler');
+const ProjectConstants = require('../enum/projectConstants');
+const SearchCriteria = require('../handler/queryHandler/searchCriteria');
 
 const retrievalQueryHandler = new RetrievalQueryHandler();
 const userPermissionHandler = new UserPermissionHandler()
@@ -51,11 +53,54 @@ const getDataForGrid = async (req,res) =>{
     res.json(Object.fromEntries(response_result));
 }
 const getMultiGridData = async (req,res) =>{
-    let result  = new Map();
-		result.set("success",[]);
-    res.json(result);
+    const kvpList = req.body;
+    let result  = new Map();		
+    const result_list = [];
+    const employee = await userPermissionHandler.getApplicationUser(req);
+    await Promise.all(kvpList.map(async kvp => {
+        try {
+          const reponse = new Map();
+          const count = await retrievalQueryHandler.getCountWithQueryCriteria(employee,kvp);
+          reponse.set("data_size", count);
+          reponse.set( "value", kvp.value.toLowerCase() );
+          reponse.set( "field", kvp.key3 );
+          reponse.set( "adkeys", kvp.adkeys);
+          result_list.push(Object.fromEntries(reponse));
+        } catch (err) {
+          console.error(err.stack);
+        }
+    }));
+    result.set("success",result_list);
+    res.json(Object.fromEntries(result));
+}
+const getStaticData = async (req,res) =>{
+  const kvpList = req.body;
+  const result  = new Map();
+	const employee = await userPermissionHandler.getApplicationUser(req);
+  if(kvpList && Array.isArray(kvpList) && kvpList.length > 0){
+    kvpList.forEach(async kvp =>{
+      if(kvp.crList == null){
+				kvp['crList'] = [];
+			}
+			kvp.crList?.push(new SearchCriteria("status","neq",ProjectConstants.STATUS_INACTIVE));
+			const pageSize = kvp.pageSize == 0 ? 1000 : kvp.pageSize;
+			kvp['pageSize'] = pageSize;
+      const resultList= [];
+		  const sub_result = new Map();
+      try {
+        const values = kvp.value.split(":");
+			  const value = values[0].toLowerCase();
+        await retrievalQueryHandler.getStaticDataResultForCoreMasters(result, employee, kvp, resultList, sub_result, values, value);
+      }catch(err){
+        console.log( "Error occured while fetching result..{}",e.message );
+      }
+			// processKvpforStaticDataCall(result, employee, kvp);
+    })
+  }
+  res.json(Object.fromEntries(result));
+	
 }
 
 
 
-module.exports = {  genericSearch , getDataForGrid, getMultiGridData };
+module.exports = {  genericSearch , getDataForGrid, getMultiGridData, getStaticData };

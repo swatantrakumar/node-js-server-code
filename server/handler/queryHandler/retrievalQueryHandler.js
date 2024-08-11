@@ -184,7 +184,7 @@ class RetrievalQueryHandler{
         const criteriaList = [];
         let clazz=null;
         try {
-            clazz = await commonUtils.getClass(colName);
+            clazz = await commonUtils.getModel(colName);
         }catch (e){
             console.log("Error while fetching class by colName {}", colName);
         }
@@ -195,38 +195,33 @@ class RetrievalQueryHandler{
             if (!orderBy) {
                 orderBy="-updateDate,-createdDate";
             }
-            let data_size =0;
             switch (colName){                
                 case "alert_notification":
                     response_result.set('data', [])
                     response_result.set('dataSize', 0)
                     break;
                 default:
-                    enrichQueryAndGetResult(clazz,kvp, response_result, colName,orderBy, pageSize, pageNumber, criteriaList, data_size );
+                    await this.enrichQueryAndGetResult(clazz,kvp, response_result, colName,orderBy, pageSize, pageNumber, criteriaList );
             }
-            logger.info("Query Executed for /gd for {} : {}", colName, criteriaList.toString());
+            console.log("Query Executed for /gd for {} : {}", colName, criteriaList.toString());
         }
         
     }
-    enrichQueryAndGetResult(clazz, kvp, response_result, colName, orderBy, pageSize, pageNumber, criteriaList, data_size) {
+    async enrichQueryAndGetResult(clazz, kvp, response_result, colName, orderBy, pageSize, pageNumber, criteriaList) {
         let result;
-        reportHandler.enrichQuery(colName, kvp, criteriaList);
+        queryHandler.enrichQuery(colName, kvp, criteriaList);
 
-        let templateTab = templateHandler.getTabNameMap().get(kvp.getTab());
-        let grid = templateTab != null && templateTab.getGrid() != null ? templateTab.getGrid() : null;
-        let dbName = grid != null && grid.getDbName()!= null && !grid.getDbName().isBlank() ? grid.getDbName() : null;
-        let count = dbName != null ? collectionHandler.count(clazz, criteriaList,dbName) : collectionHandler.count(clazz, criteriaList);
-        if(kvp.isCountOnly()){
-            response_result.put("data_size",count);
-            response_result.put("data", null);
+        let templateTab = templateHandler.getTabNameMap().get(kvp.tab);
+        let grid = templateTab && templateTab.grid ? templateTab.grid : null;
+        let dbName = grid && grid?.dbName ? grid.dbName : null;
+        let count = dbName ? await collectionHandler.count(clazz, criteriaList,dbName) : await collectionHandler.count(clazz, criteriaList);
+        if(kvp.countOnly){
+            response_result.set("data_size",count);
+            response_result.set("data", null);
         }else {
-            response_result.put("data_size", count);
-            if (pageSize > 0) {
-                result = queryHandler.asList(clazz, criteriaList, orderBy, pageNumber, pageSize,dbName);
-            } else {
-                result = queryHandler.asList(clazz, criteriaList,dbName);
-            }
-            response_result.put("data", result);
+            response_result.set("data_size", count);
+            result = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz, criteriaList, orderBy, pageNumber, pageSize);            
+            response_result.set("data", result);
         }
     }
 }

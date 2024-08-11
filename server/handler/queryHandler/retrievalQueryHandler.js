@@ -4,6 +4,7 @@ const templateHandler = require("../templateHandler");
 const QueryHandler = require("./queryHandler");
 const cacheService = require('../../cache/cacheService');
 const PermissionHandler = require("../permissionHandler");
+const SearchCriteria = require("./searchCriteria");
 
 const commonUtils = new CommonUtils();
 const queryHandler = new QueryHandler()
@@ -223,6 +224,101 @@ class RetrievalQueryHandler{
             result = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz, criteriaList, orderBy, pageNumber, pageSize);            
             response_result.set("data", result);
         }
+    }
+    async getCountWithQueryCriteria(employees,kvp){
+        const criteriaList = [];
+        const colName = kvp.value;
+        let count  = 0;
+        let clazz = null;
+        try {
+            clazz = await commonUtils.getModel(colName);
+            // enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
+            queryHandler.enrichQuery(colName, kvp, criteriaList);
+            count =  await collectionHandler.count(clazz, criteriaList);
+        } catch (error) {
+            console.log("Error while fetching class by colName {}", colName);
+        }  
+        return count;      
+    }
+    async getStaticDataResultForCoreMasters(result, employee, kvp, resultList, sub_result, values, value){
+        if(value.toUpperCase().includes("QTMP")){
+			invokeQtmp(result, employee, kvp, resultList, sub_result, values, value);
+		}else {
+			this.prepareCoreKvpForStaticDataSearch(kvp, sub_result, values, value);
+			const sortBy = this.getDefaultSortByString(value);
+			const data_list = await this.processApplicationSobjCall(employee,sortBy, kvp);
+			this.prepareCoreReponseDataForStaticDataCallMasters(false,result, employee, kvp, resultList, sub_result, values, value, data_list);
+		}
+    }
+    prepareCoreKvpForStaticDataSearch(kvp, sub_result, values, value) {
+        let colValue="";
+        this.handleCoreKvpEnrichment(kvp, values, value, colValue);
+        sub_result.set( "value", colValue);
+        sub_result.set( "field", kvp.key3 );
+        sub_result.set( "adkeys", kvp.adkeys);
+        this.handleSpecialCharecterInIncomingQuery(kvp);
+        return colValue;
+    }
+    handleCoreKvpEnrichment(kvp, values, value, colValue) {
+        let fValue;
+        switch (value.toLowerCase()){
+            case "adm":
+                colValue = "additional_master";
+                fValue = values[values.length-1];
+                kvp['value'] = colValue;
+                const criteria = new SearchCriteria();
+                criteria.fName = "type";
+                criteria.operator = "eq";
+                criteria.fValue = fValue;
+                if(kvp.crList != null && Array.isArray(kvp.crList) && kvp.crList.length > 0){
+                    kvp.crList.push(criteria);
+                }else {
+                    kvp['crList'] = [];
+                    kvp.crList.push(criteria);
+                }
+                break;
+            case "form_field_reference":
+            case "grid_field_reference":
+            case "grid_reference":
+            case "form_reference":
+            case "tab_reference":
+            case "form_template_reference":
+                kvp.value =  value.replace("_reference","");
+                break;
+            case "refresh_template":
+                // templateHandler.prepareFieldWiseTemplates();
+                break;
+            case "available_status":
+                kvp.value = "status_master";
+                break;
+            case "account_city" :
+                if(kvp.crList != null && Array.isArray(kvp.crList) && kvp.crList.length > 0){
+                    kvp.crList.forEach(searchCriteria => {
+                        if(searchCriteria.fName == "name" && searchCriteria.fValue != null && searchCriteria.fValue != ""){
+                            const fvalue = searchCriteria.fValue;
+                            fvalue = fvalue.split("/")[0];
+                            searchCriteria.fValue = fvalue;
+                        }
+                    });
+                }
+                break;
+            default:
+                colValue = value;
+                break;
+        }
+        return colValue;
+    }
+    handleSpecialCharecterInIncomingQuery(kvp) {
+        if(kvp.crList != null && Array.isArray(kvp.crList) && kvp.crList.length > 0){
+            kvp.crList.forEach(searchCriteria => {
+                if(searchCriteria.fValue !=null && searchCriteria.operator == "neq"  && searchCriteria.operator != "eq"  &&searchCriteria.operator != "in"  &&searchCriteria.operator != "stw"){
+                    searchCriteria.fValue = commonUtils.removeSpecialCharactersByWithSameCase( searchCriteria.fValue,":" );
+                }
+            } );
+        }
+    }
+    prepareCoreReponseDataForStaticDataCallMasters(){
+        
     }
 }
 module.exports = RetrievalQueryHandler;

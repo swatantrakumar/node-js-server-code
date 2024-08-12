@@ -3,6 +3,7 @@ const { pathToFileURL } = require('url');
 const cacheService = require('../cache/cacheService');
 const Config = require('../enum/config');
 const moment = require('moment');
+const Reference = require('../model/reference');
 
 
 class CommonUtils {
@@ -27,6 +28,44 @@ class CommonUtils {
             model =  file.default;
         }
         return model;
+    }
+    getFieldList(schema, prefix = '') {
+        const resultList = [];
+    
+        // Iterate over schema paths
+        schema.eachPath((path, schemaType) => {
+            // Full path with prefix
+            const fullPath = prefix ? `${prefix}.${path}` : path;
+    
+            // Check if the type is a nested schema
+            if (schemaType instanceof mongoose.Schema.Types.Embedded) {
+                // If it's a nested schema, recursively get its fields
+                if (schemaType.schema === Reference) {
+                    resultList.push(`${path}.code`);
+                    resultList.push(`${path}.name`);
+                    resultList.push(`${path}._id`);
+                }else{
+                    resultList.push(...getFieldList(schemaType.schema, fullPath));
+                }                
+            } else {
+                resultList.push(fullPath);
+            }
+        });
+    
+        return resultList;
+    }
+    mapToObj(map) {
+        const obj = {};
+        for (let [key, value] of map.entries()) {
+          if (value instanceof Map) {
+            obj[key] = this.mapToObj(value);
+          } else if (Array.isArray(value)) {
+            obj[key] = value.map(item => (item instanceof Map ? this.mapToObj(item) : item));
+          } else {
+            obj[key] = value;
+          }
+        }
+        return obj;
     }
     decodeBase64(encodeData){
         return JSON.parse(Buffer.from(encodeData, 'base64').toString('utf-8'));
@@ -95,6 +134,40 @@ class CommonUtils {
             return str.replace(/[^0-9a-zA-Z]/g, separator);
         }
         return null;
+    }
+    allobject(){
+        return {
+            _id: "ALL",
+            name: "All",
+            code: "ALL"
+        }
+    };
+    getReferenceJsonObject(il,name='') {        
+        const obj = new Map();
+        try {
+            obj.set( "_id", il._id ? il._id.toString():"");
+            if(il.code){
+                obj.set( "code", il.code.toString() );
+            }  else if(il.serialId){
+                obj.set( "code", il.serialId.toString());
+            }
+            obj.set('name', name === "" 
+                            ? (il.name === null || il.name === undefined 
+                                ? obj.code 
+                                : il.name) 
+                            : name);
+            if(il.type){
+                obj.set( "type", il.type.toString());
+            }
+            if(il.version){
+                obj.set( "version", il.version);
+            }else{
+                obj.set( "version",0);
+            }
+        }catch (e){
+            console.error(e.stack);
+        }
+        return JSON.parse(JSON.stringify(obj));
     }
 }
 

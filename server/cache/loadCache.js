@@ -3,7 +3,7 @@ const cacheService = require("./cacheService");
 class LoadCache {
     
     static async refreshCache(){
-       await cacheService.preparePojoMap();
+       await cacheService.cacheStaticData();
     }
 }
 module.exports = LoadCache;

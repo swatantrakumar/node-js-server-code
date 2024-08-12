@@ -1,4 +1,5 @@
 // server/CacheService.js
+const ExportConfiguration = require('../model/generic/exportConfiguration');
 const PojoMaster = require('../model/generic/pojoMaster');
 
 class CacheService {
@@ -10,6 +11,7 @@ class CacheService {
             this.userIdWithAppRoleIds = new Map();
             this.userIdWithTemplateTabIdMap = new Map();
             this.userIdWithFevouriteTemplateTabIdMap = new Map();
+            this.export_configuration = new Map();
             this.coreModuleList = [];
             CacheService.instance = this;
           }
@@ -52,6 +54,10 @@ class CacheService {
   
     clear() {
       this.cache.clear();
+    }
+    async cacheStaticData(){
+      await this.preparePojoMap();
+      await this.prepareExportConfiguration();
     }
     async preparePojoMap(){
         try {
@@ -99,6 +105,22 @@ class CacheService {
     }
     getFieldMap() {
       return this.fieldMap;
+    }
+    async prepareExportConfiguration() {
+      const exportConfigurationList = await ExportConfiguration.find({}).exec();;
+      if(exportConfigurationList && Array.isArray(exportConfigurationList) && exportConfigurationList.length > 0){
+          exportConfigurationList.forEach(config => {
+              this.export_configuration.set(config.name == null ? config.collectionName.toUpperCase():config.name.toUpperCase(),config);
+          });
+          console.log("ExportConfiguration List Cached...");
+      }else{
+        console.log("ExportConfiguration List not exists...");
+      }
+    }
+    retriveAsStringList(col) {
+      const colLowerCase = col.toLowerCase();
+      if (this.pojoMap.get(colLowerCase) != null) return pojoMap.get(colLowerCase).pick_as_string;
+      return false;
     }
     
   }

@@ -76,9 +76,10 @@ const getMultiGridData = async (req,res) =>{
 const getStaticData = async (req,res) =>{
   const kvpList = req.body;
   const result  = new Map();
+  result.set("success",[]);
 	const employee = await userPermissionHandler.getApplicationUser(req);
   if(kvpList && Array.isArray(kvpList) && kvpList.length > 0){
-    kvpList.forEach(async kvp =>{
+    for (const kvp of kvpList) {
       if(kvp.crList == null){
 				kvp['crList'] = [];
 			}
@@ -91,11 +92,11 @@ const getStaticData = async (req,res) =>{
         const values = kvp.value.split(":");
 			  const value = values[0].toLowerCase();
         await retrievalQueryHandler.getStaticDataResultForCoreMasters(result, employee, kvp, resultList, sub_result, values, value);
-      }catch(err){
+      }catch(e){
         console.log( "Error occured while fetching result..{}",e.message );
       }
 			// processKvpforStaticDataCall(result, employee, kvp);
-    })
+    }
   }
   res.json(Object.fromEntries(result));
 	

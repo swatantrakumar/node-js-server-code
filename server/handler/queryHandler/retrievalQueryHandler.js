@@ -25,7 +25,7 @@ class RetrievalQueryHandler{
         let templateList = [];
         let clazz = null;
         try {
-            clazz = await commonUtils.getModel(colName);
+            clazz = await cacheService.getModel(colName);
         } catch (error) {
             console.log("Error while fetching class by colName {}", colName);
         }
@@ -185,7 +185,7 @@ class RetrievalQueryHandler{
         const criteriaList = [];
         let clazz=null;
         try {
-            clazz = await commonUtils.getModel(colName);
+            clazz = await cacheService.getModel(colName);
         }catch (e){
             console.log("Error while fetching class by colName {}", colName);
         }
@@ -231,7 +231,7 @@ class RetrievalQueryHandler{
         let count  = 0;
         let clazz = null;
         try {
-            clazz = await commonUtils.getModel(colName);
+            clazz = await cacheService.getModel(colName);
             // enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
             queryHandler.enrichQuery(colName, kvp, criteriaList);
             count =  await collectionHandler.count(clazz, criteriaList);
@@ -458,7 +458,7 @@ class RetrievalQueryHandler{
                         if(searchCriteria.fName == "name" && searchCriteria.fValue){
                             const colName = searchCriteria.fValue;
                             try {
-                                const clazz = await commonUtils.getModel(colName);
+                                const clazz = await cacheService.getModel(colName);
                                 resultList.push(...commonUtils.getFieldList(clazz));                                
                             } catch (e) {
                                 console.error(e.stack);

@@ -17,7 +17,8 @@ const Config = {
     STATUS_INACTIVE: 'inactive',
     ROLE_ADMIN: 'admin',
     ROLE_USER: 'user',
-    PACKAGE_PATH : 'server/model/'
+    PACKAGE_PATH : 'server/model/',
+    DEFAULT_REFCODE : 'MCLR01'
   };
   
   // Export the config object

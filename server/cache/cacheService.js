@@ -1,6 +1,12 @@
-// server/CacheService.js
+const path = require('path');
+const { pathToFileURL } = require('url');
+const Config = require('../enum/config');
+const ClientConfiguration = require('../model/generic/clientConfiguration');
 const ExportConfiguration = require('../model/generic/exportConfiguration');
 const PojoMaster = require('../model/generic/pojoMaster');
+const CommonUtils = require('../utils/commonUtils');
+
+const commonUtil = new CommonUtils();
 
 class CacheService {
     constructor() {
@@ -12,6 +18,8 @@ class CacheService {
             this.userIdWithTemplateTabIdMap = new Map();
             this.userIdWithFevouriteTemplateTabIdMap = new Map();
             this.export_configuration = new Map();
+            this.clientConfigurations = new Map();
+            this.activeUserJSONMap = new Map();
             this.coreModuleList = [];
             CacheService.instance = this;
           }
@@ -58,6 +66,7 @@ class CacheService {
     async cacheStaticData(){
       await this.preparePojoMap();
       await this.prepareExportConfiguration();
+      await this.prepareClientConfiguration();
     }
     async preparePojoMap(){
         try {
@@ -103,11 +112,40 @@ class CacheService {
         }
         return collection;
     }
+    async getModel(collectionName) {
+      const modelPath = this.getModulePath(collectionName);
+      let model = null;
+      if(path){
+          const filePath = Config.PACKAGE_PATH + modelPath +'.js';
+          const projectRoot = process.cwd();
+          const absolutePath = path.resolve(projectRoot, filePath);
+
+          // Validate the file path and extension
+          if (!absolutePath.endsWith('.js') && !absolutePath.endsWith('.mjs')) {
+              throw new Error('The file path must end with .js or .mjs');
+          }
+
+          // Convert the absolute path to a file URL
+          const fileUrl = pathToFileURL(absolutePath).href;
+
+          const file = await import(fileUrl);
+          model =  file.default;
+      }
+      return model;
+    }
+    getModulePath(colName){
+      let modulePath = null;
+      const pojo = this.getPojoFromCollection(colName);
+      if(pojo && pojo.pojo.class_name){
+          modulePath = pojo?.pojo?.class_name;
+      }
+      return modulePath;
+    }
     getFieldMap() {
       return this.fieldMap;
     }
     async prepareExportConfiguration() {
-      const exportConfigurationList = await ExportConfiguration.find({}).exec();;
+      const exportConfigurationList = await ExportConfiguration.find({}).exec();
       if(exportConfigurationList && Array.isArray(exportConfigurationList) && exportConfigurationList.length > 0){
           exportConfigurationList.forEach(config => {
               this.export_configuration.set(config.name == null ? config.collectionName.toUpperCase():config.name.toUpperCase(),config);
@@ -117,10 +155,41 @@ class CacheService {
         console.log("ExportConfiguration List not exists...");
       }
     }
+    async prepareClientConfiguration(){
+      const clientConfigurationList = await ClientConfiguration.find({}).exec();
+        if (clientConfigurationList && Array.isArray(clientConfigurationList) && clientConfigurationList.length > 0) {
+            clientConfigurationList.forEach((config) => {
+                this.clientConfigurations.set(config.refCode, config);
+            });
+            console.log("ClientConfiguration List Cached..");
+        }else{
+          console.log("ClientConfiguration List not exists..");
+        }        
+    }
     retriveAsStringList(col) {
       const colLowerCase = col.toLowerCase();
-      if (this.pojoMap.get(colLowerCase) != null) return pojoMap.get(colLowerCase).pick_as_string;
+      if (this.pojoMap.get(colLowerCase) != null) return this.pojoMap.get(colLowerCase).pick_as_string;
       return false;
+    }
+    getConfiguration(refCode, type) {
+      return this.clientConfigurations != null && this.clientConfigurations[refCode] != null && this.clientConfigurations[refCode].settings != null ? this.clientConfigurations[refCode].settings[type] : null;
+    }
+    
+    populateUserJsonInStaticDataCache(user){
+        const fieldsToBeTakenForUser =["name","email","code","mobile1","branch"];
+        const userJson = JSON.parse(JSON.stringify(user));
+        const newUser = {};
+        fieldsToBeTakenForUser.forEach(field=>{
+            commonUtil.populateFieldFromTo(userJson,newUser,field);
+        });
+        this.activeUserJSONMap.set(user.email.toLowerCase(),newUser);
+    }
+    getActiveUserJSONMap() {
+      return this.activeUserJSONMap;
+    }
+    getPojoScope(col) {
+      const colLowerCase = col.toLowerCase();
+      return this.pojoMap.get(colLowerCase) != null && (this.pojoMap.get(colLowerCase)).scope != null ? (this.pojoMap.get(colLowerCase)).scope : "";
     }
     
   }

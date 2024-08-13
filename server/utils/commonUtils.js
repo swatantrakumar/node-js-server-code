@@ -1,34 +1,11 @@
-const path = require('path');
-const { pathToFileURL } = require('url');
-const cacheService = require('../cache/cacheService');
-const Config = require('../enum/config');
+
 const moment = require('moment');
 const Reference = require('../model/reference');
 
 
 class CommonUtils {
 // Function to dynamically import models based on path
-    async getModel(collectionName) {
-        const modelPath = this.getModulePath(collectionName);
-        let model = null;
-        if(path){
-            const filePath = Config.PACKAGE_PATH + modelPath +'.js';
-            const projectRoot = process.cwd();
-            const absolutePath = path.resolve(projectRoot, filePath);
-
-            // Validate the file path and extension
-            if (!absolutePath.endsWith('.js') && !absolutePath.endsWith('.mjs')) {
-                throw new Error('The file path must end with .js or .mjs');
-            }
-
-            // Convert the absolute path to a file URL
-            const fileUrl = pathToFileURL(absolutePath).href;
-
-            const file = await import(fileUrl);
-            model =  file.default;
-        }
-        return model;
-    }
+    
     getFieldList(schema, prefix = '') {
         const resultList = [];
     
@@ -70,14 +47,7 @@ class CommonUtils {
     decodeBase64(encodeData){
         return JSON.parse(Buffer.from(encodeData, 'base64').toString('utf-8'));
     }
-    getModulePath(colName){
-        let modulePath = null;
-        const pojo = cacheService.getPojoFromCollection(colName);
-        if(pojo && pojo.pojo.class_name){
-            modulePath = pojo?.pojo?.class_name;
-        }
-        return modulePath;
-    }
+    
     getReference(obj){
         let ref = {};
         if(obj?._id) ref['_id'] = obj._id;
@@ -167,7 +137,26 @@ class CommonUtils {
         }catch (e){
             console.error(e.stack);
         }
-        return JSON.parse(JSON.stringify(obj));
+        return obj;
+    }
+    populateFieldFromTo(from,to,field){
+        try {
+            if(from.has(field) && from[field]) {
+                to.set( field, from[field] );
+            }else{
+                console.log( field + " does not exist in from_Json" );
+            }
+        } catch (e) {
+            console.error(e.stack);
+        }
+    }
+    getJsonAcceptableDate(date) {
+        if (date != null) {            
+            const reportDate = moment(date).utc().format("ddd, DD MMM YYYY HH:mm:ss [GMT]");            
+            return reportDate;
+        } else {
+            return null;
+        }
     }
 }
 

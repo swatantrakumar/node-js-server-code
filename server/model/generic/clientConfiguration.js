@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
+const ObjectSeriesMethodSchema = require('./objectSeriesMethod');
+const ExportedFileNameSchema = require('./exportedFileName');
 
 // Creating user schema
 const ClientConfigurationSchema = mongoose.Schema({ 
@@ -7,9 +9,9 @@ const ClientConfigurationSchema = mongoose.Schema({
     configType:String,
     static_info:{type:Map},
     settings:{type:Map},
-    series_methods:[],
-    pdf_exports:[],
-    excel_exports:[]   
+    series_methods:[ObjectSeriesMethodSchema],
+    pdf_exports:[ExportedFileNameSchema],
+    excel_exports:[ExportedFileNameSchema]   
 });
 
 // Combine the base entity schema with the user schema

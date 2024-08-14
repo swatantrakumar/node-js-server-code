@@ -99,11 +99,54 @@ class CommonUtils {
         
         return newDate;
     }
+    convertDateToStandardDateTimeWithFormat(date, pattern) {        
+        const reportDate = moment(date).format(pattern);
+        return reportDate;
+    }
+    changeStringDateToSpecificFormat(date, pattern) {
+        const parsedDate = moment(date, pattern, true);
+        if (!parsedDate.isValid()) {
+            throw new Error('Invalid date or pattern');
+        }
+        return parsedDate.toDate();
+    }
     removeSpecialCharactersByWithSameCase(str, separator) {
         if (str && str.trim() !== "") {
             return str.replace(/[^0-9a-zA-Z]/g, separator);
         }
         return null;
+    }
+    getMonth(date) {
+        if (!date) return null;
+        return moment(date).format('MM');
+    }
+    getFinancialDay(date) {
+        return getYYMMDD(date);
+    }    
+    getYYMMDD(date) {
+        if (!date) return null;
+        return moment(date).format('YYMMDD');
+    }
+    addCurrentTimeInDate(date) {
+        if (!date) return null;
+    
+        const now = moment(); // Current date and time
+        const currentHour = now.hour();
+        const currentMinute = now.minute();
+        const currentSecond = now.second();
+    
+        // Set the time of the provided date to the current time
+        return moment(date)
+            .set({ hour: currentHour, minute: currentMinute, second: currentSecond, millisecond: 0 })
+            .toDate();
+    }
+    getFinancialYear(date) {
+        if (!date) return null;
+    
+        const year = moment(date).format('YYYY');
+        const month = parseInt(moment(date).format('MM'), 10);
+    
+        return month <= 3 ? (parseInt(year, 10) - 1).toString() : year;
     }
     allobject(){
         return {
@@ -157,6 +200,47 @@ class CommonUtils {
         } else {
             return null;
         }
+    }
+    getTrimmedString(string) {
+        if (string && string.trim() !== "") {
+            return string.replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
+        }
+        return null;
+    }
+    getValueFromJSONObject(parentObj, jsonfield){
+        const childObject = parentObj;
+        if (jsonfield) {
+            const fields = jsonfield.split(/\./);
+            if (fields && fields.length > 0) {
+                for (let index = 0; index < fields.length; index++) {
+                    const field = fields[index];
+                    childObject = this.getChildJSONObject(childObject, field);                    
+                }
+            } else {
+                childObject = this.getChildJSONObject(childObject, jsonfield);
+            }
+        }
+        return childObject;
+    }
+    getChildJSONObject(parentObject, child) {
+        if (child != null && parentObject != null) {
+            if (Array.isArray(parentObject)) {
+                return parentObject[parseInt(child)];
+            } else {
+                const value = parentObject[child];
+            
+                if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+                    return value; // It's a plain object
+                } else if (value !== null && Array.isArray(value)) {
+                    return value; // It's an array
+                } else if (value !== null) {
+                    return value; // It's some other value (e.g., a string, number, etc.)
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
     }
 }
 

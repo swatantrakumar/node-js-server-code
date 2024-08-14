@@ -106,7 +106,7 @@ class CacheService {
     }
 
     getPojoFromCollection(collectionName) {
-        const collection = this.pojoMap.get(collectionName);
+        const collection = this.pojoMap.get(collectionName).pojo;
         if (!collection) {
             return null;
         }
@@ -136,8 +136,8 @@ class CacheService {
     getModulePath(colName){
       let modulePath = null;
       const pojo = this.getPojoFromCollection(colName);
-      if(pojo && pojo.pojo.class_name){
-          modulePath = pojo?.pojo?.class_name;
+      if(pojo && pojo.class_name){
+          modulePath = pojo?.class_name;
       }
       return modulePath;
     }
@@ -189,7 +189,30 @@ class CacheService {
     }
     getPojoScope(col) {
       const colLowerCase = col.toLowerCase();
-      return this.pojoMap.get(colLowerCase) != null && (this.pojoMap.get(colLowerCase)).scope != null ? (this.pojoMap.get(colLowerCase)).scope : "";
+      const pojoMaster = this.getPojoFromCollection(colLowerCase);
+      if(pojoMaster && pojoMaster?.scope){
+        return pojoMaster?.scope
+      }else{
+        return '';
+      }
+    }
+    getPrimaryKeysForPojo(name){
+      const pojoMaster = this.getPojoFromCollection(name);
+      if(pojoMaster.primaryKeys && Array.isArray(pojoMaster.primaryKeys) && pojoMaster.length > 0){
+          return pojoMaster.primaryKeys;
+      }
+      return null;
+    }
+    getSeriesMethod(refCode, pojo){
+      try {
+          if (this.clientConfigurations && this.clientConfigurations.get(refCode) && this.clientConfigurations.get(refCode).series_methods) {
+              const seriesMethod = this.clientConfigurations.get(refCode).series_methods.filter(exportedFileName => exportedFileName.applicable_pojos.includes(pojo)).shift();
+              return seriesMethod;
+          }
+      }catch (e){
+          console.log("Error while fetching pdf name pattern");
+      }
+      return null;
     }
     
   }

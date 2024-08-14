@@ -74,7 +74,7 @@ const save = async (req,res) =>{
             }else {
                 switch (cacheService.getPojoScope(coll)) {
                     case commonConstant.POJO_SCOPE_CORE:
-                        coreInComingDataHandler.saveOrUpdateMasterObject(result, coll, jsonObject);
+                        await coreInComingDataHandler.saveOrUpdateMasterObject(result, coll, jsonObject);
                         // if(coll == "move_modules" || coll == "compare_modules") {
                         //     const mapper = new ObjectMapper();
                         //     const moveModules = mapper.readValue(jsonObject.toString(), MoveModules.class);

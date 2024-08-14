@@ -1,9 +1,14 @@
+const {ObjectId} = require('mongodb');
 const cacheService  = require('../cache/cacheService');
 const CommonUtils = require('../utils/commonUtils');
 const Config = require('../enum/config');
+const ObjectKeyHandler = require('./objectHandler');
+const CollectionHandler = require('./collectionHandler');
 
 
 const commonUtil = new CommonUtils();
+const objectKeyHandler = new ObjectKeyHandler();
+const collectionHandler = new CollectionHandler();
 
 class InComingDataHandler {
     updateCreatorUpdaterInfoInJson(result, jsonObject, user){
@@ -36,32 +41,37 @@ class InComingDataHandler {
         }
         return false;
     }
-    saveOrUpdateMasterObject(result, coll, jsonObject){
+    async saveOrUpdateMasterObject(result, coll, jsonObject){
         if (coll) {
             let clazz = null;
             try {
-                clazz = cacheService.getModel(coll);
+                clazz = await cacheService.getModel(coll);
             } catch (e) {
                 console.log("Unable to Find Class against incoming object {}", coll);
             }
             try {
-                this.enrichOjectAndSave(result, coll, jsonObject, clazz);
+                await this.enrichOjectAndSave(result, coll, jsonObject, clazz);
             }catch (e){
                 result.set("error" , e.message);
             }
         }
     }
-    enrichOjectAndSave(result, coll, jsonObject, clazz){
-        populateDefaultRefCode(jsonObject);
+    populateDefaultRefCode(object){
+        try {
+            if (!object?.refCode) {
+                object.refCode = Config.DEFAULT_REFCODE;
+            }
+
+        } catch (e) {
+            object.put("refCode", Config.DEFAULT_REFCODE);
+        }
+    }
+    async enrichOjectAndSave(result, coll, jsonObject, clazz){
+        this.populateDefaultRefCode(jsonObject);
         let key = null;
         let data;
-        if (!isDuplicate(clazz, coll, jsonObject, result)) {
-            switch (coll) {
-                case "admin_forms":
-                case "admin_columns":
-                case "admin_fields":
-                    key =  updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
-                    break;
+        if (!await this.isDuplicate(clazz, coll, jsonObject, result)) {
+            switch (coll) {               
                 case "holiday_calendar":
                     key =  updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
                     staticDataCache.prepareHolidayCalendar();
@@ -142,6 +152,58 @@ class InComingDataHandler {
         } else {
             result.set("error", "duplicate error !!!");
         }
+    }
+    async isDuplicate(clazz, collection, incomingObject, result) {
+        try {            
+            const primaryKeys = cacheService.getPrimaryKeysForPojo(collection);
+            if (primaryKeys && primaryKeys.length > 0) {
+                const queryCriteriaList = objectKeyHandler.getUniqueKeyQuery(collection, incomingObject);
+                const persistedObject = await collectionHandler.findFirstDocumentWithListQueryCriteria(clazz, queryCriteriaList);
+                if (persistedObject) {                    
+                    const jsonObject = JSON.parse(JSON.stringify(persistedString));
+                    const prevVersion = 0;
+                    try {
+                        if (jsonObject.version) {
+                            prevVersion = jsonObject.version;
+                        }
+                    } catch (e) {
+                        console.log("Error while getting previous version ");
+                    }
+                    if (incomingObject._id) {
+                        if (jsonObject._id != incomingObject._id) {
+                            result.set("persisted", persistedObject);
+                            return true;
+                        } else {
+                            incomingObject.version = ++prevVersion;
+                            result.set("persisted", persistedObject);
+                            return false;
+                        }
+                    } else {
+                        result.set("persisted", persistedObject);
+                        return true;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e.stack);
+        }
+        return false;
+    }
+    updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){
+        ObjectMapper mapper = new ObjectMapper();
+        seriesHandler.populate_series(coll, jsonObject, null, null);
+        inDataEnricher(coll, jsonObject);
+        updateAltNameInObject(jsonObject);
+        if (!jsonObject._id) {
+            jsonObject._id =  new ObjectId().toString();
+        }
+        try {
+            attachmentHandler.handleAssociatedFile(coll, jsonObject, null);
+
+        } catch (e) {
+            console.log("Error while saving attachment {}", e.message);
+        }        
+        return collectionHandler.insertDocumentWithLog(clazz,jsonObject,mapper.readValue(jsonObject.toString(), clazz));
     }
 }
 

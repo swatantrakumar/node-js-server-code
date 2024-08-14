@@ -46,6 +46,29 @@ class CollectionHandler {
         }
         return list;
     }  
+    async findDocumentsWithListQueryCriteria(model, queryCriteriaList,  orderBy, dbName = '') {
+        const query = queryHandler.buildMongoQuery(queryCriteriaList);
+        const sortObject = queryHandler.handleSort(orderBy);
+        try {
+            list = await model.find(query)
+                          .sort(sortObject)
+                          .exec();
+          } catch (error) {
+              console.log(error);
+          }
+        if(list && Array.isArray(list) && list.length > 0){
+            return list[0];
+        }        
+        return null;
+    }
+    async findFirstDocumentWithListQueryCriteria(model, queryCriteriaList, dbName = "") {
+        const query = queryHandler.buildMongoQuery(queryCriteriaList);
+        const result = await model.find(query).exec();
+        if (result && Array.isArray(result) && result.length > 0) {
+            return result[0];
+        }
+        return null;
+    }
     async count(clazz, queryCriteriaList) {        
         const query = queryHandler.buildMongoQuery(queryCriteriaList);
         const count  = await clazz.countDocuments(query);

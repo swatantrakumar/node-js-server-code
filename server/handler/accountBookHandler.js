@@ -25,12 +25,57 @@ class AccountBookHandler{
                 await collectionHandler.insertDocument(accountBook);
                 
                 // Copy properties (assuming you have a similar utility function)
-                copyProperties(accountBook, accountBooks);
+                commonUtil.copyProperties(accountBook, accountBooks);
             }
         } catch (error) {
             console.error('Error in getDailyBookSerialNumber:', error);     
         }
 		return transactionSerialNumber;
+	}
+    async getBookSerialNumber (refCode, series, accountBooks){
+        const transactionSerialNumber =1;
+        try {
+            const accountBook = await this.getAccountBook(refCode, series,null);
+            if(accountBook!=null){
+                transactionSerialNumber = accountBook.srNumber + 1;
+                accountBook.srNumber = transactionSerialNumber;
+                accountBook.updateDate = new Date();
+                console.info(`Saving account Book with new SerialNumber ${accountBook.case_id} : ${accountBook.series} : ${accountBook.srNumber}`);
+                //queryHandler.saveObject(AccountBook.class, accountBook);
+                await collectionHandler.insertDocument(accountBook);
+                commonUtil.copyProperties(accountBook, accountBooks);
+            }
+        } catch (error) {
+            console.error('Error in getDailyBookSerialNumber:', error);        
+        }
+        return transactionSerialNumber;
+    }
+    async getAccountBook(refCode, series){
+        let accountBook =null;
+        try {            
+            console.log("Calling to fetch Account Book for {} : {}" + refCode,series);
+            if(refCode!=null){
+                let queryCriteriaList = [];
+		        queryCriteriaList.push(new QueryCriteria("refCode","string",Operator.EQUAL,refCode));
+		        queryCriteriaList.push(new QueryCriteria("series","string",Operator.EQUAL,series));
+
+				accountBook = await collectionHandler.findFirstDocumentWithListQueryCriteria(AccountBook, queryCriteriaList);
+				//queryHandler.findByRefCodeAndSeries( refCode, series);
+			}
+			
+			if (accountBook == null) {
+                const newBook = new AccountBook();
+				console.log("Account Book not found for {} : {}",refCode,series);
+				newBook = this.getNewAccountBook(refCode, series, null);
+                console.log(`Returning new Book found for {}: {} : {} ${accountBook.case_id} : ${accountBook.series} : ${accountBook.srNumber}`);
+				return newBook;
+			}
+			
+		}catch (e){
+			console.error(e.stack);
+		}
+		console.log(`Returning saved Book found for {} : {} : {} ${accountBook.case_id} : ${accountBook.series} : ${accountBook.srNumber}`);
+		return accountBook;
 	}
     async getDailyBook(refCode, series, financialDay) {
 		let accountBook;
@@ -69,3 +114,4 @@ class AccountBookHandler{
         return accountBook;
     }
 }
+module.exports = AccountBookHandler;

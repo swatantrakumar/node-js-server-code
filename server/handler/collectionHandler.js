@@ -74,6 +74,13 @@ class CollectionHandler {
         const count  = await clazz.countDocuments(query);
         return count;
     }  
+    async insertDocument(object){
+        try {
+            await object.save();
+        } catch (error) {
+            console.log("Insert Document Issue : =" + error);
+        }
+    }
     
     
 }

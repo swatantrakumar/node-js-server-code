@@ -242,6 +242,15 @@ class CommonUtils {
         }
         return null;
     }
+    copyProperties(source, target) {
+        try {
+            if (source && target) {
+                Object.assign(target, source);
+            }
+        } catch (error) {
+            console.error('Error during copyProperties:', error);
+        }
+    }
 }
 
 module.exports = CommonUtils;

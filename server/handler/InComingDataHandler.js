@@ -4,11 +4,13 @@ const CommonUtils = require('../utils/commonUtils');
 const Config = require('../enum/config');
 const ObjectKeyHandler = require('./objectHandler');
 const CollectionHandler = require('./collectionHandler');
+const SeriesHandler = require('./seriesHandler');
 
 
 const commonUtil = new CommonUtils();
 const objectKeyHandler = new ObjectKeyHandler();
 const collectionHandler = new CollectionHandler();
+const seriesHandler = new SeriesHandler();
 
 class InComingDataHandler {
     updateCreatorUpdaterInfoInJson(result, jsonObject, user){
@@ -138,7 +140,7 @@ class InComingDataHandler {
                     }
                     break;
                 default:
-                    key = updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
+                    key = this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
                     break;
             }
             if (key != null) {
@@ -189,9 +191,8 @@ class InComingDataHandler {
         }
         return false;
     }
-    updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){
-        ObjectMapper mapper = new ObjectMapper();
-        seriesHandler.populate_series(coll, jsonObject, null, null);
+    updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){        
+        seriesHandler.populate_series(coll, jsonObject, null, null);    /// done
         inDataEnricher(coll, jsonObject);
         updateAltNameInObject(jsonObject);
         if (!jsonObject._id) {
@@ -203,7 +204,7 @@ class InComingDataHandler {
         } catch (e) {
             console.log("Error while saving attachment {}", e.message);
         }        
-        return collectionHandler.insertDocumentWithLog(clazz,jsonObject,mapper.readValue(jsonObject.toString(), clazz));
+        return collectionHandler.insertDocumentWithLog(clazz,jsonObject);
     }
 }
 

@@ -1,10 +1,13 @@
 const cacheService  = require('../cache/cacheService');
 const CommonUtils = require('../utils/commonUtils');
+const AccountBookHandler = require('./accountBookHandler');
 
 const commonUtil = new CommonUtils();
 
 const JSON_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 const JSON_DATE_FORMAT_2 ="yyyy-MM-dd'T'HH:mm:ss.SS";
+
+const accountBookHandler = new AccountBookHandler();
 
 
 class SeriesHandler{
@@ -66,27 +69,30 @@ class SeriesHandler{
                     srNumber = accountBookHandler.getDailyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
                     break;
                 case "MONTHLY":
-                    srNumber = accountBookHandler.getMonthlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    // srNumber = accountBookHandler.getMonthlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    console.log("monthly account book.")
                     break;
                 case "YEARLY":
-                    srNumber = accountBookHandler.getRunningYearlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    // srNumber = accountBookHandler.getRunningYearlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    console.log("YEARLY account book.")
                     break;
                 case "FINANCEYEAR":
-                    srNumber = accountBookHandler.getYearlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    // srNumber = accountBookHandler.getYearlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    console.log("FINANCEYEAR account book.")
                     break;
                 case "CONTINUOUS":
                     srNumber = accountBookHandler.getBookSerialNumber(jsonObject.getString("refCode"), object_series, accountBook);
                     break;
             }
-            jsonObject.put("srNumber", srNumber);
-            jsonObject.put("series", object_series);
-            jsonObject.put("serialId", this.getConvertedString(jsonObject, pattern));
+            jsonObject.srNumber = srNumber;
+            jsonObject.series = object_series;
+            jsonObject.serialId = this.getConvertedString(jsonObject, pattern);
             if(jsonObjectForSeriesDetails != null) {
-                jsonObjectForSeriesDetails.put("srNumber", srNumber);
-                jsonObjectForSeriesDetails.put("series", object_series);
-                jsonObjectForSeriesDetails.put("serialId", this.getConvertedString(jsonObject, pattern));
+                jsonObjectForSeriesDetails.srNumber = srNumber;
+                jsonObjectForSeriesDetails.series = object_series;
+                jsonObjectForSeriesDetails.serialId = this.getConvertedString(jsonObject, pattern);
             }
-            logger.info("srNumber :{} , series :{}, serialId : {}",srNumber,object_series,jsonObject.getString("serialId"));
+            console.log("srNumber :{} , series :{}, serialId : {}" + srNumber,object_series,jsonObject.serialId);
         }
 
     }    
@@ -257,3 +263,4 @@ class SeriesHandler{
         return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 }
+module.exports = SeriesHandler;

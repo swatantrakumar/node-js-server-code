@@ -1,6 +1,9 @@
+const CommonUtils = require("../utils/commonUtils");
+const QueryCriteria = require("./queryHandler/queryCriteria");
 const QueryHandler = require("./queryHandler/queryHandler");
 
 const queryHandler = new QueryHandler();
+const commonutil = new CommonUtils();
 class CollectionHandler {
     async findDocumentById(model,id,key,list){
         let user = null;        
@@ -29,6 +32,23 @@ class CollectionHandler {
           list = await model.find({}).exec();
         }
         return list;
+    }
+    async findDocument(model, field, value, dbName='') {
+        const valueObject  = commonutil.getValueFromJSONObject(field, value);
+        let queryCriteriaList = [];
+		queryCriteriaList.push(new QueryCriteria(field,"string",Operator.EQUAL,valueObject));
+        const query = queryHandler.buildMongoQuery(queryCriteriaList);
+        let list = [];
+        try {
+          list = await model.find(query)                        
+                        .exec();
+        } catch (error) {
+            console.log(error);
+        }
+        if(list && Array.isArray(list) && list.length > 0){
+            return list[0];
+        }        
+        return null;        
     }
     async findAllDocumentsWithListQueryCriteria(model,queryCriteriaList,orderBy,pageNo,limit){
         const query = queryHandler.buildMongoQuery(queryCriteriaList);
@@ -81,7 +101,32 @@ class CollectionHandler {
             console.log("Insert Document Issue : =" + error);
         }
     }
-    
+    insertDocumentWithLog(model, jsonObject,  obj){
+        try {
+            model.save(obj);
+        } catch (error) {
+            
+        }
+    }
+    // saveModificationLog(clazz, imcomingObject) {
+    //     try {
+    //         ModificationLog log = new ModificationLog();
+    //         log.setCollection_name(clazz.getName());
+    //         log.setObject_id(imcomingObject.getString("_id"));
+    //         log.setCurrentObject(mapper.readValue(imcomingObject.toString(), Map.class));
+    //         log.setCreatedDate(new Date());
+    //         try {
+    //             log.setCreatedByName(imcomingObject.isNull("createdByName") ?(imcomingObject.isNull("updatedByName")?"System Admin":imcomingObject.getString("updatedByName")) : imcomingObject.getString("createdByName"));
+    //         }catch (Exception e){
+
+    //         }
+    //         insertDocument(log);
+    //         LOGGER.info("Modification log saved for {} - {} ", imcomingObject.getString("_id"));
+    //     } catch (Exception e) {
+    //         LOGGER.info("Error while saving modification log {}",e.getMessage());
+    //         e.printStackTrace();
+    //     }
+    // }   
     
 }
 

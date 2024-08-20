@@ -5,12 +5,17 @@ const Config = require('../enum/config');
 const ObjectKeyHandler = require('./objectHandler');
 const CollectionHandler = require('./collectionHandler');
 const SeriesHandler = require('./seriesHandler');
+const FreemarkerTemplateWriter = require('./freeMarker/freemarkerTemplateWriter');
+const EmailTemplate = require('../model/generic/emailTemplate');
+const AttachmentHandler = require('./attachmentHandler');
 
 
 const commonUtil = new CommonUtils();
 const objectKeyHandler = new ObjectKeyHandler();
 const collectionHandler = new CollectionHandler();
 const seriesHandler = new SeriesHandler();
+const freemarkerTemplateWriter = new FreemarkerTemplateWriter();
+const attachmentHandler = new AttachmentHandler();
 
 class InComingDataHandler {
     updateCreatorUpdaterInfoInJson(result, jsonObject, user){
@@ -75,7 +80,7 @@ class InComingDataHandler {
         if (!await this.isDuplicate(clazz, coll, jsonObject, result)) {
             switch (coll) {               
                 case "holiday_calendar":
-                    key =  updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
+                    key =  await this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
                     staticDataCache.prepareHolidayCalendar();
                     break;
                 case "compare_modules":
@@ -140,7 +145,7 @@ class InComingDataHandler {
                     }
                     break;
                 default:
-                    key = this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
+                    key = await this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
                     break;
             }
             if (key != null) {
@@ -191,20 +196,62 @@ class InComingDataHandler {
         }
         return false;
     }
-    updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){        
+    async updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){        
         seriesHandler.populate_series(coll, jsonObject, null, null);    /// done
-        inDataEnricher(coll, jsonObject);
-        updateAltNameInObject(jsonObject);
+        await this.inDataEnricher(coll, jsonObject);
+        this.updateAltNameInObject(jsonObject);
         if (!jsonObject._id) {
             jsonObject._id =  new ObjectId().toString();
         }
         try {
-            attachmentHandler.handleAssociatedFile(coll, jsonObject, null);
-
+            await attachmentHandler.handleAssociatedFile(coll, jsonObject, null);
         } catch (e) {
             console.log("Error while saving attachment {}", e.message);
         }        
-        return collectionHandler.insertDocumentWithLog(clazz,jsonObject);
+        return collectionHandler.insertDocumentWithLog(clazz,jsonObject,JSON.parse(JSON.stringify(jsonObject)));
+    }
+    inDataEnricher = async (col, jsonObject) => {
+        switch (col.toLowerCase()) {            
+            case "pojo_master":
+                if (jsonObject.class_fields) {
+                    try {
+                        const template = await this.getTemplate("POJO_GENERATOR");
+                        jsonObject.code_string = await freemarkerTemplateWriter.getHtmlContentForObject(JSON.parse(JSON.stringify(jsonObject)), template);
+
+                    } catch (e) {
+                        console.log("Error while generating code string {}", e.message);
+                    }
+                }
+                break;
+        }
+    }
+    getTemplate = async (templateName) => {
+        let template = '';
+        
+        try {
+            const emailTemplate = await collectionHandler.findDocument(EmailTemplate,"type",templateName);
+    
+            if (emailTemplate) {
+                template = emailTemplate.body;
+            }
+        } catch (error) {
+            console.error('Error fetching email template:', error);
+        }
+    
+        return template;
+    };
+    updateAltNameInObject(object) {
+        try {
+            if (object.name) {
+                object.altname = commonUtil.getTrimmedString(object.name.toString());
+                if(object.altname == ""){
+                    object.altname = object.name;
+                }
+            }
+
+        } catch (e) {
+            console.error(e.stack);
+        }
     }
 }
 

@@ -5,8 +5,11 @@ const ClientConfiguration = require('../model/generic/clientConfiguration');
 const ExportConfiguration = require('../model/generic/exportConfiguration');
 const PojoMaster = require('../model/generic/pojoMaster');
 const CommonUtils = require('../utils/commonUtils');
+const ApplicationProperties = require('../model/generic/applicationProperties');
+const CollectionHandler = require('../handler/collectionHandler');
 
 const commonUtil = new CommonUtils();
+const collectionHandler = new CollectionHandler();
 
 class CacheService {
     constructor() {
@@ -213,6 +216,17 @@ class CacheService {
           console.log("Error while fetching pdf name pattern");
       }
       return null;
+    }
+    async getApplicationProperties(key) {
+      try{
+          const applicationProperties = await collectionHandler.findDocument(ApplicationProperties,"key",key);
+          return applicationProperties?.value ? applicationProperties.value : null;
+      }
+      catch (e){
+          console.log("Application Property Not Found : "+ key);
+          return  null;
+      }
+
     }
     
   }

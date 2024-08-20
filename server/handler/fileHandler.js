@@ -1,3 +1,10 @@
+const Config = require("../enum/config");
+const AWSHelper = require("./awsHelper");
+const LocalStorageFileHandler = require("./localStorageFileHandler");
+
+const awsHelper = new AWSHelper();
+const localStorageFileHandler = new LocalStorageFileHandler();
+
 class FileHandler {
     handleUploadThroughExcel(coll, object, user, jsonObject){
         if (coll.toLowerCase() == "upload_data") {
@@ -25,6 +32,23 @@ class FileHandler {
         } else {
             return jsonObject;
         }
+    }
+    async create_file_based_file_system(bucket, uploadData) {
+        let folderCreated = false;
+        if(Config.FILE_SYSTEM == 'S3') {
+            console.log( "Creating a new file on S3 in bucket {} with key {}"+ bucket + uploadData.innerBucketPath );
+            const result = await awsHelper.saveFileToS3(bucket,uploadData);
+            if(result){
+                folderCreated=true;
+            }
+        }else{
+            console.log( "Creating a new file in FileSystem {} with key {}", bucket + uploadData.innerBucketPath );
+            const result = await localStorageFileHandler.saveFileToStorage( bucket,uploadData);
+            if(result.success){
+                folderCreated=true;
+            }
+        }
+        return folderCreated;
     }
 
 }

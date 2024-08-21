@@ -6,10 +6,8 @@ const ExportConfiguration = require('../model/generic/exportConfiguration');
 const PojoMaster = require('../model/generic/pojoMaster');
 const CommonUtils = require('../utils/commonUtils');
 const ApplicationProperties = require('../model/generic/applicationProperties');
-const CollectionHandler = require('../handler/collectionHandler');
 
 const commonUtil = new CommonUtils();
-// const collectionHandler = new CollectionHandler();
 
 class CacheService {
     constructor() {
@@ -21,6 +19,7 @@ class CacheService {
             this.userIdWithTemplateTabIdMap = new Map();
             this.userIdWithFevouriteTemplateTabIdMap = new Map();
             this.export_configuration = new Map();
+            this.application_properties = new Map();
             this.clientConfigurations = new Map();
             this.activeUserJSONMap = new Map();
             this.coreModuleList = [];
@@ -70,6 +69,7 @@ class CacheService {
       await this.preparePojoMap();
       await this.prepareExportConfiguration();
       await this.prepareClientConfiguration();
+      await this.prepareApplicationProperties();
     }
     async preparePojoMap(){
         try {
@@ -169,6 +169,18 @@ class CacheService {
           console.log("ClientConfiguration List not exists..");
         }        
     }
+    async prepareApplicationProperties(){
+      const applicationPropertiesList = await ApplicationProperties.find({}).exec();
+        if (applicationPropertiesList && Array.isArray(applicationPropertiesList) && applicationPropertiesList.length > 0) {
+            applicationPropertiesList.forEach((obj) => {
+                this.application_properties.set(obj.key, obj.value);
+            });
+            console.log("applicationProperties List Cached..");
+        }else{
+          console.log("applicationProperties List not exists..");
+        }        
+    }
+    
     retriveAsStringList(col) {
       const colLowerCase = col.toLowerCase();
       if (this.pojoMap.get(colLowerCase) != null) return this.pojoMap.get(colLowerCase).pick_as_string;
@@ -218,16 +230,11 @@ class CacheService {
       return null;
     }
     async getApplicationProperties(key) {
-      try{
-          // const applicationProperties = await collectionHandler.findDocument(ApplicationProperties,"key",key);
-          const applicationProperties = {}
-          return applicationProperties?.value ? applicationProperties.value : null;
-      }
-      catch (e){
-          console.log("Application Property Not Found : "+ key);
-          return  null;
-      }
-
+        if(this.application_properties.has(key)){
+          return this.application_properties.get(key);
+        }else{
+          return null;
+        }      
     }
     
   }

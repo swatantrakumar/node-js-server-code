@@ -4,7 +4,8 @@ const BaseEntity = require("../baseEntity");
 // Creating user schema
 const ApplicationPropertiesSchema = mongoose.Schema({ 
     ...BaseEntity.schema.obj,
-      
+    key:String,
+    value:String
 });
 
 // Combine the base entity schema with the user schema

@@ -4,7 +4,12 @@ const { PassThrough } = require('stream');
 const Config = require('../enum/config');
 
 // Configure AWS SDK
-const s3Client = new S3Client(Config.AWS_CONFIG);
+const config  = {};
+config.accessKeyId = Config.AWS_CONFIG.accId
+config.secretAccessKey = Config.AWS_CONFIG.secAccess
+config.region = Config.AWS_CONFIG.region
+
+const s3Client = new S3Client(config);
 
 class AWSHelper{    
     async saveFileToS3(bucketName, ud) {

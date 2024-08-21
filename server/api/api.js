@@ -11,6 +11,7 @@ const Config = require('../enum/config');
 const LoadCache = require('../cache/loadCache');
 const PermissionHandler = require('../handler/permissionHandler');
 const templateHandler = require('../handler/templateHandler');
+require('dotenv').config();
 
 
 const permissionHandler = new PermissionHandler();

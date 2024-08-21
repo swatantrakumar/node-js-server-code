@@ -5,8 +5,10 @@ const Config = require('../enum/config');
 
 // Configure AWS SDK
 const config  = {};
-config.accessKeyId = Config.AWS_CONFIG.accId
-config.secretAccessKey = Config.AWS_CONFIG.secAccess
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+config.accessKeyId = AWS_ACCESS_KEY_ID
+config.secretAccessKey = AWS_SECRET_ACCESS_KEY
 config.region = Config.AWS_CONFIG.region
 
 const s3Client = new S3Client(config);

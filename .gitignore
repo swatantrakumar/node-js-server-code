@@ -3,4 +3,5 @@ node_modules/
 dist/
 .scannerwork/
 .vscode/
-.env/
+# Environment variables
+.env

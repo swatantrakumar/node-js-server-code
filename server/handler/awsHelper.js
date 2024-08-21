@@ -1,11 +1,10 @@
-const AWS = require('aws-sdk');
+
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { PassThrough } = require('stream');
 const Config = require('../enum/config');
 
 // Configure AWS SDK
-AWS.config.update(Config.AWS_CONFIG); // Replace with your AWS region
-
-const s3 = new AWS.S3();
+const s3Client = new S3Client(Config.AWS_CONFIG);
 
 class AWSHelper{    
     async saveFileToS3(bucketName, ud) {
@@ -37,7 +36,8 @@ class AWSHelper{
             }
     
             // Upload the file to S3
-            const putObjectResult = await s3.putObject(params).promise();
+            // const putObjectResult = await s3.putObject(params).promise();
+            const putObjectResult = await s3Client.send(new GetObjectCommand(params));
             
             if (isPublicFile) {
                 // Generate the URL for the uploaded file

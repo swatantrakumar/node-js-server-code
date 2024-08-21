@@ -7,12 +7,12 @@ const FormFieldsSchema = require('../builder/formFieldsSchema');
 // Creating user schema
 const ModificationLogSchema = mongoose.Schema({ 
     ...BaseEntity.schema.obj,
-    object_id: { type: String, required: true },
-    collection_name: { type: String, required: true },
+    object_id: { type: String},
+    collection_name: { type: String},
     previous: { type: String },
     current: { type: String },
-    previousObject: { type: Map, of: Schema.Types.Mixed },
-    currentObject: { type: Map, of: Schema.Types.Mixed },
+    previousObject: { type: Map, of: mongoose.Schema.Types.Mixed },
+    currentObject: { type: Map, of: mongoose.Schema.Types.Mixed },
     // auditFields is transient and will not be stored in MongoDB
 }, {
     toJSON: { virtuals: true,versionKey: false,  // remove __v

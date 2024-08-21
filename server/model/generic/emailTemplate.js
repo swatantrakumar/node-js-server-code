@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
+const Reference = require('../reference');
 
 // Creating user schema
 const EmailTemplateSchema = mongoose.Schema({ 

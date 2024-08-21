@@ -1,3 +1,4 @@
+const ModificationLog = require("../model/generic/modificationLog");
 const CommonUtils = require("../utils/commonUtils");
 const QueryCriteria = require("./queryHandler/queryCriteria");
 const QueryHandler = require("./queryHandler/queryHandler");
@@ -5,6 +6,7 @@ const QueryHandler = require("./queryHandler/queryHandler");
 const queryHandler = new QueryHandler();
 const commonutil = new CommonUtils();
 class CollectionHandler {
+    
     async findDocumentById(model,id,key,list){
         let user = null;        
         if(key){
@@ -101,32 +103,33 @@ class CollectionHandler {
             console.log("Insert Document Issue : =" + error);
         }
     }
-    insertDocumentWithLog(model, jsonObject,  obj){
+    async insertDocumentWithLog(model, jsonObject,  obj){
+        let result = null;
         try {
-            model.save(obj);
+            result = await model.save(obj);
+            await saveModificationLog(model,jsonObject);
         } catch (error) {
-            
+            console.log(e.stack);
+            console.error("Exception Encountered with Creating Document");
         }
+        return result;
     }
-    // saveModificationLog(clazz, imcomingObject) {
-    //     try {
-    //         ModificationLog log = new ModificationLog();
-    //         log.setCollection_name(clazz.getName());
-    //         log.setObject_id(imcomingObject.getString("_id"));
-    //         log.setCurrentObject(mapper.readValue(imcomingObject.toString(), Map.class));
-    //         log.setCreatedDate(new Date());
-    //         try {
-    //             log.setCreatedByName(imcomingObject.isNull("createdByName") ?(imcomingObject.isNull("updatedByName")?"System Admin":imcomingObject.getString("updatedByName")) : imcomingObject.getString("createdByName"));
-    //         }catch (Exception e){
-
-    //         }
-    //         insertDocument(log);
-    //         LOGGER.info("Modification log saved for {} - {} ", imcomingObject.getString("_id"));
-    //     } catch (Exception e) {
-    //         LOGGER.info("Error while saving modification log {}",e.getMessage());
-    //         e.printStackTrace();
-    //     }
-    // }   
+    async saveModificationLog(clazz, imcomingObject) {
+        try {
+            const log = new ModificationLog();
+            log.collection_name = clazz.name;
+            log.object_id = imcomingObject._id;
+            log.currentObject = JSON.parse(JSON.stringify(imcomingObject));
+            log.CreatedDate = new Date();
+            log.CreatedByName = imcomingObject.createdByName == null ?(imcomingObject.updatedByName == null ?"System Admin":imcomingObject.updatedByName) : imcomingObject.createdByName;
+            
+            await this.insertDocument(log);
+            console.log("Modification log saved for {} - {} ", imcomingObject._id);
+        } catch (e) {
+            console.log("Error while saving modification log {}"+e.message);
+            console.error(e.stack)
+        }
+    }   
     
 }
 

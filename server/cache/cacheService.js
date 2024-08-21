@@ -9,7 +9,7 @@ const ApplicationProperties = require('../model/generic/applicationProperties');
 const CollectionHandler = require('../handler/collectionHandler');
 
 const commonUtil = new CommonUtils();
-const collectionHandler = new CollectionHandler();
+// const collectionHandler = new CollectionHandler();
 
 class CacheService {
     constructor() {
@@ -219,7 +219,8 @@ class CacheService {
     }
     async getApplicationProperties(key) {
       try{
-          const applicationProperties = await collectionHandler.findDocument(ApplicationProperties,"key",key);
+          // const applicationProperties = await collectionHandler.findDocument(ApplicationProperties,"key",key);
+          const applicationProperties = {}
           return applicationProperties?.value ? applicationProperties.value : null;
       }
       catch (e){

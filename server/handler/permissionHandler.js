@@ -1,4 +1,3 @@
-const { Map } = require("mongodb");
 const CollectionHandler = require("./collectionHandler");
 const AppRoleBinding = require("../model/permission/appRoleBinding");
 const AppUsersGroup = require("../model/permission/appUsersGroup");

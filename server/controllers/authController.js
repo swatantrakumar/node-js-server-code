@@ -11,14 +11,13 @@ class AuthController {
 
     static login = async (req, res) =>  {
         const body = commonUtils.decodeBase64(req.body);
-        // Find user with requested email
-        User.findOne({ email: body.userId }, function (err, user) {
+        try {
+            let user = await User.findOne({ email: body.userId });
             if (user === null) {
                 return res.status(400).send({
                     message: "User not found."
                 });
-            }
-            else {
+            }else {
                 if (user.validPassword(body.password)) {
                     const payload = {email : user.email};
                     // Generate JWT token
@@ -26,14 +25,15 @@ class AuthController {
 
                     // Return token to client
                     return res.status(200).send({token : token });
-                }
-                else {
+                }else {
                     return res.status(400).send({
                         message: "Wrong Password"
                     });
                 }
             }
-        });
+        } catch (error) {
+            console.log("login error");
+        }       
     }
 
     static signUp = async (req, res) => {

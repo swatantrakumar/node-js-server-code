@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const connectToDatabase = async () => {
   try {
-    await mongoose.connect(Config.MONGODB_URI,{"dbName":Config.DATABASE_NAME,useNewUrlParser: true,useUnifiedTopology: true});
+    await mongoose.connect(Config.MONGODB_URI,{"dbName":Config.DATABASE_NAME});
     loadApi();
     console.log('Connected successfully to MongoDB');
   } catch (err) {

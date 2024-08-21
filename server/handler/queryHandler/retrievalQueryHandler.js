@@ -173,7 +173,7 @@ class RetrievalQueryHandler{
         return result;
     }
     getDefaultSortByString(value) {
-        const sortBy = "name";
+        let sortBy = "name";
         if (cacheService.getPojoFromCollection(value) && cacheService.getPojoFromCollection(value)?.defaultSortBy) {
             sortBy = cacheService.getPojoFromCollection(value)?.defaultSortBy;
         }

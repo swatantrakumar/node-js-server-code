@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
-<<<<<<< HEAD
 const S3FolderDataSchema = require('../generic/S3FolderSchema');
-=======
-const S3FolderData = require('../generic/S3FolderData');
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
 
 // Creating user schema
 const ApplicationUserSchema = mongoose.Schema({ 
@@ -24,11 +20,7 @@ const ApplicationUserSchema = mongoose.Schema({
     action:String,
     designation:String,
     signature:[],
-<<<<<<< HEAD
     signature_file:[S3FolderDataSchema],
-=======
-    signature_file:[S3FolderData],
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
     signatureUrl:String,
     password:String,
     confirm_password:String,

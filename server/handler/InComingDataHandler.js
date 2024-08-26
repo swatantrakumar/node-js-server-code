@@ -5,23 +5,17 @@ const Config = require('../enum/config');
 const ObjectKeyHandler = require('./objectHandler');
 const CollectionHandler = require('./collectionHandler');
 const SeriesHandler = require('./seriesHandler');
-<<<<<<< HEAD
 const FreemarkerTemplateWriter = require('./freeMarker/freemarkerTemplateWriter');
 const EmailTemplate = require('../model/generic/emailTemplate');
 const AttachmentHandler = require('./attachmentHandler');
-=======
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
 
 
 const commonUtil = new CommonUtils();
 const objectKeyHandler = new ObjectKeyHandler();
 const collectionHandler = new CollectionHandler();
 const seriesHandler = new SeriesHandler();
-<<<<<<< HEAD
 const freemarkerTemplateWriter = new FreemarkerTemplateWriter();
 const attachmentHandler = new AttachmentHandler();
-=======
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
 
 class InComingDataHandler {
     updateCreatorUpdaterInfoInJson(result, jsonObject, user){
@@ -86,11 +80,7 @@ class InComingDataHandler {
         if (!await this.isDuplicate(clazz, coll, jsonObject, result)) {
             switch (coll) {               
                 case "holiday_calendar":
-<<<<<<< HEAD
                     key =  await this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
-=======
-                    key =  updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
                     staticDataCache.prepareHolidayCalendar();
                     break;
                 case "compare_modules":
@@ -155,11 +145,7 @@ class InComingDataHandler {
                     }
                     break;
                 default:
-<<<<<<< HEAD
                     key = await this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
-=======
-                    key = this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
                     break;
             }
             if (key != null) {
@@ -210,22 +196,14 @@ class InComingDataHandler {
         }
         return false;
     }
-<<<<<<< HEAD
     async updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){        
         seriesHandler.populate_series(coll, jsonObject, null, null);    /// done
         await this.inDataEnricher(coll, jsonObject);
         this.updateAltNameInObject(jsonObject);
-=======
-    updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){        
-        seriesHandler.populate_series(coll, jsonObject, null, null);    /// done
-        inDataEnricher(coll, jsonObject);
-        updateAltNameInObject(jsonObject);
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
         if (!jsonObject._id) {
             jsonObject._id =  new ObjectId().toString();
         }
         try {
-<<<<<<< HEAD
             await attachmentHandler.handleAssociatedFile(coll, jsonObject, null);
         } catch (e) {
             console.log("Error while saving attachment {}", e.message);
@@ -274,14 +252,6 @@ class InComingDataHandler {
         } catch (e) {
             console.error(e.stack);
         }
-=======
-            attachmentHandler.handleAssociatedFile(coll, jsonObject, null);
-
-        } catch (e) {
-            console.log("Error while saving attachment {}", e.message);
-        }        
-        return collectionHandler.insertDocumentWithLog(clazz,jsonObject);
->>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
     }
 }
 

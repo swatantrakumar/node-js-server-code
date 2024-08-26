@@ -3,5 +3,8 @@ node_modules/
 dist/
 .scannerwork/
 .vscode/
+<<<<<<< HEAD
 # Environment variables
 .env
+=======
+>>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555

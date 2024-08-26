@@ -251,9 +251,12 @@ class CommonUtils {
             console.error('Error during copyProperties:', error);
         }
     }
+<<<<<<< HEAD
     hasKeyInJsonObject(jsonObject, key) {
         return jsonObject !== null && jsonObject.hasOwnProperty(key) && jsonObject[key] !== null;
     }
+=======
+>>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
 }
 
 module.exports = CommonUtils;

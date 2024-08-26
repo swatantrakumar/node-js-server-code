@@ -2,12 +2,20 @@
 const mongoose = require('mongoose');
 const {ObjectId} = require('mongodb');
 
+<<<<<<< HEAD
 // var objectId = new ObjectId();
+=======
+var objectId = new ObjectId();
+>>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
 
 
 // Creating BaseEntity schema
 const BaseEntitySchema = mongoose.Schema({
+<<<<<<< HEAD
     _id:{ type: String, default: () => new ObjectId().toString() },
+=======
+    _id:{ type: String, default: objectId },
+>>>>>>> fe97f992c1a7be91fa0d0fceda288fabedd90555
     print_template:String,
     remarks:String,
     cancel_reason:String,

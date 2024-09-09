@@ -5,14 +5,15 @@ const ClassFields = require('./classFields');
 
 // Creating user schema
 const PojoMasterSchema = mongoose.Schema({ 
+    ...BaseEntity.schema.obj,
     scope:String,
     level:String,
     type:String,
     name:String,
     field_splitter:String,
     fields_for_reference:[String],
-    pick_as_string:Boolean,
-    dynamic:Boolean,
+    pick_as_string:{type:Boolean,default:false},
+    dynamic:{type:Boolean,default:false},
     collection_prefix:String,
     collection_name:String,
     class_name:String,
@@ -49,10 +50,10 @@ const PojoMasterSchema = mongoose.Schema({
         type:Map,
         of:String
     },
-    configMaster:Boolean,
+    configMaster:{type:Boolean,default:false},
     enrich_query_with:[String],
-    forApproval:Boolean,
-    logBookRequired:Boolean,
+    forApproval:{type:Boolean,default:false},
+    logBookRequired:{type:Boolean,default:false},
     mappedAttributes:[String],
     series_method:{
         type:Map,
@@ -65,12 +66,12 @@ const PojoMasterSchema = mongoose.Schema({
     on_save_methods:[{}],
     after_save_methods:[{}],
     report_collection_name:String,
-    report_flag:Boolean,
+    report_flag:{type:Boolean,default:false},
     report_form_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
     report_tab_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
     report_grid_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
-    sqsFlow:Boolean,
-    autoSync:Boolean
+    sqsFlow:{type:Boolean,default:false},
+    autoSync:{type:Boolean,default:false}
 });
 
 // Combine the base entity schema with the user schema

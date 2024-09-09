@@ -13,15 +13,15 @@ const accountBookHandler = new AccountBookHandler();
 class SeriesHandler{
 
     
-    populate_series(coll, jsonObject, jsonObjectForSeriesDetails, accountBook){
-        const srNumber = 0;
+    async populate_series(coll, jsonObject, jsonObjectForSeriesDetails, accountBook){
+        let srNumber = 0;
         if (jsonObject.srNumber == null || jsonObject.srNumber == 0) {
             const pojoMaster = cacheService.getPojoFromCollection(coll.toLowerCase());
             const series=pojoMaster.defaultSeries;
-            const seriesType =pojoMaster.seriesMethod==null?"CONTINUOUS":pojoMaster.seriesMethod;
-            const seriesPattern = pojoMaster.defaultSeries;
-            const pattern=pojoMaster.series_pattern==null?(seriesPattern+"-[srNumber]"):pojoMaster.series_pattern;
-            const on_date = pojoMaster.series_on_date_field;
+            let seriesType =pojoMaster.seriesMethod==null?"CONTINUOUS":pojoMaster.seriesMethod;
+            let seriesPattern = pojoMaster.defaultSeries;
+            let pattern=pojoMaster.series_pattern==null?(seriesPattern+"-[srNumber]"):pojoMaster.series_pattern;
+            let on_date = pojoMaster.series_on_date_field;
             let objectseriesMethod=null;
             try {
                 objectseriesMethod = cacheService.getSeriesMethod(jsonObject?.refCode, coll);
@@ -66,22 +66,22 @@ class SeriesHandler{
             const object_series = seriesPattern==null?series:this.getConvertedString(jsonObject,seriesPattern);
             switch (seriesType.toUpperCase()) {
                 case "DAILY":
-                    srNumber = accountBookHandler.getDailyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    srNumber = await accountBookHandler.getDailyBookSerialNumber(jsonObject.refCode, object_series, date, accountBook);
                     break;
                 case "MONTHLY":
-                    // srNumber = accountBookHandler.getMonthlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    // srNumber = accountBookHandler.getMonthlyBookSerialNumber(jsonObject.refCode, object_series, date, accountBook);
                     console.log("monthly account book.")
                     break;
                 case "YEARLY":
-                    // srNumber = accountBookHandler.getRunningYearlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    // srNumber = accountBookHandler.getRunningYearlyBookSerialNumber(jsonObject.refCode, object_series, date, accountBook);
                     console.log("YEARLY account book.")
                     break;
                 case "FINANCEYEAR":
-                    // srNumber = accountBookHandler.getYearlyBookSerialNumber(jsonObject.getString("refCode"), object_series, date, accountBook);
+                    // srNumber = accountBookHandler.getYearlyBookSerialNumber(jsonObject.refCode, object_series, date, accountBook);
                     console.log("FINANCEYEAR account book.")
                     break;
                 case "CONTINUOUS":
-                    srNumber = accountBookHandler.getBookSerialNumber(jsonObject.getString("refCode"), object_series, accountBook);
+                    srNumber = await accountBookHandler.getBookSerialNumber(jsonObject.refCode, object_series, accountBook);
                     break;
             }
             jsonObject.srNumber = srNumber;
@@ -105,7 +105,7 @@ class SeriesHandler{
         while ((match = pattern.exec(template)) !== null) {
             listMatches.push(match[1]);
             const details = match[1];
-            const valueString = getStringValue(details, ja);
+            const valueString = this.getStringValue(details, ja);
             template = template.replace(`[${details}]`, valueString);
         }
     

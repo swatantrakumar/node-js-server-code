@@ -103,13 +103,13 @@ class InComingDataHandler {
                         const twoFactorAuthentication = false;
 
                         if (jsonObject.has(AccountStatus.ENABLED.value)) enabledStatus = jsonObject.getBoolean(AccountStatus.ENABLED.value);
-                        if (jsonObject.has(AccountField.ACCOUNT_STATUS.name)) accountStatus = jsonObject.getString(AccountField.ACCOUNT_STATUS.name);
+                        if (jsonObject.has(AccountField.ACCOUNT_STATUS.name)) accountStatus = jsonObject[AccountField.ACCOUNT_STATUS.name];
                         if (jsonObject.has(AccountField.TWO_FACTOR_AUTHENTICATION.name)) twoFactorAuthentication = jsonObject.getBoolean(AccountField.TWO_FACTOR_AUTHENTICATION.name);
                         if (accountStatus != null) updateMap.put(AccountField.ACCOUNT_STATUS.name,accountStatus);
                         updateMap.put(AccountStatus.ENABLED.value, enabledStatus);
                         updateMap.put(AccountField.TWO_FACTOR_AUTHENTICATION.name,twoFactorAuthentication);
                         const crlIst = [];
-                        crlIst.push(new QueryCriteria("_id", Operator.EQUAL, jsonObject.getString("_id")));
+                        crlIst.push(new QueryCriteria("_id", Operator.EQUAL, jsonObject._id));
                         collectionHandler.upsert(AppUser.class, crlIst, updateMap);
                         result.set("success", "success");
                     }catch (e){
@@ -148,8 +148,8 @@ class InComingDataHandler {
                     key = await this.updateSerialEnrichObjectAndSave(clazz, coll, jsonObject);
                     break;
             }
-            if (key != null) {
-                data = collectionHandler.findDocumentById(clazz, key.get_id());
+            if (key && key._id) {
+                data = await collectionHandler.findDocumentById(clazz, key._id);
                 result.set("success", "success");
                 result.set("data", data);
                 sendWhatsAppNotification(coll, jsonObject, clazz);
@@ -197,7 +197,7 @@ class InComingDataHandler {
         return false;
     }
     async updateSerialEnrichObjectAndSave(clazz, coll, jsonObject){        
-        seriesHandler.populate_series(coll, jsonObject, null, null);    /// done
+        await seriesHandler.populate_series(coll, jsonObject, null, null);    /// done
         await this.inDataEnricher(coll, jsonObject);
         this.updateAltNameInObject(jsonObject);
         if (!jsonObject._id) {

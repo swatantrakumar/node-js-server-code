@@ -11,7 +11,7 @@ const collectionHandler = new CollectionHandler();
 
 class AccountBookHandler{
     async getDailyBookSerialNumber(refCode, series, financialDay, accountBooks) {
-		const transactionSerialNumber = 1;
+		let transactionSerialNumber = 1;
         try {                  
             let accountBook = await this.getDailyBook(refCode, series,financialDay);
             if (accountBook) {
@@ -33,9 +33,9 @@ class AccountBookHandler{
 		return transactionSerialNumber;
 	}
     async getBookSerialNumber (refCode, series, accountBooks){
-        const transactionSerialNumber =1;
+        let transactionSerialNumber =1;
         try {
-            const accountBook = await this.getAccountBook(refCode, series,null);
+            let accountBook = await this.getAccountBook(refCode, series,null);
             if(accountBook!=null){
                 transactionSerialNumber = accountBook.srNumber + 1;
                 accountBook.srNumber = transactionSerialNumber;
@@ -59,12 +59,12 @@ class AccountBookHandler{
 		        queryCriteriaList.push(new QueryCriteria("refCode","string",Operator.EQUAL,refCode));
 		        queryCriteriaList.push(new QueryCriteria("series","string",Operator.EQUAL,series));
 
-				accountBook = await collectionHandler.findFirstDocumentWithListQueryCriteria(AccountBook, queryCriteriaList);
+				accountBook = new AccountBook(await collectionHandler.findFirstDocumentWithListQueryCriteria(AccountBook, queryCriteriaList));
 				//queryHandler.findByRefCodeAndSeries( refCode, series);
 			}
 			
 			if (accountBook == null) {
-                const newBook = new AccountBook();
+                let newBook = new AccountBook();
 				console.log("Account Book not found for {} : {}",refCode,series);
 				newBook = this.getNewAccountBook(refCode, series, null);
                 console.log(`Returning new Book found for {}: {} : {} ${accountBook.case_id} : ${accountBook.series} : ${accountBook.srNumber}`);
@@ -79,9 +79,9 @@ class AccountBookHandler{
 	}
     async getDailyBook(refCode, series, financialDay) {
 		let accountBook;
-		const year = commonUtil.getFinancialYear(financialDay);
-		const month = commonUtil.getMonth(financialDay);
-		const fDay = commonUtil.getFinancialDay(financialDay);
+		let year = commonUtil.getFinancialYear(financialDay);
+		let month = commonUtil.getMonth(financialDay);
+		let fDay = commonUtil.getFinancialDay(financialDay);
 		accountBook = await this.findByFinancialDay(refCode, series, year,month,fDay);
 		if(accountBook==null){
 			console.info("accountBook Could not be Retrived, hence creating new Book for {}, {}, {}, {}",  refCode,series, year,financialDay);
@@ -101,7 +101,7 @@ class AccountBookHandler{
 	}
     getNewAccountBook(refCode, series , date ) {
         if (!date) date = new Date();    
-        const accountBook = new AccountBook({
+        let accountBook = new AccountBook({
             _id: new ObjectId().toString(), // Generates a new ObjectId
             refCode: refCode,
             series: series,

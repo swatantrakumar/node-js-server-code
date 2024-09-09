@@ -106,9 +106,10 @@ class CollectionHandler {
     async insertDocumentWithLog(model, jsonObject,  obj){
         let result = null;
         try {
-            result = await model.save(obj);
-            await saveModificationLog(model,jsonObject);
-        } catch (error) {
+            let saveObject = new model(obj);
+            result = await saveObject.save();
+            await this.saveModificationLog(model,jsonObject);
+        } catch (e) {
             console.log(e.stack);
             console.error("Exception Encountered with Creating Document");
         }

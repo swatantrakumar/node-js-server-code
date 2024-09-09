@@ -68,7 +68,7 @@ class RetrievalQueryHandler{
                 //     try {
                 //         JSONArray array = new JSONArray(gson.toJson(templateList));
                 //         for (int i = 0; i < array.length(); i++) {
-                //             objList.add(templateHandler.templateIdMap.get(array.getJSONObject(i).getString("_id")));
+                //             objList.add(templateHandler.templateIdMap.get(array.getJSONObject(i)._id));
                 //         }
                 //     } catch (e) {
                 //         e.printStackTrace();
@@ -146,7 +146,7 @@ class RetrievalQueryHandler{
                 //         JSONArray array = new JSONArray(gson.toJson(forms));
                 //         for (int i = 0; i < array.length(); i++) {
                 //             JSONObject templateJson = array.getJSONObject(i);
-                //             objList.add(templateHandler.getFormMap().get(templateJson.getString("_id")));
+                //             objList.add(templateHandler.getFormMap().get(templateJson._id));
                 //         }
                 //     } catch (e) {
                 //         e.printStackTrace();

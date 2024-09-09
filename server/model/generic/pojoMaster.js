@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
 const ClassFields = require('./classFields');
+const IgnoreNull = require('../ignoreNull');
 
 // Creating user schema
 const PojoMasterSchema = mongoose.Schema({ 
@@ -11,7 +12,7 @@ const PojoMasterSchema = mongoose.Schema({
     type:String,
     name:String,
     field_splitter:String,
-    fields_for_reference:[String],
+    fields_for_reference:{type:[String],default:undefined},
     pick_as_string:{type:Boolean,default:false},
     dynamic:{type:Boolean,default:false},
     collection_prefix:String,
@@ -31,17 +32,17 @@ const PojoMasterSchema = mongoose.Schema({
     altvalue:String,
     parent_id:String,
     parent_serial:String,
-    primaryKeys:[String],
-    fileTypeFields:[String],
-    aliasNames:[String],
-    importClasses:[String],
+    primaryKeys:{type:[String],default:undefined},
+    fileTypeFields:{type:[String],default:undefined},
+    aliasNames:{type:[String],default:undefined},
+    importClasses:{type:[String],default:undefined},
     code_string:String,
     code_type:String,
     packagePath:String,
-    class_fields:[ClassFields],
-    listOfVariables:[ClassFields],
+    class_fields:{type:[ClassFields],default:undefined},
+    listOfVariables:{type:[ClassFields],default:undefined},
     // fetch_criterias:[PojoFetchCriteria],
-    imports:[String],
+    imports:{type:[String],default:undefined},
     defaultSortBy:{
         type:String,
         default : '-createdDate'
@@ -51,10 +52,10 @@ const PojoMasterSchema = mongoose.Schema({
         of:String
     },
     configMaster:{type:Boolean,default:false},
-    enrich_query_with:[String],
+    enrich_query_with:{type:[String],default:undefined},
     forApproval:{type:Boolean,default:false},
     logBookRequired:{type:Boolean,default:false},
-    mappedAttributes:[String],
+    mappedAttributes:{type:[String],default:undefined},
     series_method:{
         type:Map,
         of:{
@@ -63,8 +64,8 @@ const PojoMasterSchema = mongoose.Schema({
         }
     },
     approvalDataMappingName:String,
-    on_save_methods:[{}],
-    after_save_methods:[{}],
+    on_save_methods:{type:[{}],default:undefined},
+    after_save_methods:{type:[{}],default:undefined},
     report_collection_name:String,
     report_flag:{type:Boolean,default:false},
     report_form_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
@@ -73,6 +74,8 @@ const PojoMasterSchema = mongoose.Schema({
     sqsFlow:{type:Boolean,default:false},
     autoSync:{type:Boolean,default:false}
 });
+
+IgnoreNull(PojoMasterSchema);
 
 // Combine the base entity schema with the user schema
 const PojoMaster =  mongoose.model('PojoMaster', PojoMasterSchema,'app_pojo_master');

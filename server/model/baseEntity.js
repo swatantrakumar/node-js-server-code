@@ -15,7 +15,7 @@ const BaseEntitySchema = mongoose.Schema({
     series:String,
     srNumber:Number,
     serialId:String,
-    customEntry:Boolean,
+    customEntry:{type:Boolean,default:false},
     status:String,
     version:Number,
     etc_fields:{

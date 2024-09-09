@@ -152,7 +152,7 @@ class InComingDataHandler {
                 data = await collectionHandler.findDocumentById(clazz, key._id);
                 result.set("success", "success");
                 result.set("data", data);
-                sendWhatsAppNotification(coll, jsonObject, clazz);
+                // sendWhatsAppNotification(coll, jsonObject, clazz);
             } else {
                 result.set("error", "error occurred");
             }

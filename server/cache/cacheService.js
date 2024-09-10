@@ -213,7 +213,7 @@ class CacheService {
     }
     getPrimaryKeysForPojo(name){
       const pojoMaster = this.getPojoFromCollection(name);
-      if(pojoMaster.primaryKeys && Array.isArray(pojoMaster.primaryKeys) && pojoMaster.length > 0){
+      if(pojoMaster.primaryKeys && Array.isArray(pojoMaster.primaryKeys) && pojoMaster.primaryKeys.length > 0){
           return pojoMaster.primaryKeys;
       }
       return null;

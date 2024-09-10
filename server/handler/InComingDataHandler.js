@@ -26,11 +26,11 @@ class InComingDataHandler {
                     jsonObject.createdBy = user.email;
                     jsonObject.createdByName = user.name;
                     jsonObject.createdDate = commonUtil.getJsonAcceptableDate(new Date());
-                    jsonObject.status = (jsonObject.status === null ? "Active" : jsonObject.status);
+                    jsonObject.status = jsonObject.status ? jsonObject.status : "Active";
                 } else {
                     jsonObject.updatedBy =  user.email;
                     jsonObject.updatedByName = user.name;
-                    jsonObject.updateDate = commonUtil.getJsonAcceptableDate(new Date());
+                    jsonObject.updatedDate = commonUtil.getJsonAcceptableDate(new Date());
                 }
                 if (jsonObject.refCode == null || jsonObject.refCode == "") {
                     if(user.refCode){
@@ -167,8 +167,8 @@ class InComingDataHandler {
                 const queryCriteriaList = objectKeyHandler.getUniqueKeyQuery(collection, incomingObject);
                 const persistedObject = await collectionHandler.findFirstDocumentWithListQueryCriteria(clazz, queryCriteriaList);
                 if (persistedObject) {                    
-                    const jsonObject = JSON.parse(JSON.stringify(persistedString));
-                    const prevVersion = 0;
+                    const jsonObject = JSON.parse(JSON.stringify(persistedObject));
+                    let prevVersion = 0;
                     try {
                         if (jsonObject.version) {
                             prevVersion = jsonObject.version;

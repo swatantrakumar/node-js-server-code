@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const path = require('path');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
 const ClassFields = require('./classFields');
@@ -73,9 +74,12 @@ const PojoMasterSchema = mongoose.Schema({
     report_grid_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
     sqsFlow:{type:Boolean,default:false},
     autoSync:{type:Boolean,default:false}
-});
+}, { versionKey: '__v' });
+// Add a static property for file path
+PojoMasterSchema.statics.modelFilePath = path.relative(process.cwd(), __filename);
 
-IgnoreNull(PojoMasterSchema);
+
+PojoMasterSchema.plugin(IgnoreNull);
 
 // Combine the base entity schema with the user schema
 const PojoMaster =  mongoose.model('PojoMaster', PojoMasterSchema,'app_pojo_master');

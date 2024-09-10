@@ -17,7 +17,7 @@ class AccountBookHandler{
             if (accountBook) {
                 transactionSerialNumber = accountBook.srNumber + 1;
                 accountBook.srNumber = transactionSerialNumber;
-                accountBook.updateDate = new Date();
+                accountBook.updatedDate = commonUtil.getJsonAcceptableDate(new Date());
                 
                 console.info(`Saving account Book with new SerialNumber ${accountBook.case_id} : ${accountBook.series} : ${accountBook.srNumber}`);
                 
@@ -39,7 +39,7 @@ class AccountBookHandler{
             if(accountBook!=null){
                 transactionSerialNumber = accountBook.srNumber + 1;
                 accountBook.srNumber = transactionSerialNumber;
-                accountBook.updateDate = new Date();
+                accountBook.updatedDate = commonUtil.getJsonAcceptableDate(new Date());
                 console.info(`Saving account Book with new SerialNumber ${accountBook.case_id} : ${accountBook.series} : ${accountBook.srNumber}`);
                 //queryHandler.saveObject(AccountBook.class, accountBook);
                 await collectionHandler.insertDocument(accountBook);
@@ -109,7 +109,7 @@ class AccountBookHandler{
             month: commonUtil.getMonth(date),
             fDay: commonUtil.getFinancialDay(date),
             srNumber: 0,
-            createdDate: new Date()
+            createdDate: commonUtil.getJsonAcceptableDate(new Date())
         });        
         return accountBook;
     }

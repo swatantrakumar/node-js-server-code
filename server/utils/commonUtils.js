@@ -208,7 +208,7 @@ class CommonUtils {
         return null;
     }
     getValueFromJSONObject(parentObj, jsonfield){
-        const childObject = parentObj;
+        let childObject = parentObj;
         if (jsonfield) {
             const fields = jsonfield.split(/\./);
             if (fields && fields.length > 0) {

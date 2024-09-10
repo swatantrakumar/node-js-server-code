@@ -10,7 +10,7 @@ class ObjectKeyHandler {
         return this.enrichQueryForUniqueKey(collection, this.getPrimaryKeyFields( collection ),jsonObject );
     }
     getPrimaryKeyFields(name){
-        const pojoMaster = staticDataCache.getPojoMaster(name);
+        const pojoMaster = cacheService.getPojoFromCollection(name);
         const primaryKeys = [];
         if(pojoMaster.primaryKeys){
             if(pojoMaster.level){
@@ -27,10 +27,11 @@ class ObjectKeyHandler {
         return ["altname"];
     }
     enrichQueryForUniqueKey(collection, fields, jsonObject){
-        const queryCriteriaList = [];
+        let queryCriteriaList = [];
         try {
             if(jsonObject.refCode){
-                const queryCriteria = new QueryCriteria();
+                let queryCriteria = new QueryCriteria();
+                queryCriteria.fieldType = "string";
                 queryCriteria.field = "refCode";
                 queryCriteria.operator = Operators.EQUAL;
                 queryCriteria.value = jsonObject.refCode;
@@ -49,16 +50,18 @@ class ObjectKeyHandler {
         if(fields && Array.isArray(fields) && fields.length > 0){
             fields.forEach( field =>{
                 try {
-                    const fieldType = cacheService.getFieldMap().get( (collection.toLowerCase() +"_"+ field) );
-                    if (fieldType == null) fieldType = "string";
+                    let key = collection.toLowerCase() +"_"+ field;
+                    let fieldType = cacheService.getFieldMap().get(key);
+                    if (!fieldType) fieldType = "string";
                     const value = commonUtil.getValueFromJSONObject( jsonObject, field ).toString();
-                    const queryCriteria = new QueryCriteria();
+                    let queryCriteria = new QueryCriteria();
+                    queryCriteria.fieldType = fieldType;
                     queryCriteria.field = field;
                     queryCriteria.operator = Operators.EQUAL;
                     queryCriteria.value = value;
                     queryCriteriaList.push(queryCriteria);
                 }catch (e){
-                    const queryCriteria = new QueryCriteria();
+                    let queryCriteria = new QueryCriteria();
                     queryCriteria.field = field;
                     queryCriteria.operator = Operators.DO_NOT_EXIST;
                     queryCriteriaList.push(queryCriteria);

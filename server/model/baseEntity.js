@@ -8,10 +8,12 @@ const {ObjectId} = require('mongodb');
 // Creating BaseEntity schema
 const BaseEntitySchema = mongoose.Schema({
     _id:{ type: String, default: () => new ObjectId().toString() },
+    _class: { type: String, default: 'MyDocument' },
     print_template:String,
     remarks:String,
     cancel_reason:String,
     migrationStatus:String,
+    altname:String,
     series:String,
     srNumber:Number,
     serialId:String,
@@ -29,7 +31,8 @@ const BaseEntitySchema = mongoose.Schema({
     createdByName:String,
     updatedBy : String,
     updatedDate : { type: Date },
-    updatedByName : String
+    updatedByName : String,
+    modelName:String
 });
 
 BaseEntitySchema.virtual('favourite')

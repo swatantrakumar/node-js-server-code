@@ -106,8 +106,10 @@ class CollectionHandler {
     async insertDocumentWithLog(model, jsonObject,  obj){
         let result = null;
         try {
-            let saveObject = new model(obj);
-            result = await saveObject.save();
+            const filter = { _id: obj._id };  // or any other unique field
+            const update = { $set: obj };  // the fields to update
+            const options = { upsert: true, new: true };  // upsert inserts if not found, new returns the updated doc
+            result = await model.findOneAndUpdate(filter, update, options);            
             await this.saveModificationLog(model,jsonObject);
         } catch (e) {
             console.log(e.stack);

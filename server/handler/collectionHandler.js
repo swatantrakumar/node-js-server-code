@@ -110,21 +110,20 @@ class CollectionHandler {
             const update = { $set: obj };  // the fields to update
             const options = { upsert: true, new: true };  // upsert inserts if not found, new returns the updated doc
             result = await model.findOneAndUpdate(filter, update, options);            
-            await this.saveModificationLog(model,jsonObject);
+            await this.saveModificationLog(jsonObject);
         } catch (e) {
             console.log(e.stack);
             console.error("Exception Encountered with Creating Document");
         }
         return result;
     }
-    async saveModificationLog(clazz, imcomingObject) {
+    async saveModificationLog(imcomingObject) {
         try {
             const log = new ModificationLog();
-            log.collection_name = clazz.name;
+            log.collection_name = imcomingObject._class;
             log.object_id = imcomingObject._id;
             log.currentObject = JSON.parse(JSON.stringify(imcomingObject));
-            log.CreatedDate = new Date();
-            log.CreatedByName = imcomingObject.createdByName == null ?(imcomingObject.updatedByName == null ?"System Admin":imcomingObject.updatedByName) : imcomingObject.createdByName;
+            log.createdByName = imcomingObject.createdByName ? imcomingObject.createdByName : imcomingObject.updatedByName  ? imcomingObject.updatedByName : "System Admin" ;
             
             await this.insertDocument(log);
             console.log("Modification log saved for {} - {} ", imcomingObject._id);

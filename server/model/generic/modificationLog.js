@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
+const path = require('path');
 const BaseEntity = require("../baseEntity");
 const FormFieldsSchema = require('../builder/formFieldsSchema');
+const IgnoreNull = require('../ignoreNull');
 
 
 
@@ -33,6 +35,11 @@ ModificationLogSchema.virtual('auditFields', {
     foreignField: 'parentField', // or any other field in FormFields
     justOne: false
 });
+
+ModificationLogSchema.statics.modelFilePath = path.relative(process.cwd(), __filename);
+
+
+ModificationLogSchema.plugin(IgnoreNull);
 
 // Combine the base entity schema with the user schema
 const ModificationLog =  mongoose.model('ModificationLog', ModificationLogSchema,'app_modification_log');

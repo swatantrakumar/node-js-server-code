@@ -8,7 +8,7 @@ const {ObjectId} = require('mongodb');
 // Creating BaseEntity schema
 const BaseEntitySchema = mongoose.Schema({
     _id:{ type: String, default: () => new ObjectId().toString() },
-    _class: { type: String, default: 'MyDocument' },
+    _class: { type: String },
     print_template:String,
     remarks:String,
     cancel_reason:String,

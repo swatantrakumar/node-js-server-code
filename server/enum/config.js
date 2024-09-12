@@ -19,11 +19,11 @@ const Config = {
     ROLE_USER: 'user',
     PACKAGE_PATH : 'server/model/',
     DEFAULT_REFCODE : 'MCLR01',
-    STORAGE_ROOT_PATH : 'e-labs-prod-documents',
+    STORAGE_ROOT_PATH : 'server',
     AWS : {
       BUCKET_PREFIX : 'prod/appId/refCode/COLLECTION/series/serialId'
     },
-    FILE_SYSTEM: 'S3',
+    FILE_SYSTEM: 'local',
     AWS_CONFIG : {      
       region: 'ap-south-1'
     }

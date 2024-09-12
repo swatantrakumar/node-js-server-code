@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const DocPermissionSchema = require('../permission/docPermission');
-const uploadDataSchema = require('./uploadDataSchema');
+const uploadData = require('./uploadDataSchema');
 
 // Creating user schema
 const S3FolderDataSchema = mongoose.Schema({ 
@@ -19,7 +19,7 @@ const S3FolderDataSchema = mongoose.Schema({
     modifiedName:String,
     fileType:String,
     fileSize:Number,
-    publicFilefalse:{type:Boolean,default:false},
+    publicFile:{type:Boolean,default:false},
     publicUrl:String,
     folder:Boolean,
     parentId:String,
@@ -44,7 +44,7 @@ const S3FolderDataSchema = mongoose.Schema({
 });
 S3FolderDataSchema.virtual('uploadData')
     .get(function () {
-        return new uploadDataSchema(this._uploadData);
+        return this._uploadData;
     })
     .set(function (value) {
         this._uploadData = value;

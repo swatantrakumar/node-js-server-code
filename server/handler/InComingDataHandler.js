@@ -95,29 +95,6 @@ class InComingDataHandler {
                 case "move_env_modules":
                     key = moveModules(coll, jsonObject, clazz,"direct",true);
                     break;
-                case "user_status":
-                    try{
-                        const updateMap = new Map();
-                        const enabledStatus = false;
-                        const accountStatus = null;
-                        const twoFactorAuthentication = false;
-
-                        if (jsonObject.has(AccountStatus.ENABLED.value)) enabledStatus = jsonObject.getBoolean(AccountStatus.ENABLED.value);
-                        if (jsonObject.has(AccountField.ACCOUNT_STATUS.name)) accountStatus = jsonObject[AccountField.ACCOUNT_STATUS.name];
-                        if (jsonObject.has(AccountField.TWO_FACTOR_AUTHENTICATION.name)) twoFactorAuthentication = jsonObject.getBoolean(AccountField.TWO_FACTOR_AUTHENTICATION.name);
-                        if (accountStatus != null) updateMap.put(AccountField.ACCOUNT_STATUS.name,accountStatus);
-                        updateMap.put(AccountStatus.ENABLED.value, enabledStatus);
-                        updateMap.put(AccountField.TWO_FACTOR_AUTHENTICATION.name,twoFactorAuthentication);
-                        const crlIst = [];
-                        crlIst.push(new QueryCriteria("_id", Operator.EQUAL, jsonObject._id));
-                        collectionHandler.upsert(AppUser.class, crlIst, updateMap);
-                        result.set("success", "success");
-                    }catch (e){
-                        console.log("Error while update status of user");
-                        result.set("error","Error while update status of user");
-                    }
-
-                    break;
                 case "schedule_event":
                     const externalSystemConnections = null;
                     externalSystemConnections = serverCallHandler.getExternalSystemConnections("SchedulerAccountCreateSchedule");

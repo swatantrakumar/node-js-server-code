@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+const path = require('path');
 const BaseEntity = require("../baseEntity");
+const IgnoreNull = require('../ignoreNull');
 
 // Creating user schema
 const AccountBookSchema = mongoose.Schema({ 
@@ -17,6 +19,11 @@ const AccountBookSchema = mongoose.Schema({
     
 });
 
+// Add a static property for file path
+AccountBookSchema.statics.modelFilePath = path.relative(process.cwd(), __filename);
+
+
+AccountBookSchema.plugin(IgnoreNull);
 
 // Combine the base entity schema with the user schema
 const AccountBook =  mongoose.model('AccountBook', AccountBookSchema,'app_accountBook');

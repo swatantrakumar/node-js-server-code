@@ -15,13 +15,14 @@ const collectionHandler = new CollectionHandler();
 class AttachmentHandler {
     async handleAssociatedFile(collection, jsonObject, field){ 
         try {
-            await Promise.all(getFileFieldListForCollection(collection).map(async fileField => {         
+            let list = this.getFileFieldListForCollection(collection);
+            await Promise.all(list.map(async fileField => {         
                 const splittedFileField = fileField.split('.');
-                const parentFieldName = splittedFileField[0];
+                const parentFieldName = splittedFileField[0];                
                 let childField = "";
                 let fieldType = "";
-                const mainJson = {};
-                if(splittedFileField.length > 1){
+                let mainJson = {};
+                if(splittedFileField.length > 1){                    
                     try {
                         mainJson = JSON.parse(JSON.stringify(jsonObject));
                         const value = mainJson[parentFieldName];
@@ -62,12 +63,13 @@ class AttachmentHandler {
                 }
             }));
         } catch (error) {
+            console.error(error);
             console.log("Error while upload files");    
         } 
     }
     getFileFieldListForCollection(collection){
         const fileFields = [];
-        let pojo = cacheService.getPojoFromCollection();
+        let pojo = cacheService.getPojoFromCollection(collection);
         if(pojo && pojo.fileTypeFields){
             fileFields.push(...pojo.fileTypeFields);
         }
@@ -96,7 +98,7 @@ class AttachmentHandler {
         mainJson._id = new ObjectId().toString();
     }
     async uploadAndUseS3Object(collection, jsonObject, field, fileField, parentFieldName, childField, fieldType, mainJson,indexForJSONArrayType) {
-        if(mainJson.fileField){
+        if(mainJson[fileField]){
             try {
                 const attachmentList = this.getUploadData(mainJson, fileField); 
                 const savedList = [];
@@ -115,7 +117,6 @@ class AttachmentHandler {
                                 attachementJson.folder = false;
                                 savedList.push(attachementJson);
                             }
-
                         }else{
                             savedList.push(element);
                         }                        
@@ -154,7 +155,7 @@ class AttachmentHandler {
                                 });                                
                             }
                         }catch (e){
-                            consol.log("Error while getUploadData {}" + e.message);
+                            console.log("Error while getUploadData {}" + e.message);
                         }
                     }
                     delete jsonObject[fileField];
@@ -166,7 +167,7 @@ class AttachmentHandler {
         return docList;
     }
     async getUploadDataWithAttach(collection, jsonObject, field, attachment){
-        const fileInfo = attachment.uploadData[0];
+        let fileInfo = attachment.uploadData[0];
         const fileFolder = this.attachKeyPrefix(jsonObject,collection);
         const fileName = fileInfo.fileName;
         const fileKey = fileFolder + "/" + fileName;
@@ -232,7 +233,7 @@ class AttachmentHandler {
     }
     isPublicFile(jsonObject) {
         try {
-            return jsonObject.publicFile !== null && jsonObject.publicFile !== undefined && jsonObject.publicFile !== "" ? Boolean(jsonObject.publicFile) : false;
+            return jsonObject.publicFile ? jsonObject.publicFile : false;
         } catch (error) {
             console.error("Error checking if the file is public: ", error);
             return false;

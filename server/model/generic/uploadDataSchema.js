@@ -16,4 +16,6 @@ const uploadDataSchema = new mongoose.Schema({
     log: { type: clientLogSchema } // Nested object
 });
 
-module.exports = uploadDataSchema;
+const uploadData = mongoose.model('UploadData', uploadDataSchema);
+
+module.exports = uploadData;

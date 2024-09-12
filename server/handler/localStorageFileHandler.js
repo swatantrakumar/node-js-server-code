@@ -12,10 +12,15 @@ class LocalStorageFileHandler {
             const folderPath = path.dirname(innerBucketPath);
             if (await this.createFolderPath(folderPath)) {
                 // Create full path to save the file
-                const fullPath = path.join(bucketName, innerBucketPath);
+                const fullPath = path.join(innerBucketPath);
+                // Remove the data URL part (if present)
+                const base64Data = fileData.replace(/^data:.+;base64,/, '');
+
+                // Convert Base64 to binary and then to a buffer
+                const binaryData = Buffer.from(base64Data, 'base64');
                 
                 // Write file to local storage
-                fs.writeFileSync(fullPath, fileData);
+                fs.writeFileSync(fullPath, binaryData);
     
                 // Optionally, return a success message or file info
                 result.success = 'File uploaded successfully';

@@ -109,7 +109,7 @@ class CacheService {
     }
 
     getPojoFromCollection(collectionName) {
-        const collection = this.pojoMap.get(collectionName).pojo;
+        const collection = this.pojoMap.get(collectionName)?.pojo;
         if (!collection) {
             return null;
         }
@@ -130,9 +130,12 @@ class CacheService {
 
           // Convert the absolute path to a file URL
           const fileUrl = pathToFileURL(absolutePath).href;
-
-          const file = await import(fileUrl);
-          model =  file.default;
+          try {
+            const file = await import(fileUrl);
+            model =  file.default;
+          } catch (error) {
+            console.log(error);
+          }    
       }
       return model;
     }

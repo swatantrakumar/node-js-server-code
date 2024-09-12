@@ -5,6 +5,7 @@ const BaseEntity = require("../baseEntity");
  
 // Creating user schema
 const UserSchema = mongoose.Schema({
+    ...BaseEntity.schema.obj,
     name: {
         type: String,
         required: true
@@ -14,8 +15,21 @@ const UserSchema = mongoose.Schema({
         required: true
     },
     hash: String,
-    salt: String,
-    ...BaseEntity.schema.obj
+    salt: String,    
+    mobileNumber:String,
+    passwordResetCode:String,
+    resetCodeGenerateTime:{type:Date},
+    disableTwoFactorAuthentication:{type:Boolean},
+    authenticationCode:{type:String},
+    authenticationCodeGenerateTime:{type:Date},
+    enabled:{type:Boolean},
+    accountStatus:String,
+    lastPasswordResetDate:{type:Date},
+    lockTime:{type:Date},
+    lastLoginTime:{type:Date},
+    wrongLoginAttempt:{type:Number},
+    wrongLoginAttemptTime:{type:Number},
+    todayLoginAttempt:{type:Number}
 });
  
 // Method to set salt and hash the password for a user

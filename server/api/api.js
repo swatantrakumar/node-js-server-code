@@ -22,7 +22,7 @@ app.use(cors());
 
 async function loadApi (){
     // Middleware to parse JSON data
-    app.use(express.json());
+    app.use(express.json({ limit: '50mb' }));
     await LoadCache.refreshCache();
     await permissionHandler.fetAppRoleAndAppRoleBindingAndAppUsersGroupAndProcessData();
     await templateHandler.prepareTemplates();

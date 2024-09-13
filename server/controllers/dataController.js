@@ -2,9 +2,11 @@ const RetrievalQueryHandler = require('../handler/queryHandler/retrievalQueryHan
 const UserPermissionHandler = require('../handler/userPermissionHandler');
 const ProjectConstants = require('../enum/projectConstants');
 const SearchCriteria = require('../handler/queryHandler/searchCriteria');
+const AttachmentHandler = require('../handler/attachmentHandler');
 
 const retrievalQueryHandler = new RetrievalQueryHandler();
 const userPermissionHandler = new UserPermissionHandler()
+const attachmentHandler = new AttachmentHandler();
 
 const genericSearch = async (req, res) =>{
     let result = [];
@@ -101,7 +103,18 @@ const getStaticData = async (req,res) =>{
   res.json(Object.fromEntries(result));
 	
 }
+const getFileToView = async (req,res) =>{
+  const kvpList = req.body;
+  const result  = new Map();
+	const employee = await userPermissionHandler.getApplicationUser(req);
+  let link = await attachmentHandler.getAttachmentLink(kvpList);
+  if(link){
+    result.set("success", link);
+  }else{
+    result.set("error", "Unexpected Error Occured while saving");
+  }
+  res.json(Object.fromEntries(result));
+}
 
 
-
-module.exports = {  genericSearch , getDataForGrid, getMultiGridData, getStaticData };
+module.exports = {  genericSearch , getDataForGrid, getMultiGridData, getStaticData,getFileToView };

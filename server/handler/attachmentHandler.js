@@ -7,6 +7,7 @@ const s3Handler = require('./s3Handler');
 const FileHandler = require('./fileHandler');
 const CollectionHandler = require('./collectionHandler');
 
+
 const utils = new CommonUtils();
 const s3Helper = new s3Handler();
 const fileHandler = new FileHandler();
@@ -237,6 +238,14 @@ class AttachmentHandler {
         } catch (error) {
             console.error("Error checking if the file is public: ", error);
             return false;
+        }
+    }
+    getAttachmentLink(folder){
+        if(Config.FILE_SYSTEM == 'S3') {
+            return s3Helper.getPresignedURL(s3Helper.getS3Client(), Config.STORAGE_ROOT_PATH, folder.key);
+        }else{
+            const filePath = process.cwd().replace(/\\/g, '/') +'/'+ folder.key;  
+            return filePath;
         }
     }
 }

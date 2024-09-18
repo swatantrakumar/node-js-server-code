@@ -118,7 +118,7 @@ class CacheService {
     async getModel(collectionName) {
       const modelPath = this.getModulePath(collectionName);
       let model = null;
-      if(path){
+      if(modelPath){
           const filePath = Config.PACKAGE_PATH + modelPath +'.js';
           const projectRoot = process.cwd();
           const absolutePath = path.resolve(projectRoot, filePath);

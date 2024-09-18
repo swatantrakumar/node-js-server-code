@@ -1,3 +1,4 @@
+const Operators = require("../enum/operator");
 const ModificationLog = require("../model/generic/modificationLog");
 const CommonUtils = require("../utils/commonUtils");
 const QueryCriteria = require("./queryHandler/queryCriteria");
@@ -35,10 +36,10 @@ class CollectionHandler {
         }
         return list;
     }
-    async findDocument(model, field, value, dbName='') {
+    async findDocument(model, field, value,operator = Operators.EQUAL, dbName='') {
         const valueObject  = commonutil.getValueFromJSONObject(field, value);
         let queryCriteriaList = [];
-		queryCriteriaList.push(new QueryCriteria(field,"string",Operator.EQUAL,valueObject));
+		queryCriteriaList.push(new QueryCriteria(field,"string",operator,valueObject));
         const query = queryHandler.buildMongoQuery(queryCriteriaList);
         let list = [];
         try {

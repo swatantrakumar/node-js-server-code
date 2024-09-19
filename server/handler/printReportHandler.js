@@ -128,8 +128,6 @@ class PrintReportHandler {
                 }             
                 
             });
-            // Add the row to the sheet
-            sheet.addRow(row);
 
             let columnsName = commonUtil.getSelectColumns(fieldNameList || []);
 
@@ -149,10 +147,11 @@ class PrintReportHandler {
             // let list = JSON.parse(JSON.stringify(data));
 
             if(dataMapList && dataMapList.length > 0){
-                for (let index = 0; index < array.length; index++) {
+                for (let index = 0; index < dataMapList.length; index++) {
+                    column = 0;
                     const rowData = JSON.parse(JSON.stringify(dataMapList[index]));
-                    this.createRowInExcel(fieldTypeMapList, styles, column, rowData, sheet.getRow(sheet.lastRow ? sheet.lastRow.number + 1 : 1));
-                    
+                    let row = sheet.getRow(sheet.lastRow ? sheet.lastRow.number + 1 : 1);
+                    this.createRowInExcel(fieldTypeMapList, styles, column, rowData, row); 
                 }
             }
             
@@ -247,11 +246,8 @@ class PrintReportHandler {
     createCellInRow(column, row, fieldType, fieldValue,style){
         let value = fieldValue;
         switch (fieldType) {            
-            case "number", "double":
-                value = commonUtil.getDecimalAmount(fieldValue.toString());
-                break;
-            case "int":
-                value = commonUtil.getDecimalAmount(fieldValue.toString());
+            case "number", "double", "int":
+                value = commonUtil.getDecimalAmount(fieldValue);
                 break;
             case "daterange", "date":
                 const date = value;
@@ -261,12 +257,12 @@ class PrintReportHandler {
                 if(date.length == 10){
                     value = commonUtil.getDate(date);
                 }else {
-                    value = commonUtil.convertJsonStringToDate(fieldValue.toString());
+                    value = commonUtil.convertJsonStringToDate(fieldValue);
                 }
                 break;
             case "time":
-                const datetime = commonUtil.changeStringDateToSpecificFormat(fieldValue, "MMM dd, yyyy, HH:mm:ss");
-                value = commonUtil.convertDateToTime(datetime, "HH:mm a");
+                // const datetime = commonUtil.changeStringDateToSpecificFormat(fieldValue, "MMM dd, yyyy, HH:mm:ss");
+                // value = commonUtil.convertDateToTime(datetime, "HH:mm a");
                 break;
             case "reference_names":
             case "info":

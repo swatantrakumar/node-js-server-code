@@ -254,6 +254,95 @@ class CommonUtils {
     hasKeyInJsonObject(jsonObject, key) {
         return jsonObject !== null && jsonObject.hasOwnProperty(key) && jsonObject[key] !== null;
     }
+    getDecimalAmount(value) {
+        try {
+            const parsedValue = parseFloat(value);
+            if (isNaN(parsedValue)) {
+                throw new Error("Invalid number");
+            }
+            return parseFloat(parsedValue.toFixed(2)); // Ensures 2 decimal places
+        } catch (e) {
+            return 0.0;
+        }
+    }
+    getDate(invdate) {
+        const dummyDate = new Date(2099, 11, 2); // December 2, 2099
+    
+        // Check if the input is numeric and parseable
+        if (!isNaN(parseFloat(invdate)) && isFinite(invdate)) {
+            return new Date(parseFloat(invdate));
+        } else {
+            // Handle different invalid or special cases
+            const invalidValues = ['null', '0', 'N-A', 'N/A', 'N.A.', 'N.A'];
+            if (invdate && !invalidValues.includes(invdate.trim())) {
+                // Normalize date string by removing spaces and replacing slashes with dashes
+                invdate = invdate.replace(/\s+/g, '').replace(/\//g, '-');
+    
+                // Define patterns and corresponding regular expressions
+                const patterns = {
+                    'MM-yy': /^\d{2}-\d{2}$/,
+                    'dd-MMM-yyyy': /^\d{2}-[A-Za-z]{3}-\d{4}$/,
+                    'yyyy-MM-dd': /^\d{4}-\d{2}-\d{2}$/,
+                    'dd-MM-yyyy': /^\d{2}-\d{2}-\d{4}$/,
+                    'dd-MMM-yy': /^\d{2}-[A-Za-z]{3}-\d{2}$/,
+                    'MM-yyyy': /^\d{2}-\d{4}$/,
+                    'dd-MM-yy': /^\d{2}-\d{2}-\d{2}$/,
+                    'MMM-yyyy': /^[A-Za-z]{3}-\d{4}$/
+                };
+    
+                // Check which pattern matches the input
+                for (const [pattern, regex] of Object.entries(patterns)) {
+                    if (regex.test(invdate)) {
+                        // Normalize to a format that JavaScript can parse, like yyyy-MM-dd
+                        const parts = invdate.split('-');
+                        let formattedDate;
+    
+                        switch (pattern) {
+                            case 'MM-yy':
+                                formattedDate = `20${parts[1]}-${parts[0]}-01`; // Assumes the day is the 1st
+                                break;
+                            case 'dd-MMM-yyyy':
+                                formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                break;
+                            case 'yyyy-MM-dd':
+                                formattedDate = invdate;
+                                break;
+                            case 'dd-MM-yyyy':
+                                formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                break;
+                            case 'dd-MMM-yy':
+                                formattedDate = `20${parts[2]}-${parts[1]}-${parts[0]}`;
+                                break;
+                            case 'MM-yyyy':
+                                formattedDate = `${parts[1]}-${parts[0]}-01`; // Assumes the day is the 1st
+                                break;
+                            case 'dd-MM-yy':
+                                formattedDate = `20${parts[2]}-${parts[1]}-${parts[0]}`;
+                                break;
+                            case 'MMM-yyyy':
+                                formattedDate = `${parts[1]}-${parts[0]}-01`; // Assumes the day is the 1st
+                                break;
+                        }
+    
+                        return new Date(formattedDate);
+                    }
+                }
+            }
+        }
+        return dummyDate;
+    }
+    convertJsonStringToDate(date) {
+        const [month, day, year, time, period] = date.split(/[\s,]+/);
+        const formattedDate = `${month} ${day}, ${year} ${time} ${period}`;
+        
+        const parsedDate = new Date(formattedDate);
+        
+        if (isNaN(parsedDate)) {
+            throw new Error('Unable to parse date');
+        }
+        
+        return parsedDate;
+    }
 }
 
 module.exports = CommonUtils;

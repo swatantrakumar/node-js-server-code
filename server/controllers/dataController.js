@@ -5,7 +5,7 @@ const SearchCriteria = require('../handler/queryHandler/searchCriteria');
 const AttachmentHandler = require('../handler/attachmentHandler');
 
 const retrievalQueryHandler = new RetrievalQueryHandler();
-const userPermissionHandler = new UserPermissionHandler()
+const userPermissionHandler = new UserPermissionHandler();
 const attachmentHandler = new AttachmentHandler();
 
 const genericSearch = async (req, res) =>{

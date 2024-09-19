@@ -5,14 +5,20 @@ const CollectionHandler = require("./collectionHandler");
 const templateHandler = require("../handler/templateHandler");
 const ExcelJS = require('exceljs');
 const colorMap = require("../enum/colorMap");
+const UserPermissionHandler = require("./userPermissionHandler");
+const QueryHandler = require("./queryHandler/queryHandler");
+const cacheService = require('../cache/cacheService');
+const { json } = require("express");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
+const userPermissionHandler = new UserPermissionHandler();
+const queryHandler = new QueryHandler();
 
 class PrintReportHandler {
     async createReport(tabName,object){
         let pageSize = 75;
-        let pageNo = 0;
+        let pageNo = 1;
 
         let fieldNameMap = new Map();
         let fieldTypeMap = new Map();
@@ -65,12 +71,14 @@ class PrintReportHandler {
         let rowBackGround = new Map();
         let rowColor = new Map();
         let styles = new Map();
+        let fieldNameList = [];
 
         for (let index = 0; index < fieldTypeMapList.length; index++) {
             const field = fieldTypeMapList[index];
             const fieldName = field.field;
             const displayName = field.displayName;
             const type = field.type;
+            fieldNameList.push(fieldName);
 
             fieldNameMap.set(fieldName,displayName);
             fieldTypeMap.set(fieldName,type ? type : "string");
@@ -98,29 +106,66 @@ class PrintReportHandler {
             fieldTypeMapList.forEach((field,i) => {
                 column++; // Move to the next column
               
-                const fieldName = field.displayName;
+                const fieldName = field.field;
+                const displayName = field.displayName;
                 const fieldType = field.type;
                 const fieldFormat = field.format;
               
                 // Create a cell in the current row and column
                 const cell = row.getCell(column);
-                cell.value = fieldName;
+                cell.value = displayName;
               
                 // Apply header style
                 styles.set(fieldName + "_HEADER", this.getStyle(fieldName,headerBackGround,headerColor, true));
-                cell.style = styles[fieldName + "_HEADER"];
+                const headerStyle = styles.get(fieldName + "_HEADER");
+                cell.style = headerStyle;
               
                 // Set up cell styles for data rows (not header)
-                styles.set(i + "_CELL", this.getStyle(fieldName,rowBackGround,rowColor, true));
+                styles.set(i + "_CELL", this.getStyle(fieldName,rowBackGround,rowColor, false));
               
                 if (fieldType === 'date' || fieldType === 'daterange') {
                   styles.get(i + "_CELL").numFmt = fieldFormat || 'dd-mmm-yyyy'; // Default date format
                 }             
                 
-              });
+            });
+            // Add the row to the sheet
+            sheet.addRow(row);
+
+            let columnsName = commonUtil.getSelectColumns(fieldNameList || []);
+
+            // let clazz = reportHandler.getClass(keyValuePair.value);
+            let clazz = null;
+            try {
+                clazz = await cacheService.getModel(keyValuePair.value);
+            } catch (error) {
+                console.log("Error while fetching class by colName {}", colName);
+            }
+            let tab = commonUtil.getValueFromJSONObject(object, "kvp.tab");
+            let applicationUser = userPermissionHandler.getApplicationUser(object);
+            let criteriaList = [];
+            // retrievalQueryHandler.enrichQueryWithDefaultCriteria(applicationUser, tab, criteriaList, keyValuePair);
+            queryHandler.enrichQuery(tab, keyValuePair, criteriaList);
+            dataMapList = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz,criteriaList,null,pageNo,pageSize,columnsName);
+            // let list = JSON.parse(JSON.stringify(data));
+
+            if(dataMapList && dataMapList.length > 0){
+                for (let index = 0; index < array.length; index++) {
+                    const rowData = JSON.parse(JSON.stringify(dataMapList[index]));
+                    this.createRowInExcel(fieldTypeMapList, styles, column, rowData, sheet.getRow(sheet.lastRow ? sheet.lastRow.number + 1 : 1));
+                    
+                }
+            }
+            
               
-              // Add the row to the sheet
-              sheet.addRow(row);
+
+            try {
+                fieldTypeMapList.forEach((field, columnPosition) => {
+                    // Setting width, similar to your Java code which multiplies the width
+                    sheet.getColumn(columnPosition + 1).width = 3 * (sheet.getColumn(columnPosition + 1).width || 10);
+                });
+            } catch (error) {
+                console.error("Error while resizing columns in excel", error.message);
+            }
 
             // Prepare a ByteArrayOutputStream equivalent in Node.js using a buffer
             const buffer = await workbook.xlsx.writeBuffer(); // Write workbook to buffer
@@ -152,15 +197,17 @@ class PrintReportHandler {
         }
     }
     getStyle(fieldName, backGround, color, isHeader) {
+        const bgColor = colorMap[backGround.get(fieldName)];
+        const textColor = colorMap[color.get(fieldName)];
         return {
           fill: {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: colorMap[backGround[fieldName]] } // Use color map for background
+            fgColor: { argb:  bgColor} // Use color map for background
           },
           font: {
             bold: isHeader,
-            color: { argb: colorMap[color[fieldName]] }, // Use color map for font
+            color: { argb:  textColor}, // Use color map for font
             size: 13
           },
           border: {
@@ -173,6 +220,83 @@ class PrintReportHandler {
             wrapText: true
           }
         };
+    }
+    createRowInExcel(fieldTypeMapList, styles, column, jsonObject, row2) {
+        let row = row2;
+        fieldTypeMapList.forEach((field,i) => {
+            column++;
+            try {
+                const fieldName = field.field;
+                const getValueFromJson = field.getValueFromJson || true;
+                const fieldType = field.type || "string";
+                let fieldValue = null;
+                if(getValueFromJson){
+                    fieldValue = commonUtil.getValueFromJSONObject(jsonObject,fieldName);
+                }else{
+                    fieldValue = fieldName;
+                }
+                let style = styles.get(i + "_CELL")
+                this.createCellInRow(column, row, fieldType, fieldValue,style);
+                
+            } catch (error) {
+                console.error(error.stack);
+                console.log("error while printing " + field.field)
+            }
+        });        
+    }
+    createCellInRow(column, row, fieldType, fieldValue,style){
+        let value = fieldValue;
+        switch (fieldType) {            
+            case "number", "double":
+                value = commonUtil.getDecimalAmount(fieldValue.toString());
+                break;
+            case "int":
+                value = commonUtil.getDecimalAmount(fieldValue.toString());
+                break;
+            case "daterange", "date":
+                const date = value;
+                if(date && date.endsWith("T00:00:00.000Z")){
+                    date = date.substring(0,10);
+                }
+                if(date.length == 10){
+                    value = commonUtil.getDate(date);
+                }else {
+                    value = commonUtil.convertJsonStringToDate(fieldValue.toString());
+                }
+                break;
+            case "time":
+                const datetime = commonUtil.changeStringDateToSpecificFormat(fieldValue, "MMM dd, yyyy, HH:mm:ss");
+                value = commonUtil.convertDateToTime(datetime, "HH:mm a");
+                break;
+            case "reference_names":
+            case "info":
+                // if (fieldValue && Array.isArray(fieldValue)) {                     
+                //     StringBuilder stringBuilder = new StringBuilder();
+                //     for (int k = 0; k < jsonArray.length(); k++) {
+                //         if (jsonArray.get(k) instanceof JSONObject) {
+                //             if (!jsonArray.getJSONObject(k).isNull("name")) {
+                //                 stringBuilder.append(jsonArray.getJSONObject(k).getString("name") + ",");
+                //             }
+                //         } else {
+                //             stringBuilder.append(jsonArray.getString(k) + ",");
+                //         }
+                //     }
+                //     value = stringBuilder.toString();
+                //     if(row.getCell(column).getStringCellValue().length()>1){
+                //         row.getCell(column).setCellValue(row.getCell(column).getStringCellValue().substring(0,row.getCell(column).getStringCellValue().length()-1));
+                //     }
+                // }
+                break;
+            case "boolean":
+                value = fieldValue ? "Yes" : "No";
+                break;
+            default:
+                break;
+        }
+        // Create a cell in the current row and column
+        const cell = row.getCell(column);
+        cell.value = value;
+        cell.style = style;
     }
 }
 

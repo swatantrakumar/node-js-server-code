@@ -7,7 +7,7 @@ const PermissionHandler = require("../permissionHandler");
 const SearchCriteria = require("./searchCriteria");
 
 const commonUtils = new CommonUtils();
-const queryHandler = new QueryHandler()
+const queryHandler = new QueryHandler();
 const collectionHandler = new CollectionHandler();
 const permissionHandler = new PermissionHandler();
 

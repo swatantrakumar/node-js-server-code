@@ -53,7 +53,7 @@ class CollectionHandler {
         }        
         return null;        
     }
-    async findAllDocumentsWithListQueryCriteria(model,queryCriteriaList,orderBy,pageNo,limit){
+    async findAllDocumentsWithListQueryCriteria(model,queryCriteriaList,orderBy,pageNo,limit,select = '',dbName = ''){
         const query = queryHandler.buildMongoQuery(queryCriteriaList);
         var skipAmount = (pageNo - 1) * limit;
         const sortObject = queryHandler.handleSort(orderBy);
@@ -63,6 +63,7 @@ class CollectionHandler {
                         .sort(sortObject)
                         .skip(skipAmount)
                         .limit(limit)
+                        .select(select)
                         .exec();
         } catch (error) {
             console.log(error);

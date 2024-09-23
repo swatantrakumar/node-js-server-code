@@ -1,11 +1,12 @@
 const Operators = require("../../enum/operator");
 
 class QueryCriteria {
-    constructor(field, fieldType, operator, value) {
+    constructor(field, fieldType, operator, value,logicalOperator) {
         this.field = field;
         this.fieldType = fieldType;
         this.operator = operator;
         this.value = value;
+        this.logicalOperator = logicalOperator;
         this.greaterThan = null;
         this.lessThan = null;
         this.pattern = null;

@@ -343,6 +343,79 @@ class CommonUtils {
         
         return parsedDate;
     }
+    convertDateToTime(date, format) {
+        // Moment expects the date to be in JavaScript Date format, so passing the Date object directly
+        return moment(date).format(format);
+    }
+    getValueFromJSONObjectFromAnyLevel(parentObj, jsonField) {
+        try {
+            let childObject = parentObj;
+    
+            if (jsonField) {
+                const fields = jsonField.split('.'); // Split the jsonField by '.'
+                
+                if (fields && fields.length > 0) {
+                    // Traverse through the nested JSON fields
+                    childObject = this.getChildJSONObjectFromField(childObject, fields, 0, fields.length - 1);
+                } else {
+                    // Handle the case where jsonField doesn't contain any '.'
+                    childObject = this.getChildJSONObject(childObject, jsonField);
+                }
+            }
+    
+            return childObject;
+        } catch (error) {
+            console.error(error);
+            return ""; // Return empty string on failure
+        }
+    }
+    getChildJSONObjectFromField(parentObject, fields, startIndex, endIndex) {
+        // Base case: if we've reached the end of the field chain
+        if (startIndex === endIndex || startIndex > endIndex) {
+            if (Array.isArray(parentObject)) {
+                // If the parentObject is an array, return the indexed value
+                return parentObject[parseInt(fields[endIndex])];
+            } else if (typeof parentObject === 'object' && parentObject !== null) {
+                // Handle objects (can be Array, plain object, or JSON objects)
+                return parentObject[fields[endIndex]];
+            }
+            return null; // If it's not an array or object, return null
+        }
+    
+        // Recursive case: if we are still processing the fields
+        if (Array.isArray(parentObject)) {
+            // Handle array traversal
+            return this.getChildJSONObjectFromField(parentObject[parseInt(fields[startIndex])], fields, startIndex + 1, endIndex);
+        } else if (typeof parentObject === 'object' && parentObject !== null) {
+            if (parentObject.hasOwnProperty(fields[startIndex])) {
+                return getChildJSONObjectFromField(parentObject[fields[startIndex]], fields, startIndex + 1, endIndex);
+            }
+            return null; // If the object doesn't contain the expected field, return null
+        }
+        return null;
+    }
+    getObjectIdFromListOfReference(references) {
+        const _ids = [];
+    
+        if (references && references.length > 0) {
+            references.forEach(department => {
+                if (department._id) {
+                    _ids.push(department._id);
+                }
+            });
+        }
+    
+        return _ids;
+    }
+    getIdFromListOfReference(references) {
+        let _ids = [];
+        if(references && references.length > 0) {
+            references.forEach(department => {
+                _ids.push(department._id);
+            });
+        }
+        return _ids;
+    }
 }
 
 module.exports = CommonUtils;

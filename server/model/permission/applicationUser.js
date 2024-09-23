@@ -43,7 +43,7 @@ const ApplicationUserSchema = mongoose.Schema({
     country:Reference,
     state:Reference,
     login_user_exist:Boolean,
-    admin:Boolean,
+    admin:{type:Boolean,default:false},
     branch_admin:Boolean,
     crm:Boolean,
     selfData:Boolean,

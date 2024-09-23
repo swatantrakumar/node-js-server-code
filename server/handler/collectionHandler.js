@@ -73,6 +73,7 @@ class CollectionHandler {
     async findDocumentsWithListQueryCriteria(model, queryCriteriaList,  orderBy, dbName = '') {
         const query = queryHandler.buildMongoQuery(queryCriteriaList);
         const sortObject = queryHandler.handleSort(orderBy);
+        let list = [];
         try {
             list = await model.find(query)
                           .sort(sortObject)

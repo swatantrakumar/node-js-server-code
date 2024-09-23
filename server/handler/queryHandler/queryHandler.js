@@ -36,8 +36,8 @@ class QueryHandler {
         const notConditions = [];
       
         queryList.forEach(query => {
-          const { field, operator, value, type, logicalOperator } = query;
-          const condition = this.handleOperator(field, operator, value, type);
+          const { field, operator, value, fieldType, logicalOperator } = query;
+          const condition = this.handleOperator(field, operator, value, fieldType);
         //   andConditions.push(condition);
           if (logicalOperator) {
             if (logicalOperator === 'AND') {

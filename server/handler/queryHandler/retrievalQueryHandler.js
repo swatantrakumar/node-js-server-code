@@ -5,6 +5,8 @@ const QueryHandler = require("./queryHandler");
 const cacheService = require('../../cache/cacheService');
 const PermissionHandler = require("../permissionHandler");
 const SearchCriteria = require("./searchCriteria");
+const QueryCriteria = require("./queryCriteria");
+const Operators = require("../../enum/operator");
 
 const commonUtils = new CommonUtils();
 const queryHandler = new QueryHandler();
@@ -571,6 +573,122 @@ class RetrievalQueryHandler{
     }
     checkType(kvp){
         return kvp.data_template != null ? kvp.data_template.toUpperCase():"";
+    }
+    enrichQueryWithDefaultCriteria(employee, colName, query,kvp){
+        try {
+            if(employee){
+                let pojoMaster = cacheService.getPojoFromCollection(colName.toLowerCase());
+                if(pojoMaster.level){
+                    switch (pojoMaster.level.toUpperCase()) {
+                        case "APPID":
+                            query.push(new QueryCriteria('appId','string',Operators.EQUAL,employee.appId));
+                            break;
+                        case "REFCODE":
+                            query.push(new QueryCriteria('appId','string',Operators.EQUAL,employee.refCode));
+                            break;                    
+                        default:
+                            break;
+                    }
+                }
+                let criteriaList = pojoMaster?.enrich_query_with || [];
+                let dept_ids = commonUtils.getObjectIdFromListOfReference(employee?.departments);
+                if(criteriaList){
+                    criteriaList.forEach(criteria => {
+                        switch (criteria.toLowerCase()) {
+                            case "APPID":
+                                query.push(new QueryCriteria("appId",Operators.EQUAL,employee.appId));
+                                break;
+                            case "REFCODE":
+                                query.push(new QueryCriteria("refCode",Operators.EQUAL,employee.refCode));
+                                break;
+                            case "BRANCH":
+                                if(!employee.admin) {
+                                    query.push(new QueryCriteria("branch._id", Operators.EQUAL, employee?.branch?._id));
+                                }
+                                break;
+                            case "DEPARTMENT":
+                                if(!employee.admin) {
+                                    query.push(new QueryCriteria("department._id", Operators.IN, dept_ids));
+                                }
+                                break;
+                            case "DEPARTMENT_LIST":
+                                if(!employee.admin) {
+                                    query.push(new QueryCriteria("departments._id", Operators.IN, dept_ids));
+                                }
+                                break;
+                            case "ACCOUNT" :
+                                if(!employee.admin) {
+                                    query.push(new QueryCriteria("account._id", Operators.IN, commonUtils.getIdFromListOfReference(employee.accounts)));
+                                }
+                                break;
+                            case "LEAD" :
+                                query.push(new QueryCriteria("lead._id",Operators.IN,commonUtils.getIdFromListOfReference(employee.accounts)));
+                                break;
+                            case "CUSTOMER" :
+                                query.push(new QueryCriteria("customer._id",Operators.IN,commonUtils.getIdFromListOfReference(employee.accounts)));
+                                break;
+                            case "PARTY" :
+                                query.push(new QueryCriteria("party._id",Operators.IN,commonUtils.getIdFromListOfReference(employee.accounts)));
+                                break;
+                            case "OWN_ACCOUNTS" :
+                                if(!employee.isAdmin()) {
+                                    query.push(new QueryCriteria("_id", Operators.IN, commonUtils.getIdFromListOfReference(employee.accounts)));
+                                }
+                                break;
+                            case "TEAM" :
+                                query.push(new QueryCriteria("team._id",Operators.IN,commonUtils.getIdFromListOfReference(employee.list1)));
+                                break;
+                            case "APPROVERS" :
+                                query.push(new QueryCriteria("approvers._id",Operators.EQUAL,employee._id));
+                                break;
+                            case "CREATED_BY" :
+                                if(!employee.admin) {
+                                    query.push(new QueryCriteria("createdBy", Operators.EQUAL_IGNORE_CASE, employee.email));
+                                }
+                                break;
+                        
+                            default:
+                                break;
+                        }
+                    });
+                }
+                let criteria = null;
+                if (permissionHandler.getAppResourceCriteria(key.toString())) {
+                    criteria = permissionHandler.getAppResourceCriteria(key.toString());
+                }
+                let key = '';
+                key += kvp.key2 + "_";
+                key += kvp.key + "_";
+                key += kvp.module + "_";
+                key += colName + "_";
+                key += kvp.role;
+            }
+
+            if (criteria != null) {
+                let crList = null;
+                if (criteria.crList) {
+                    crList = criteria.crList;
+                }
+                if(crList && crList.length > 0){
+                    for (const cr of crList) {
+                        let fName = cr.fName;
+                        let fieldType = cacheService.getFieldMap().get((colName.toLowerCase() + "_" + fName));
+                        if (fieldType == null) {
+                            if (fName == "createdDate" || fName == "updateDate") {
+                                fieldType = "date";
+                            } else {
+                                fieldType = "string";
+                            }
+                        }
+                        if (cr.fValue) {
+                            queryHandler.populateQuery(query, cr.operator, fName, cr.fValue, fieldType);
+                        }                        
+                    }
+                }
+            }
+        } catch (error) {
+            
+        }
     }
 }
 module.exports = RetrievalQueryHandler;

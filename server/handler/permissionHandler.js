@@ -724,6 +724,12 @@ class PermissionHandler{
         }
         return null;
     }
+    getAppResourceCriteria(key) {
+        if (key){
+            return cacheService.rollIdWithCriteriaList.get(key);
+        }
+        return null;
+    }
     
 }
 module.exports = PermissionHandler;

@@ -9,6 +9,9 @@ const UserPermissionHandler = require("./userPermissionHandler");
 const QueryHandler = require("./queryHandler/queryHandler");
 const cacheService = require('../cache/cacheService');
 const { json } = require("express");
+const QueryCriteria = require("./queryHandler/queryCriteria");
+const ExportConfiguration = require("../model/generic/exportConfiguration");
+const SearchCriteriaSchema = require("../model/generic/searchCriteria");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
@@ -59,12 +62,33 @@ class PrintReportHandler {
         let exportConfiguration = null;
 
         try {
-            exportConfiguration = null;
+            let queryCriteriaList = [];
+            queryCriteriaList.push(new QueryCriteria("collectionName","string",Operators.EQUAL_IGNORE_CASE,keyValuePair.value,'OR'));
+            queryCriteriaList.push(new QueryCriteria("applicableForAlias","string",Operators.EQUAL_IGNORE_CASE,keyValuePair.value,'OR'));
+            exportConfiguration = await collectionHandler.findDocumentsWithListQueryCriteria(ExportConfiguration,queryCriteriaList,null);
         } catch (error) {
             exportConfiguration = null;
         }
 
-        if (exportConfiguration != null) {}
+        if (exportConfiguration && exportConfiguration.columnLists && exportConfiguration.columnLists.length > 0) {
+            let columns = exportConfiguration.columnLists;
+            for (let index = 0; index < columns.length; index++) {
+                const column = JSON.parse(JSON.stringify(columns[index]));
+                if(column && column.columnType && (column.columnType.toLowerCase() == 'flat' || column.columnType.toLowerCase() == 'list')){
+                    let updated = false;
+                    if(column.columnList && Array.isArray(column.columnList) && column.columnList.length > 0){
+                        for (const col of column.columnList) {
+                            updated = false;
+                            this.updateColumnInColumnTypeList(col,fieldTypeMapList,updated);
+                        }
+                    }else{
+                        if(column){
+                            this.updateColumnInColumnTypeList(column,fieldTypeMapList,updated);
+                        }
+                    }
+                }                
+            }
+        }
 
         let headerBackGround = new Map();
         let headerColor = new Map();
@@ -130,8 +154,6 @@ class PrintReportHandler {
             });
 
             let columnsName = commonUtil.getSelectColumns(fieldNameList || []);
-
-            // let clazz = reportHandler.getClass(keyValuePair.value);
             let clazz = null;
             try {
                 clazz = await cacheService.getModel(keyValuePair.value);
@@ -143,15 +165,36 @@ class PrintReportHandler {
             let criteriaList = [];
             // retrievalQueryHandler.enrichQueryWithDefaultCriteria(applicationUser, tab, criteriaList, keyValuePair);
             queryHandler.enrichQuery(tab, keyValuePair, criteriaList);
-            dataMapList = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz,criteriaList,null,pageNo,pageSize,columnsName);
-            // let list = JSON.parse(JSON.stringify(data));
 
-            if(dataMapList && dataMapList.length > 0){
-                for (let index = 0; index < dataMapList.length; index++) {
-                    column = 0;
-                    const rowData = JSON.parse(JSON.stringify(dataMapList[index]));
-                    let row = sheet.getRow(sheet.lastRow ? sheet.lastRow.number + 1 : 1);
-                    this.createRowInExcel(fieldTypeMapList, styles, column, rowData, row); 
+            for (let j = 0; j <= pageNo; j++) {
+                dataMapList = await collectionHandler.findAllDocumentsWithListQueryCriteria(clazz,criteriaList,null,pageNo,pageSize,columnsName);
+
+                if(dataMapList && dataMapList.length > 0){
+                    for (let index = 0; index < dataMapList.length; index++) {
+                        column = 0;
+                        const rowData = JSON.parse(JSON.stringify(dataMapList[index]));
+                        let jsonArray = [];
+
+                        if (exportConfiguration != null) {
+                            //First Loop for Flat Fields to add data in columns
+                            await this.enrichForFlatAndListButFlatFields(exportConfiguration, rowData);
+                            //Loop for List Fields to create multiple rows
+                            await this.enrichForListFields(exportConfiguration.columnLists, rowData, jsonArray);
+                        }
+
+                        if (jsonArray.length == 0) {
+                            jsonArray.push(rowData);
+                        }
+                        let row = sheet.getRow(sheet.lastRow ? sheet.lastRow.number + 1 : 1);
+                        for (let i = 0; i < jsonArray.length; i++) {
+                            this.createRowInExcel(fieldTypeMapList, styles, column, jsonArray[i], row);
+                        }                     
+                    }
+                }
+                if (dataMapList.length < pageSize) {
+                    break;
+                } else {
+                    pageNo++;
                 }
             }
             
@@ -261,27 +304,26 @@ class PrintReportHandler {
                 }
                 break;
             case "time":
-                // const datetime = commonUtil.changeStringDateToSpecificFormat(fieldValue, "MMM dd, yyyy, HH:mm:ss");
-                // value = commonUtil.convertDateToTime(datetime, "HH:mm a");
+                const datetime = commonUtil.changeStringDateToSpecificFormat(fieldValue, "MMM dd, yyyy, HH:mm:ss");
+                value = commonUtil.convertDateToTime(datetime, "HH:mm a");
                 break;
             case "reference_names":
             case "info":
-                // if (fieldValue && Array.isArray(fieldValue)) {                     
-                //     StringBuilder stringBuilder = new StringBuilder();
-                //     for (int k = 0; k < jsonArray.length(); k++) {
-                //         if (jsonArray.get(k) instanceof JSONObject) {
-                //             if (!jsonArray.getJSONObject(k).isNull("name")) {
-                //                 stringBuilder.append(jsonArray.getJSONObject(k).getString("name") + ",");
-                //             }
-                //         } else {
-                //             stringBuilder.append(jsonArray.getString(k) + ",");
-                //         }
-                //     }
-                //     value = stringBuilder.toString();
-                //     if(row.getCell(column).getStringCellValue().length()>1){
-                //         row.getCell(column).setCellValue(row.getCell(column).getStringCellValue().substring(0,row.getCell(column).getStringCellValue().length()-1));
-                //     }
-                // }
+                if (fieldValue && Array.isArray(fieldValue)) {
+                    let stringBuilder = [];
+
+                    for (let k = 0; k < fieldValue.length; k++) {
+                        if (typeof fieldValue[k] === 'object' && fieldValue[k] !== null) {
+                            // Check if fieldValue[k] is a JSONObject
+                            if (fieldValue[k].name !== undefined && fieldValue[k].name !== null) {
+                                stringBuilder.push(fieldValue[k].name);
+                            }
+                        } else {
+                            stringBuilder.push(fieldValue[k]);
+                        }
+                    }
+                    value = stringBuilder.join(',');
+                }
                 break;
             case "boolean":
                 value = fieldValue ? "Yes" : "No";
@@ -293,6 +335,143 @@ class PrintReportHandler {
         const cell = row.getCell(column);
         cell.value = value;
         cell.style = style;
+    }
+    updateColumnInColumnTypeList(col,fieldTypeMapList,updated){
+        for (const map of fieldTypeMapList) {
+            if (map.field && map.field.toLowerCase() === col.columnValue.toLowerCase()) {
+                updated = true;
+                map.field = col.columnName;
+                map.displayName = col.columnName;
+                map.format = col.format;
+                map.getValueFromJson = "false";
+                map.type = col.columnType;
+                break; // Exit the loop after updating
+            }
+        }
+        if (!updated) {
+            const map = {
+                field: col.columnName,
+                displayName: col.columnName,
+                format: col.format,
+                getValueFromJson: "false",
+                type: col.columnType
+            };
+            fieldTypeMapList.push(map); // Adds the new object to the array
+        }
+    }
+    async enrichForFlatAndListButFlatFields(exportConfiguration, jsonObject) {
+        const columnLists = exportConfiguration?.columnLists || [];
+        
+        // Iterate over the columnLists array
+        for (let ecIndex = 0; ecIndex < columnLists.length; ecIndex++) {
+            const column = JSON.parse(JSON.stringify(columnLists[ecIndex]));
+    
+            // Check if columnType is 'flat'
+            if (column.columnType && column.columnType.toLowerCase() === 'flat') {
+                const query1 = await this.getQuery(column, jsonObject);
+                if (query1) {
+                    const obj1 = query1[0];
+                    if (obj1) {
+                        const str = JSON.stringify(obj1);
+                        this.updateJsonObject(jsonObject, column, str, false);
+                    }
+                }
+            } 
+            // Check if columnType is 'list'
+            else if (column.columnType && column.columnType.toLowerCase() === 'list') {
+                if (column.columnValue && column.columnValue.toLowerCase() !== 'all') {
+                    const query1 = await this.getQuery(column, jsonObject);
+                    if (query1) {
+                        const dataList = query1;
+                        if (dataList && dataList.length > 0) {
+                            const str = JSON.stringify(dataList);
+                            this.updateJsonObject(jsonObject, column, str, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    async enrichForListFields(columnLists, jsonObject, jsonArray) {
+        for (let ecIndex3 = 0; ecIndex3 < columnLists.length; ecIndex3++) {
+            let columnList = columnLists[ecIndex3];
+    
+            if (columnList.columnType && columnList.columnType.toLowerCase() === 'list') {
+                if (columnList.columnValue && columnList.columnValue.toLowerCase() === 'all') {
+                    // Execute the query to get the data
+                    let query1 = await this.getQuery(columnList, jsonObject);
+    
+                    if (query1 && query1.length > 0) {
+                        let dataList = query1;
+    
+                        if (dataList && dataList.length > 0) {
+                            let str = JSON.stringify(dataList);
+    
+                            if (str) {
+                                let array = JSON.parse(str);
+    
+                                for (let i = 0; i < array.length; i++) {
+                                    let clonedJsonObject = JSON.parse(JSON.stringify(jsonObject)); // Clone the JSON object
+    
+                                    columnList.columnList.forEach(columnList1 => {
+                                        let value = commonUtil.getValueFromJSONObjectFromAnyLevel(array[i], columnList1.columnValue);
+                                        // Parsing HTML to text (similar to Jsoup.parse)
+                                        if (typeof value === 'string') {
+                                            value = value.replace(/<\/?[^>]+(>|$)/g, ""); // Simple HTML stripping
+                                        }
+                                        clonedJsonObject[columnList1.columnName] = value;
+                                    });
+    
+                                    jsonArray.push(clonedJsonObject);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    async getQuery(column,object){
+        let query = [];
+        let keyValuePair1 = {};
+        keyValuePair1.value = column.collection;
+        keyValuePair1.crList = [];
+        if(column && column.searchCriteriaList && column.searchCriteriaList.length > 0){
+            column.searchCriteriaList.forEach(criteria => {
+                try {
+                    let searchCriteria = new SearchCriteriaSchema();
+                    searchCriteria.fName = criteria.fName;
+                    searchCriteria.operator = criteria.operator;
+                    searchCriteria.fValue = commonUtil.getValueFromJSONObjectFromAnyLevel(object, criteria.fValue).toString();
+                    keyValuePair1.crList.push(searchCriteria);
+                } catch (error) {
+                    
+                }
+            });
+        }
+        queryHandler.enrichQuery(keyValuePair1.value.toLowerCase(), keyValuePair1, query);
+        return query;
+    }
+    updateJsonObject(jsonObject, columnList, str, isListObject) {
+        if (str && isListObject) {
+            let array = JSON.parse(str); // Convert the string into a JSON array
+            let jsonObject1 = {};
+            jsonObject1[columnList.columnName.split('.')[0]] = array;
+    
+            columnList.columnList.forEach(columnList1 => {
+                let value = commonUtil.getValueFromJSONObjectFromAnyLevel(jsonObject1, columnList1.columnValue);
+                jsonObject[columnList1.columnName] = value;
+            });
+        } else if (str && !isListObject) {
+            let jsonObject1 = JSON.parse(str); // Convert the string into a JSON object
+    
+            columnList.columnList.forEach(columnList1 => {
+                if (jsonObject1.hasOwnProperty(columnList.columnValue)) {
+                    let value = commonUtil.getValueFromJSONObjectFromAnyLevel(jsonObject1, columnList1.columnValue);
+                    jsonObject[columnList1.columnName] = value;
+                }
+            });
+        }
     }
 }
 

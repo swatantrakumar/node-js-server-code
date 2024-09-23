@@ -1,6 +1,7 @@
 // Importing modules
 const mongoose = require('mongoose');
 const {ObjectId} = require('mongodb');
+const { Schema } = mongoose;
 
 // var objectId = new ObjectId();
 
@@ -32,7 +33,10 @@ const BaseEntitySchema = mongoose.Schema({
     updatedBy : String,
     updatedDate : { type: Date },
     updatedByName : String,
-    modelName:String
+    modelName:String,
+    documents:[String],
+    attachement:Schema.Types.Mixed,
+    attachments:[Schema.Types.Mixed]
 });
 
 BaseEntitySchema.virtual('favourite')

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const SearchCriteriaSchema = require('./searchCriteria');
 const Schema = mongoose.Schema;
 
 const ColumnListSchema = new Schema({
@@ -23,9 +24,7 @@ const ColumnListSchema = new Schema({
     },
     columnList: [this],
     updateable: { type: Boolean },
-    searchCriteriaList: [{
-        // Define the SearchCriteria schema if needed
-    }],
+    searchCriteriaList: [SearchCriteriaSchema],
     conditions: [{
         // Define the ConditionalCriteria schema if needed
     }],

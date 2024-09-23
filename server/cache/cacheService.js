@@ -16,6 +16,7 @@ class CacheService {
             this.pojoMap = new Map();
             this.fieldMap = new Map();
             this.userIdWithAppRoleIds = new Map();
+            this.rollIdWithCriteriaList = new Map();
             this.userIdWithTemplateTabIdMap = new Map();
             this.userIdWithFevouriteTemplateTabIdMap = new Map();
             this.export_configuration = new Map();

@@ -37,7 +37,9 @@ class CollectionHandler {
         return list;
     }
     async findDocument(model, field, value,operator = Operators.EQUAL, dbName='') {
-        const valueObject  = commonutil.getValueFromJSONObject(field, value);
+        let object = {};
+        object[field] = value;
+        const valueObject  = commonutil.getValueFromJSONObject(object,field);
         let queryCriteriaList = [];
 		queryCriteriaList.push(new QueryCriteria(field,"string",operator,valueObject));
         const query = queryHandler.buildMongoQuery(queryCriteriaList);

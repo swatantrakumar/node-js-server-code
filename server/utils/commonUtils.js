@@ -223,7 +223,7 @@ class CommonUtils {
         return childObject;
     }
     getChildJSONObject(parentObject, child) {
-        if (child != null && parentObject != null) {
+        if (child && parentObject) {
             if (Array.isArray(parentObject)) {
                 return parentObject[parseInt(child)];
             } else {

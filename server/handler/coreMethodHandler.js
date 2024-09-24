@@ -1,6 +1,8 @@
-const redisCacheService = require('../cache/redisCacheService');
 const templateHandler = require('../handler/templateHandler');
 const FieldEnricherProperties = require('../model/generic/fieldEnricherProperties');
+const CollectionHandler = require('./collectionHandler');
+
+const collectionHandler = new CollectionHandler();
 
 class CoreMethodHandlers{
     async processQueryTempalte(result, employee, kvp, resultList, sub_result, values, value){
@@ -9,10 +11,10 @@ class CoreMethodHandlers{
         if(kvp && values.length >= 0 && moduleName && templateHandler.getCoreModuleList() && templateHandler.getCoreModuleList().includes(moduleName)){
             fieldEnricherProperties = templateHandler.getFieldEnricherPropertiesFromCentral(values[1]);
             if(fieldEnricherProperties == null){
-                fieldEnricherProperties = await redisCacheService.getDataFromCacheOrCollection(FieldEnricherProperties,values[1],'key',['key','method','classNameWithPath']);
+                fieldEnricherProperties = await collectionHandler.findDocument(FieldEnricherProperties,'key',values[1]);
             }
         }else {
-            fieldEnricherProperties = await redisCacheService.getDataFromCacheOrCollection(FieldEnricherProperties,values[1],'key',['key','method','classNameWithPath']);
+            fieldEnricherProperties = await collectionHandler.findDocument(FieldEnricherProperties,'key',values[1]);
         }
 
         if (fieldEnricherProperties == null) {
@@ -20,18 +22,54 @@ class CoreMethodHandlers{
         }
         if(fieldEnricherProperties == null){
             fieldEnricherProperties = new FieldEnricherProperties();
-            fieldEnricherProperties.setClassNameWithPath("core/services/fieldEnrichers/RunFromDynamicFieldEnricher");
-            fieldEnricherProperties.setMethod("execute_with_template_name");
-            fieldEnricherProperties.setKey("RUN_FROM_DYNAMIC");
+            fieldEnricherProperties.classNameWithPath = "core/services/fieldEnrichers/RunFromDynamicFieldEnricher";
+            fieldEnricherProperties.method = "execute_with_template_name";
+            fieldEnricherProperties.key = "RUN_FROM_DYNAMIC";
         }
         try {
-            let classPath = fieldEnricherProperties.classNameWithPath;
+            let modulePath = '../' + fieldEnricherProperties.classNameWithPath;
             let method = fieldEnricherProperties.method;
-            console.log("class Path : -" + classPath);
-            console.log("Method : -" + method);
+            let methodName = "execute";
+            let loadedClass;
+            try {
+                loadedClass = require(modulePath);
+            } catch (error) {
+                console.error(`Failed to load module: ${modulePath}`, error);
+                return;
+            }
+
+            if (typeof loadedClass[methodName] === 'function') {       
+                try {
+                    switch (method) {
+                        case "all":
+                            loadedClass[methodName](employee, result, kvp, resultList, sub_result, values, value);
+                            break;  
+                        case "execute_with_template_name":
+                            loadedClass[methodName](employee,values[1], result, kvp);
+                            break;
+                        case "execute_map_keyvalue":
+                            loadedClass[methodName](result, kvp);
+                            break;
+                        case "execute":
+                            loadedClass[methodName]();
+                            break;
+                        case "execute_appuser_map_keyvalue":
+                        case "execute_with_resultList_subList_values_value" :                                              
+                        default:
+                            loadedClass[methodName](employee, result, kvp);
+                            break;
+                    }
+                } catch (error) {
+                    console.error(`Error executing method: ${methodName}`, error);
+                }
+
+            }
+            
         } catch (error) {
             console.error(error.stack);
         }
+        // let endTime = System.currentTimeMillis();
+        // collectionHandler.saveQueryLog(values[1], kvp.getCrList().toString(), startTime, endTime,0);
     }
 }
 

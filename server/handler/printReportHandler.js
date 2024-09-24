@@ -12,11 +12,13 @@ const { json } = require("express");
 const QueryCriteria = require("./queryHandler/queryCriteria");
 const ExportConfiguration = require("../model/generic/exportConfiguration");
 const SearchCriteriaSchema = require("../model/generic/searchCriteria");
+const RetrievalQueryHandler = require("./queryHandler/retrievalQueryHandler");
 
 const collectionHandler = new CollectionHandler();
 const commonUtil = new CommonUtils();
 const userPermissionHandler = new UserPermissionHandler();
 const queryHandler = new QueryHandler();
+const retrievalQueryHandler = new RetrievalQueryHandler();
 
 class PrintReportHandler {
     async createReport(tabName,object){
@@ -163,7 +165,7 @@ class PrintReportHandler {
             let tab = commonUtil.getValueFromJSONObject(object, "kvp.tab");
             let applicationUser = userPermissionHandler.getApplicationUser(object);
             let criteriaList = [];
-            // retrievalQueryHandler.enrichQueryWithDefaultCriteria(applicationUser, tab, criteriaList, keyValuePair);
+            retrievalQueryHandler.enrichQueryWithDefaultCriteria(applicationUser, tab, criteriaList, keyValuePair);
             queryHandler.enrichQuery(tab, keyValuePair, criteriaList);
 
             for (let j = 0; j <= pageNo; j++) {

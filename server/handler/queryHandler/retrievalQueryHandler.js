@@ -57,7 +57,7 @@ class RetrievalQueryHandler{
         /** END - >  set flag if Call has to be thorugh Central Server ***/
 
         if(clazz) {
-            // enrichQueryWithDefaultCriteria(employee,colName,criteriaList,kvp);
+            this.enrichQueryWithDefaultCriteria(employee,colName,criteriaList,kvp);
             queryHandler.enrichQuery( colName, kvp, criteriaList );
             switch (colName) {
 //                case "menu":
@@ -194,7 +194,7 @@ class RetrievalQueryHandler{
         if(clazz==null){
             console.log("Getting Query for " + colName + " failed");
         }else {
-            // enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
+            this.enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
             if (!orderBy) {
                 orderBy="-updateDate,-createdDate";
             }
@@ -234,7 +234,7 @@ class RetrievalQueryHandler{
         let clazz = null;
         try {
             clazz = await cacheService.getModel(colName);
-            // enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
+            this.enrichQueryWithDefaultCriteria(employees, colName, criteriaList,kvp);
             queryHandler.enrichQuery(colName, kvp, criteriaList);
             count =  await collectionHandler.count(clazz, criteriaList);
         } catch (error) {
@@ -533,7 +533,7 @@ class RetrievalQueryHandler{
     }
     getReferenceJsonObjectAsNamePicker(collection, il) {
         const pojoMaster = cacheService.getPojoFromCollection(collection);
-        const name = "";
+        let name = "";
         const fields = pojoMaster.fields_for_reference;
         if(fields && Array.isArray(fields) && fields.length > 0) {
             for (let i = 0; i < fields.length; i++) {
@@ -561,15 +561,17 @@ class RetrievalQueryHandler{
         }
     }
     retrieveDataASReferenceObject(resultList, value, data_list){
-        data_list.forEach(object => {
-            const il = JSON.parse(JSON.stringify(object));
-            try {
-                const obj = this.getReferenceJsonObjectAsNamePicker(value, il);
-                resultList.push(obj);
-            } catch (e) {
-                console.log("Error while adding reference in the list : {} {}", value, il);
-            }
-        });
+        if(data_list && Array.isArray(data_list) && data_list.length > 0){
+            data_list.forEach(object => {
+                const il = JSON.parse(JSON.stringify(object));
+                try {
+                    const obj = this.getReferenceJsonObjectAsNamePicker(value, il);
+                    resultList.push(obj);
+                } catch (e) {
+                    console.log("Error while adding reference in the list : {} {}", value, il);
+                }
+            });
+        }
     }
     checkType(kvp){
         return kvp.data_template != null ? kvp.data_template.toUpperCase():"";
@@ -652,37 +654,36 @@ class RetrievalQueryHandler{
                         }
                     });
                 }
-                let criteria = null;
-                if (permissionHandler.getAppResourceCriteria(key.toString())) {
-                    criteria = permissionHandler.getAppResourceCriteria(key.toString());
-                }
                 let key = '';
                 key += kvp.key2 + "_";
                 key += kvp.key + "_";
                 key += kvp.module + "_";
                 key += colName + "_";
                 key += kvp.role;
-            }
-
-            if (criteria != null) {
-                let crList = null;
-                if (criteria.crList) {
-                    crList = criteria.crList;
+                let criteria = null;
+                if (permissionHandler.getAppResourceCriteria(key.toString())) {
+                    criteria = permissionHandler.getAppResourceCriteria(key.toString());
                 }
-                if(crList && crList.length > 0){
-                    for (const cr of crList) {
-                        let fName = cr.fName;
-                        let fieldType = cacheService.getFieldMap().get((colName.toLowerCase() + "_" + fName));
-                        if (fieldType == null) {
-                            if (fName == "createdDate" || fName == "updateDate") {
-                                fieldType = "date";
-                            } else {
-                                fieldType = "string";
+                if (criteria) {
+                    let crList = null;
+                    if (criteria.crList) {
+                        crList = criteria.crList;
+                    }
+                    if(crList && crList.length > 0){
+                        for (const cr of crList) {
+                            let fName = cr.fName;
+                            let fieldType = cacheService.getFieldMap().get((colName.toLowerCase() + "_" + fName));
+                            if (fieldType == null) {
+                                if (fName == "createdDate" || fName == "updateDate") {
+                                    fieldType = "date";
+                                } else {
+                                    fieldType = "string";
+                                }
                             }
+                            if (cr.fValue) {
+                                queryHandler.populateQuery(query, cr.operator, fName, cr.fValue, fieldType);
+                            }                        
                         }
-                        if (cr.fValue) {
-                            queryHandler.populateQuery(query, cr.operator, fName, cr.fValue, fieldType);
-                        }                        
                     }
                 }
             }

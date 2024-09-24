@@ -586,8 +586,8 @@ class PermissionHandler{
         const applicationUserList = await this.getListFromDatabase(ApplicationUser, "_id name email appId refCode");
         const applicationUserMap = this.getObjectMap(applicationUserList, keyExtractor);
         this.processAppRoleBindings(appRoleBindingList, appUsersGroupMap, applicationUserMap, appGroupOfGroupMap);
-        const appRoleList = this.getListFromDatabase(AppRole, "_id name appResourceList appMetaData appId refCode");
-        // processAppRoleCriteria(appRoleList);
+        const appRoleList = await this.getListFromDatabase(AppRole, "_id name appResourceList appMetaData appId refCode");
+        this.processAppRoleCriteria(appRoleList);
         console.log('role id list store use wise !!!');
     }
     getListFromDatabase(model,list){
@@ -629,6 +629,63 @@ class PermissionHandler{
                             }
                         }
                     })
+                }
+            })
+        }
+    }
+    processAppRoleCriteria(roleList){
+        if(roleList && Array.isArray(roleList) && roleList.length > 0){
+            for (const role of roleList) {
+                let appResourceModuleTreeMap = null;
+                if(role && role.appResourceList && role.appResourceList.length > 0) appResourceModuleTreeMap = role.appResourceList;
+                if(appResourceModuleTreeMap){
+                    appResourceModuleTreeMap.forEach((appResourceModule, key) => {
+                        if(appResourceModule && appResourceModule.reference && appResourceModule.reference.name){
+                            let moduleName = appResourceModule.reference.name;
+                            if(appResourceModule.menus){
+                                let appResourceMenuTreeMap = appResourceModule.menus;
+                                if(appResourceMenuTreeMap){
+                                    appResourceMenuTreeMap.forEach((appResourceMenu,key)=>{
+                                        if(appResourceMenu && appResourceMenu.submenus){
+                                            let appResourceSubMenuTreeMap = appResourceMenu.submenus;
+                                            if(appResourceSubMenuTreeMap){
+                                                appResourceSubMenuTreeMap.forEach((appResourceSubMenu,key) =>{
+                                                    if(appResourceSubMenu && appResourceSubMenu.templateTabs){
+                                                        let appResourceTemplateTabTreeMapTreeMap = appResourceSubMenu.templateTabs;
+                                                        this.processRoleCriteriaFormTemplatetabs(moduleName,appResourceTemplateTabTreeMapTreeMap,role);
+                                                    }
+                                                })
+                                            }
+                                        }else{
+                                           if(appResourceMenu && appResourceMenu.templateTabs){
+                                                let appResourceTemplateTabTreeMapTreeMap = appResourceMenu.templateTabs;
+                                                this.processRoleCriteriaFormTemplatetabs(moduleName,appResourceTemplateTabTreeMapTreeMap,role);
+                                           } 
+                                        }
+                                    })
+                                }
+                            }
+                        }
+                    });                    
+                }
+            }
+        }
+    }
+    processRoleCriteriaFormTemplatetabs(moduleName, appResourceTemplateTabTreeMapTreeMap, role){
+        if(appResourceTemplateTabTreeMapTreeMap){
+            appResourceTemplateTabTreeMapTreeMap.forEach((appResourceTemplateTab,key) => {
+                if(appResourceTemplateTab && appResourceTemplateTab.criteria){
+                    if(appResourceTemplateTab.reference && appResourceTemplateTab.reference._id){
+                        const id = appResourceTemplateTab.reference._id;
+                        const tab = templateHandler.tabMap.get(id);
+                        let key = '';
+                        key += role.appId + "_";
+                        key += role.refCode + "_";
+                        key += moduleName + "_";
+                        key += tab.tab_name + "_";
+                        key += role.name;
+                        cacheService.rollIdWithCriteriaList.set(key,appResourceTemplateTab.criteria);
+                    }
                 }
             })
         }

@@ -7,6 +7,7 @@ const PermissionHandler = require("../permissionHandler");
 const SearchCriteria = require("./searchCriteria");
 const QueryCriteria = require("./queryCriteria");
 const Operators = require("../../enum/operator");
+const coreMethodHandler = require("../coreMethodHandler");
 
 const commonUtils = new CommonUtils();
 const queryHandler = new QueryHandler();
@@ -244,7 +245,7 @@ class RetrievalQueryHandler{
     }
     async getStaticDataResultForCoreMasters(result, employee, kvp, resultList, sub_result, values, value){
         if(value.toUpperCase().includes("QTMP")){
-			// invokeQtmp(result, employee, kvp, resultList, sub_result, values, value);
+			await this.invokeQtmp(result, employee, kvp, resultList, sub_result, values, value);
             console.log("qtmp call section!!!")
 		}else {
 			this.prepareCoreKvpForStaticDataSearch(kvp, sub_result, values, value);
@@ -252,6 +253,9 @@ class RetrievalQueryHandler{
 			let data_list = await this.processApplicationSobjCall(employee,sortBy, kvp);
 			await this.prepareCoreReponseDataForStaticDataCallMasters(false,result, kvp, resultList, sub_result, value, data_list);
 		}
+    }
+    async invokeQtmp(result, employee, kvp, resultList, sub_result, values, value){
+        await coreMethodHandler.processQueryTempalte(result, employee, kvp, resultList, sub_result, values, value);
     }
     prepareCoreKvpForStaticDataSearch(kvp, sub_result, values, value) {
         let colValue="";

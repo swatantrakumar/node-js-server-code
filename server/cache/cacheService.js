@@ -24,6 +24,8 @@ class CacheService {
             this.clientConfigurations = new Map();
             this.activeUserJSONMap = new Map();
             this.coreModuleList = [];
+            // For Central-Environment..
+            this.fieldEnricherPropertiesMapForCentral = new Map();
             CacheService.instance = this;
           }
       

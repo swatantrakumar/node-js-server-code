@@ -271,6 +271,9 @@ class TemplateHandler{
     getMenuWithSubMenuListForCentral(){
         return [];
     }
+    getFieldEnricherPropertiesFromCentral (key) {
+        return (cacheService.fieldEnricherPropertiesMapForCentral) ? cacheService.fieldEnricherPropertiesMapForCentral.get(key) : null;
+    }
     async getDataWithExcludeFields(model,fields){
         let list = collectionHandler.findAllDocuments(model,commonUtils.getExcludeColumns(fields));
         return list;

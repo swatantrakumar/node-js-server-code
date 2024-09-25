@@ -44,6 +44,7 @@ class TemplateHandler{
         const templatelist = await this.getDataWithExcludeFields(Template, fieldNames);
         console.log("All Config Collections retrieved from DB");
         await this.fetchCommonModuleListFromDb();
+        // addCentralMasterData();
 
         //--------------------------------------------------------------------------->>
         this.prepareMapForCollections(formList, gridList, this.formMap,this.gridMap);

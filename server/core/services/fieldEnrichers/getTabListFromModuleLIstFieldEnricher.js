@@ -7,10 +7,6 @@ const CommonUtils = require("../../../utils/commonUtils");
 const Menu = require("../../../model/builder/menu");
 const Template = require("../../../model/builder/template");
 const TemplateTab = require("../../../model/builder/templateTab");
-const Reference = require("../../../model/reference");
-const AppResourceModule = require("../../../model/permission/appResourceModule");
-const AppResourceMenu = require("../../../model/permission/appResourceMenu");
-const AppResourceTemplateTab = require("../../../model/permission/appResourceTemplateTab");
 
 
 const collectionHandler = new CollectionHandler();
@@ -38,68 +34,86 @@ class GetTabListFromModuleLIstFieldEnricher {
                     templateTabMap.set(templateTab._id, templateTab);
                 }
             }
-            let modules = new Map();
+            let modules = {};
             for (const projectModules of moduleList) {
-                if ( projectModules.status == null || projectModules.status == "InActive"){
+                if ( !projectModules.status || projectModules.status == "InActive"){
                     continue ;
                 }
                 this.prepareAppResourceModule(projectModules, menuList, templateList, templateTabMap, modules);
             }
 
+            // let projectModuleMapForCentral = templateHandler.getProjectModuleMapForCentral();
+            // let menuListForCentral = templateHandler.getMenuListWithSubMenuForCentral();
+            // let templateMapForCentral = templateHandler.getTemplateMapForCentral();
+            // let tabMapForCentral = templateHandler.getTabMapForCentral();
+
+            // const templateListForCentral = Object.values(templateMapForCentral);
+            // for (const projectModule of Object.values(projectModuleMapForCentral)) {
+            //     this.prepareAppResourceModule(projectModule, menuListForCentral, templateListForCentral, tabMapForCentral, modules);
+            // }            
+            objectList.push(commonUtil.getResultChildObject(callBackField, modules));
+
+            const list = ["menus", "submenus", "templateTabs"];
+            objectList.push(commonUtil.getResultChildObject("keys", list));
+
         } catch (error) {
-            
+            console.error(error.stack)
+        }
+        if (Array.isArray(result.get('success'))) {
+            result.get('success').push(...objectList);
         }
 
     }
     prepareAppResourceModule(projectModules,  menuList,  templateList,  templateTabMap,  modules){
         let moduleName = projectModules.name;
         let menuListForModule = menuList.filter(menu => menu.module_name && menu.module_name.toLowerCase() == moduleName.toLowerCase());
-        let appModule = new AppResourceModule();
-        let referenceModule = new Reference();
+        let appModule = {};
+        let referenceModule = {};
         referenceModule['_id'] = projectModules._id;
         referenceModule['name'] = projectModules.name;
         appModule['reference'] = referenceModule;
-        let menus = new Map();
+        let menus = {};
         let menuCount = 0;
         for (const menu of menuListForModule) {
-            let menuName = menu.name;
+            let menuName = null;
             let submenuName = null;
-            let appMenu = new AppResourceMenu() ;
+            let appMenu = {};
 
-            let reference = new Reference() ;
+            let reference = {};
             reference['_id'] = menu._id;
-            reference['name'] = menuName;
+            reference['name'] = menu.label;
             appMenu['reference'] = reference;
             if(menu && menu.submenu && menu.submenu.length > 0){
                 let submenuList = menu.submenu;
                 appMenu['templateTabs'] = null;
-                let subMenus = new Map();
+                let subMenus = {};
                 for (const submenu of submenuList) {
                     submenuName = submenu.name;
                     let tabList = this.getTabListFromMenu(templateList, submenuName , templateTabMap); 
-                    let appSubMenu = new AppResourceMenu() ;
+                    let appSubMenu = {};
 
-                    let referenceSubMenu = new Reference() ;
+                    let referenceSubMenu = {};
                     referenceSubMenu['_id'] = submenu._id;
-                    referenceSubMenu['name'] = submenu.name;
+                    referenceSubMenu['name'] = submenu.label;
                     appSubMenu['reference'] = referenceSubMenu;
                     appSubMenu['submenus'] = null;
                     
                     if(tabList && tabList.length > 0){
                         appSubMenu['templateTabs'] = this.prepareTabMapFromTabList(tabList);                        
-                        subMenus.set(appSubMenu.reference.name, appSubMenu);                        
+                        subMenus[appSubMenu.reference.name] = appSubMenu;                        
                     }
                 }
                 appMenu['submenus'] = subMenus;
-            }else{                
+            }else{  
+                menuName = menu.name;              
                 let tabList = this.getTabListFromMenu(templateList, menuName , templateTabMap);
                 appMenu['submenus'] = null;                
                 if(tabList && tabList.length > 0){                    
                     appMenu['templateTabs'] = this.prepareTabMapFromTabList(tabList); 
                 }
             }
-            if((appMenu.submenus && appMenu.submenus.size > 0) || (appMenu.templateTabs && appMenu.templateTabs.size > 0)){
-                menus.set(menuName, appMenu) ;
+            if((appMenu.submenus && Object.keys(appMenu.submenus).length > 0) || (appMenu.templateTabs && Object.keys(appMenu.templateTabs).length > 0)){
+                menus[appMenu.reference.name] = appMenu ;
             } else {
                 menuCount++ ;
             }
@@ -108,21 +122,34 @@ class GetTabListFromModuleLIstFieldEnricher {
         if ( menuListForModule.length != menuCount ){
             if (appModule.reference && appModule.reference.name){
                 let modulesKey = appModule.reference.name + " ( " + projectModules.title + " )" ;
-                modules.set(modulesKey , appModule) ;
+                modules[modulesKey] = appModule;
             }
         }
 
     }
-    getTabListFromMenu(){
+    getTabListFromMenu(templateList , menuName , templateTabMap){
+        let tabs = [];
+        const temp = templateList.find(template => template.name && template.name.toLowerCase() === menuName.toLowerCase());
+        if (temp && temp.tabs && temp.tabs.length > 0) {
+            const tabList = temp.tabs;
         
+            tabList.forEach(tab => {
+                const templateTab = templateTabMap.get(tab._id);
+                if (templateTab && templateTab.label) {
+                    tab.name = templateTab.label;  
+                }
+                tabs.push(JSON.parse(JSON.stringify(tab)));  
+            });
+        }
+        return tabs;
     }
     prepareTabMapFromTabList(tabList){
-        let templateTabs = new Map();
+        let templateTabs = {};
         for (const reference1 of tabList) {
-            let appTemplateTab = new AppResourceTemplateTab() ;
+            let appTemplateTab = {};
             appTemplateTab['reference'] = reference1;
             if (appTemplateTab.reference && appTemplateTab.reference.name){
-                templateTabs.set( appTemplateTab.reference.name,appTemplateTab) ;
+                templateTabs[appTemplateTab.reference.name] = appTemplateTab;
             }
         }
         return templateTabs;

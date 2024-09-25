@@ -416,6 +416,13 @@ class CommonUtils {
         }
         return _ids;
     }
+    getResultChildObject(field, object) {
+        const mapObject = {
+            field: field,
+            data: object
+        };
+        return mapObject;
+    }
 }
 
 module.exports = CommonUtils;

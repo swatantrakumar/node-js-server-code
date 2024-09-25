@@ -110,7 +110,7 @@ class PermissionHandler{
                     // prepareMyFavorite(favouriteMenus, tabNameWithPermissionActionsMap, modules, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, templateMap, menuSubMenuIds, templateTabIdSet, booleanFlag, fevouriteTemplateTabIdSet);
                 }
                 // console.log(modules);
-                const finalPermission = this.mapToObj(modules)
+                const finalPermission = commonUtil.mapToObj(modules)
                 result["permission"] = finalPermission;
                 
                 // this.mapToObj(modules);
@@ -129,19 +129,19 @@ class PermissionHandler{
     }
     
     // Function to recursively convert a Map to an Object
- mapToObj(map) {
-    const obj = {};
-    for (let [key, value] of map.entries()) {
-      if (value instanceof Map) {
-        obj[key] = this.mapToObj(value);
-      } else if (Array.isArray(value)) {
-        obj[key] = value.map(item => (item instanceof Map ? this.mapToObj(item) : item));
-      } else {
-        obj[key] = value;
-      }
-    }
-    return obj;
-  }
+//  mapToObj(map) {
+//     const obj = {};
+//     for (let [key, value] of map.entries()) {
+//       if (value instanceof Map) {
+//         obj[key] = this.mapToObj(value);
+//       } else if (Array.isArray(value)) {
+//         obj[key] = value.map(item => (item instanceof Map ? this.mapToObj(item) : item));
+//       } else {
+//         obj[key] = value;
+//       }
+//     }
+//     return obj;
+//   }
   
     getModuleMasterObjectAndProcess(appRole, appResourceModuleTreeMap, modules, tabNameWithPermissionActionsMap, projectModuleMap, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, menuListWithSubMenu, templateTabIdSet, templateMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
         // Iterate over the Map using for...of and entries()

@@ -42,21 +42,21 @@ class CoreMethodHandlers{
                 try {
                     switch (method) {
                         case "all":
-                            loadedClass[methodName](employee, result, kvp, resultList, sub_result, values, value);
+                            await loadedClass[methodName](employee, result, kvp, resultList, sub_result, values, value);
                             break;  
                         case "execute_with_template_name":
-                            loadedClass[methodName](employee,values[1], result, kvp);
+                            await loadedClass[methodName](employee,values[1], result, kvp);
                             break;
                         case "execute_map_keyvalue":
-                            loadedClass[methodName](result, kvp);
+                            await loadedClass[methodName](result, kvp);
                             break;
                         case "execute":
-                            loadedClass[methodName]();
+                            await loadedClass[methodName]();
                             break;
                         case "execute_appuser_map_keyvalue":
                         case "execute_with_resultList_subList_values_value" :                                              
                         default:
-                            loadedClass[methodName](employee, result, kvp);
+                            await loadedClass[methodName](employee, result, kvp);
                             break;
                     }
                 } catch (error) {

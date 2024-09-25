@@ -30,47 +30,47 @@ class QueryHandler {
     };
     buildMongoQuery(queryList) {
         // Process the query list
+		const finalQuery = {};
         const andConditions = [];
         const orConditions = [];
         const norConditions = [];
         const notConditions = [];
-      
-        queryList.forEach(query => {
-          const { field, operator, value, fieldType, logicalOperator } = query;
-          const condition = this.handleOperator(field, operator, value, fieldType);
-        //   andConditions.push(condition);
-          if (logicalOperator) {
-            if (logicalOperator === 'AND') {
-              andConditions.push(condition);
-            } else if (logicalOperator === 'OR') {
-              orConditions.push(condition);
-            } else if (logicalOperator === 'NOR') {
-                norConditions.push(condition);
-            } else if (logicalOperator === 'NOT') {
-                notConditions.push(condition);
-            }
-          } else {
-            // Default to AND conditions if no logical operator is specified
-            andConditions.push(condition);
-          }
-        });
-      
-        // Combine the conditions
-        const finalQuery = {};
+        if(queryList && queryList.length > 0){
+			queryList.forEach(query => {
+			const { field, operator, value, fieldType, logicalOperator } = query;
+			const condition = this.handleOperator(field, operator, value, fieldType);
+			//   andConditions.push(condition);
+			if (logicalOperator) {
+				if (logicalOperator === 'AND') {
+				andConditions.push(condition);
+				} else if (logicalOperator === 'OR') {
+				orConditions.push(condition);
+				} else if (logicalOperator === 'NOR') {
+					norConditions.push(condition);
+				} else if (logicalOperator === 'NOT') {
+					notConditions.push(condition);
+				}
+			} else {
+				// Default to AND conditions if no logical operator is specified
+				andConditions.push(condition);
+			}
+			});
+		
+			// Combine the conditions        
 
-        if (andConditions.length > 0) {
-            finalQuery.$and = andConditions;
-        }
-        if (orConditions.length > 0) {
-            finalQuery.$or = orConditions;
-        }
-        if (norConditions.length > 0) {
-            finalQuery.$nor = norConditions;
-        }
-        if (notConditions.length > 0) {
-            finalQuery.$not = notConditions;
-        }
-        
+			if (andConditions.length > 0) {
+				finalQuery.$and = andConditions;
+			}
+			if (orConditions.length > 0) {
+				finalQuery.$or = orConditions;
+			}
+			if (norConditions.length > 0) {
+				finalQuery.$nor = norConditions;
+			}
+			if (notConditions.length > 0) {
+				finalQuery.$not = notConditions;
+			}
+		}        
         return finalQuery;
     };
     handleSort(orderBy){

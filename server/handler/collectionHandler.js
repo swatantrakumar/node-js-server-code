@@ -27,14 +27,19 @@ class CollectionHandler {
         }
         return user;
     }
-    async findAllDocuments(model,list){
-        var list = [];
-        if(list){
-          list = await model.find({}).select(list).exec();
-        }else{
-          list = await model.find({}).exec();
+    async findAllDocuments(model, select='', queryCriteriaList = {}, orderBy=null){
+        const query = queryHandler.buildMongoQuery(queryCriteriaList);
+        const sortObject = queryHandler.handleSort(orderBy);
+        let dataList = [];
+        try {
+            dataList = await model.find(query)
+                        .sort(sortObject)
+                        .select(select)
+                        .exec();
+        } catch (error) {
+            console.log(error);
         }
-        return list;
+        return dataList;
     }
     async findDocument(model, field, value,operator = Operators.EQUAL, dbName='') {
         let object = {};

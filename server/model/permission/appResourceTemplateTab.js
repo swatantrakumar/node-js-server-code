@@ -14,7 +14,7 @@ const AppResourceTemplateTab = mongoose.Schema({
         type: Map,
         of: AppResourceGrid
     }
-});
+}, { _id: false });
 
     AppResourceTemplateTab.virtual('details')
     .get(function () {

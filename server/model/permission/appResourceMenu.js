@@ -13,7 +13,7 @@ const AppResourceMenu = mongoose.Schema({
         type: Map,
         of: AppResourceTemplateTab
     }
-});
+}, { _id: false });
 
     AppResourceMenu.virtual('details')
     .get(function () {

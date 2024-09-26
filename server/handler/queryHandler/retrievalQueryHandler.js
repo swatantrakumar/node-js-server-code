@@ -658,42 +658,147 @@ class RetrievalQueryHandler{
                         }
                     });
                 }
-                let key = '';
-                key += kvp.key2 + "_";
-                key += kvp.key + "_";
-                key += kvp.module + "_";
-                key += colName + "_";
-                key += kvp.role;
-                let criteria = null;
-                if (permissionHandler.getAppResourceCriteria(key.toString())) {
-                    criteria = permissionHandler.getAppResourceCriteria(key.toString());
-                }
-                if (criteria) {
-                    let crList = null;
-                    if (criteria.crList) {
-                        crList = criteria.crList;
-                    }
-                    if(crList && crList.length > 0){
-                        for (const cr of crList) {
-                            let fName = cr.fName;
-                            let fieldType = cacheService.getFieldMap().get((colName.toLowerCase() + "_" + fName));
-                            if (fieldType == null) {
-                                if (fName == "createdDate" || fName == "updateDate") {
-                                    fieldType = "date";
-                                } else {
-                                    fieldType = "string";
-                                }
-                            }
-                            if (cr.fValue) {
-                                queryHandler.populateQuery(query, cr.operator, fName, cr.fValue, fieldType);
-                            }                        
-                        }
-                    }
-                }
+                if (kvp.role) {
+                    this.getRoleWiseCriteria(kvp, colName,query,employee);
+                }   
             }
         } catch (error) {
             
         }
+    }
+    getRoleWiseCriteria(kvp, colName,query,employee){
+        let key = '';
+        key += kvp.key2 + "_";
+        key += kvp.key + "_";
+        key += kvp.module + "_";
+        key += colName + "_";
+        key += kvp.role;
+        let criteria = null;
+        if (permissionHandler.getAppResourceCriteria(key.toString())) {
+            criteria = permissionHandler.getAppResourceCriteria(key.toString());
+        }
+        if (criteria) {
+            let selfData = criteria.selfData;
+            if(selfData){
+                if(this.checkDublicatCriteria(query,"createdBy").check){
+                    query.splice(this.checkDublicatCriteria(query,"createdBy").index, 1);
+                }
+                query.push(new QueryCriteria("createdBy",'string', Operators.EQUAL, employee.email));
+            }
+            if (criteria.crList && criteria.crList.length > 0) {
+                for (let cr of criteria.crList) {
+                    this.processCreateCriteria(cr, query);
+                }
+            }
+            if (customCriteria.userCrList && Array.isArray(customCriteria.userCrList) && customCriteria.userCrList.length > 0) {
+                for (let cr of customCriteria.userCrList) {
+                    let field = cr.fName;
+                    let field_name = field.field_name;
+                    if(this.checkDublicatCriteria(query,field_name).check){
+                        let index = this.checkDublicatCriteria(query,field_name).index;
+                        query.splice(index,1);
+                    }
+                    let fieldValue = cr.fValue;
+                    let type = fieldValue.type;
+                    let value = fieldValue.value;
+                    switch (type){
+                        case "List":
+                            let ids = [];
+                            if (Array.isArray(value)) {
+                                value.forEach(element => {
+                                    if (element && typeof element === 'object') {
+                                        const obj = element;
+                                        if (obj._id) {
+                                            ids.push(obj._id);
+                                        }
+                                    }
+                                });
+                            }   
+                            if (ids.length > 0) {
+                                query.push({ field_name: field_name, operator: 'IN', value: ids });
+                            }                         
+                            break;
+                        case "object":
+                            let id = null;
+                            if (value && typeof value === 'object' && value._id) {
+                                id = value._id;
+                            }
+                            if (id) {
+                                query.push({ field_name: field_name, operator: cr.getOperator(), value: id });
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            
+        }
+    }
+    processCreateCriteria(cr, query){
+        let fieldObject = cr.fName;
+        let fieldValueObj = cr?.fValue;
+        let fName = null;
+        if(fieldObject && fieldObject.field_name){
+            fName = fieldObject.field_name;
+        }
+        if (fieldValueObj && fieldValueObj?.value){ 
+            let value =  fieldValueObj?.value;         
+            let type = fieldValueObj?.type;
+            switch(type) {
+                case "string":
+                    query.push(new QueryCriteria(fName, null, cr.operator, value.toString()));
+                    break;
+                case "number" :
+                    query.push(new QueryCriteria(fName, null, cr.gperator, parseInt(value.toString(),10)));
+                    break;
+                case "date":
+                    query.push(new QueryCriteria(fName, null, Operators.RANGE_BORDER_GREATER_THAN_INCLUSIVE,commonUtils.convertStringToDate(value.toString())));
+                    query.push(new QueryCriteria(fName, null, Operators.RANGE_BORDER_LESS_THAN_INCLUSIVE,commonUtils.endOfDay(commonUtils.convertStringToDate(value.toString()))));
+                    break;
+                case "daterange":
+                    let objValue = gson.fromJson(value.toString(), QueryFieldRange.class);
+                    let start = objValue.getStart();
+                    let end = objValue.getEnd();
+                    query.push(new QueryCriteria(fName, null, Operators.RANGE_BORDER_GREATER_THAN_INCLUSIVE,commonUtils.setDateToMidnight(commonUtils.convertStringToDate(start))));
+                    query.push(new QueryCriteria(fName, null, Operators.RANGE_BORDER_LESS_THAN_INCLUSIVE,commonUtils.endOfDay(commonUtils.convertStringToDate(end))));
+                    break;
+                case "object":
+                    let reference = JSON.parse(JSON.stringify(value));
+                    query.push(new QueryCriteria(fName, null, cr.operator, reference._id));
+                    break;
+                case "List":
+                    let listReference = JSON.parse(JSON.stringify((value)));
+                    let val = "";
+                    for (let ref of listReference) {
+                        let id = ref._id;
+                        if (val == '') {
+                            val = val + id;
+                        } else {
+                            val = val + ":" + id;
+                        }
+                    }
+                    query.push(new QueryCriteria(fName, null, cr.operator, val));
+                    break;
+                default :
+                    break;
+            }
+        }
+    }
+    checkDublicatCriteria(query, value){
+        let responce = {
+            check : false,
+            index : -1
+        };
+        for (let i = 0; i < query.length; i++){
+            let cr = query[i];
+            if (cr.field.toLowerCase() == value.toLowerCase()) {
+                responce.check = true;
+                responce.index = i;
+                break;
+            }
+        }
+       return responce;
     }
 }
 module.exports = RetrievalQueryHandler;

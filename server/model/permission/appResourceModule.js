@@ -9,7 +9,7 @@ const AppResourceModule = mongoose.Schema({
         type: Map,
         of: AppResourceMenu
     }
-});
+}, { _id: false });
 
 
     AppResourceModule.virtual('details')

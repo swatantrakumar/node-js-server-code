@@ -128,21 +128,6 @@ class PermissionHandler{
         }
     }
     
-    // Function to recursively convert a Map to an Object
-//  mapToObj(map) {
-//     const obj = {};
-//     for (let [key, value] of map.entries()) {
-//       if (value instanceof Map) {
-//         obj[key] = this.mapToObj(value);
-//       } else if (Array.isArray(value)) {
-//         obj[key] = value.map(item => (item instanceof Map ? this.mapToObj(item) : item));
-//       } else {
-//         obj[key] = value;
-//       }
-//     }
-//     return obj;
-//   }
-  
     getModuleMasterObjectAndProcess(appRole, appResourceModuleTreeMap, modules, tabNameWithPermissionActionsMap, projectModuleMap, menuMap, subMenuMap, templateTabMap, menuMapWithSubMenuMap, menuListWithSubMenu, templateTabIdSet, templateMap, menuSubMenuIds, booleanFlag, fevouriteTemplateTabIdSet) {
         // Iterate over the Map using for...of and entries()
         for (const [key, value] of appResourceModuleTreeMap.entries()) {
@@ -637,7 +622,7 @@ class PermissionHandler{
         if(roleList && Array.isArray(roleList) && roleList.length > 0){
             for (const role of roleList) {
                 let appResourceModuleTreeMap = null;
-                if(role && role.appResourceList && role.appResourceList.length > 0) appResourceModuleTreeMap = role.appResourceList;
+                if(role && role.appResourceList && role.appResourceList.size > 0) appResourceModuleTreeMap = role.appResourceList;
                 if(appResourceModuleTreeMap){
                     appResourceModuleTreeMap.forEach((appResourceModule, key) => {
                         if(appResourceModule && appResourceModule.reference && appResourceModule.reference.name){
@@ -672,7 +657,7 @@ class PermissionHandler{
         }
     }
     processRoleCriteriaFormTemplatetabs(moduleName, appResourceTemplateTabTreeMapTreeMap, role){
-        if(appResourceTemplateTabTreeMapTreeMap){
+        if(appResourceTemplateTabTreeMapTreeMap && appResourceTemplateTabTreeMapTreeMap.size > 0){
             appResourceTemplateTabTreeMapTreeMap.forEach((appResourceTemplateTab,key) => {
                 if(appResourceTemplateTab && appResourceTemplateTab.criteria){
                     if(appResourceTemplateTab.reference && appResourceTemplateTab.reference._id){

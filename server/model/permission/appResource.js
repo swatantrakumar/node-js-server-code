@@ -9,7 +9,7 @@ const AppResourceSchema = mongoose.Schema({
     reference:Reference,
     criteria:AppResourceCriteria,
     favourite:Boolean
-});
+}, { _id: false });
 
 
 // Exporting module to allow it to be imported in other files

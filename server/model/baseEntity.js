@@ -34,9 +34,9 @@ const BaseEntitySchema = mongoose.Schema({
     updatedDate : { type: Date },
     updatedByName : String,
     modelName:String,
-    documents:[String],
+    documents:{type:[String],default: undefined},
     attachement:Schema.Types.Mixed,
-    attachments:[Schema.Types.Mixed]
+    attachments:{type:[Schema.Types.Mixed],default: undefined}
 });
 
 BaseEntitySchema.virtual('favourite')

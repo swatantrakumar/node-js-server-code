@@ -2,14 +2,16 @@ const mongoose = require('mongoose');
 const BaseEntity = require("../baseEntity");
 const Reference = require('../reference');
 const S3FolderDataSchema = require('../generic/S3FolderSchema');
+const path = require('path');
+const IgnoreNull = require('../ignoreNull');
 
 // Creating user schema
 const ApplicationUserSchema = mongoose.Schema({ 
     ...BaseEntity.schema.obj,
     employee:Reference,
     branch:Reference,
-    branches:[Reference],
-    accounts:[Reference],
+    branches:{type:[Reference],default:undefined},
+    accounts:{type:[Reference],default: undefined},
     cognitoId:String,
     code:String,
     name:String,
@@ -19,27 +21,27 @@ const ApplicationUserSchema = mongoose.Schema({
     mobile2:String,
     action:String,
     designation:String,
-    signature:[],
-    signature_file:[S3FolderDataSchema],
+    signature:{type:[],default: undefined},
+    signature_file:{type:[S3FolderDataSchema],default: undefined},
     signatureUrl:String,
     password:String,
     confirm_password:String,
     commercialCoordinator:Boolean,
     samplerPerson:Boolean,
     sales_person:Boolean,
-    departments:[Reference],
-    extraUserRole:[Reference],
-    list1:[Reference],
-    list2:[Reference],
-    list3:[Reference],
-    user_group:[Reference],
+    departments:{type:[Reference],default: undefined},
+    extraUserRole:{type:[Reference],default: undefined},
+    list1:{type:[Reference],default: undefined},
+    list2:{type:[Reference],default: undefined},
+    list3:{type:[Reference],default: undefined},
+    user_group:{type:[Reference],default: undefined},
     managerL1:Reference,
     managerL2:Reference,
     managerL3:Reference,
     managerL4:Reference,
-    managers:[String],
-    roles:[Reference],
-    modules:[Reference],
+    managers:{type:[String],default: undefined},
+    roles:{type:[Reference],default: undefined},
+    modules:{type:[Reference],default: undefined},
     country:Reference,
     state:Reference,
     login_user_exist:Boolean,
@@ -69,6 +71,12 @@ ApplicationUserSchema.virtual('chart')
         return ret;
         }
     });
+
+// Add a static property for file path
+ApplicationUserSchema.statics.modelFilePath = path.relative(process.cwd(), __filename);
+
+
+ApplicationUserSchema.plugin(IgnoreNull);
 
 // Combine the base entity schema with the user schema
 const ApplicationUser =  mongoose.model('ApplicationUser', ApplicationUserSchema,'app_application_user');

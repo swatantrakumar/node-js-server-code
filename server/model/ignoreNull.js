@@ -61,7 +61,7 @@ const IgnoreNull = (schema) => {
       if (update.$set) {
         // Remove null values from the $set object
         for (let key in update.$set) {
-            if (update.$set[key] === null) {
+            if (!update.$set[key] || (Array.isArray(update.$set[key]) && update.$set[key].length == 0) || update.$set[key] === false) {
                 delete update.$set[key];
             }
             // Apply default values, but only if the field is undefined (not null)

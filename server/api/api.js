@@ -13,10 +13,12 @@ const Config = require('../enum/config');
 const LoadCache = require('../cache/loadCache');
 const PermissionHandler = require('../handler/permissionHandler');
 const templateHandler = require('../handler/templateHandler');
+const SendEmailHandler = require('../handler/sendEmailHandler');
 require('dotenv').config();
 
 
 const permissionHandler = new PermissionHandler();
+// const sendEmailHandler = new SendEmailHandler();
 
 const app = express();
 // Use CORS middleware
@@ -42,6 +44,12 @@ async function loadApi (){
     app.listen(Config.PORT, () => {
         console.log(`Server is running on http://localhost:${Config.PORT}`);
     });
+
+    // Schedule the task to run every 5 minutes
+    // cron.schedule('*/5 * * * *', () => {
+    //     console.log('Checking for pending emails...');
+    //     sendEmailHandler.sendPendingEmails();
+    // });
     
 }
 

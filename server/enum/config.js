@@ -26,6 +26,14 @@ const Config = {
     FILE_SYSTEM: 'local',
     AWS_CONFIG : {      
       region: 'ap-south-1'
+    },
+    AUTH : {
+      MODE : 'email',
+      SEND_MAIL: true,
+      USER:{
+        ENABLED: false
+      }
+      
     }
   };
   

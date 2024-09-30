@@ -14,9 +14,11 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    user: String,
     hash: String,
     salt: String,    
     mobileNumber:String,
+    verificationCode:String,
     passwordResetCode:String,
     resetCodeGenerateTime:{type:Date},
     disableTwoFactorAuthentication:{type:Boolean},

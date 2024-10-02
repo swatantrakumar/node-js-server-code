@@ -1,12 +1,17 @@
+const mongoose = require('mongoose');
 const Operators = require("../enum/operator");
 const ModificationLog = require("../model/generic/modificationLog");
 const CommonUtils = require("../utils/commonUtils");
 const QueryCriteria = require("./queryHandler/queryCriteria");
 const QueryHandler = require("./queryHandler/queryHandler");
+const Config = require('../enum/config');
 
 const queryHandler = new QueryHandler();
 const commonutil = new CommonUtils();
 class CollectionHandler {
+    constructor(){
+        this.connectionCache = {};
+    }
     
     async findDocumentById(model,id,key,list){
         let user = null;        
@@ -41,6 +46,23 @@ class CollectionHandler {
         }
         return dataList;
     }
+    async checkDocumentExists(model,queryCriteriaList){
+        model = await this.getModelForNewDb(model,"central_notifier");
+        const query = queryHandler.buildMongoQuery(queryCriteriaList);
+        return model.exists(query);
+    }
+    async getModelForNewDb(model,dbName){
+        let modelName = model.modelName;
+        let collectionName = model.collection.name;
+        let schema = model.schema;
+        let getDbConnection = await this.getDynamicDbConnection(dbName);
+        // Create and return the dynamic model
+        let dbModel = getDbConnection.model(modelName, schema, collectionName);
+        if(dbModel){
+            model = dbModel;
+        }
+        return model;
+    }
     async findDocument(model, field, value,operator = Operators.EQUAL, dbName='') {
         let object = {};
         object[field] = value;
@@ -60,7 +82,10 @@ class CollectionHandler {
         }        
         return null;        
     }
-    async findAllDocumentsWithListQueryCriteria(model,queryCriteriaList,orderBy,pageNo,limit,select = '',dbName = ''){
+    async findAllDocumentsWithListQueryCriteria(model,queryCriteriaList,orderBy=null,pageNo=1,limit,select = '',dbName = ''){
+        if(dbName){
+            model = await this.getModelForNewDb(model,"central_notifier");            
+        }
         const query = queryHandler.buildMongoQuery(queryCriteriaList);
         var skipAmount = (pageNo - 1) * limit;
         const sortObject = queryHandler.handleSort(orderBy);
@@ -142,6 +167,23 @@ class CollectionHandler {
             console.error(e.stack)
         }
     }   
+    async getDynamicDbConnection(dbName) {
+        // Reuse the existing connection if it exists
+        if (this.connectionCache[dbName]) {
+            return this.connectionCache[dbName];
+        }
+      
+        // Create a new connection for the specified database
+        const connection = await mongoose.createConnection(Config.MONGODB_URI, { 
+            dbName: dbName,
+            connectTimeoutMS: 30000, // Increase timeout to 30 seconds
+            serverSelectionTimeoutMS: 30000 // Increase server selection timeout 
+        });
+      
+        // Cache the connection for future use
+        this.connectionCache[dbName] = connection;
+        return connection;
+    }
     
 }
 

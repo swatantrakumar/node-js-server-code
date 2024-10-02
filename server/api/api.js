@@ -13,7 +13,7 @@ const Config = require('../enum/config');
 const LoadCache = require('../cache/loadCache');
 const PermissionHandler = require('../handler/permissionHandler');
 const templateHandler = require('../handler/templateHandler');
-const SendEmailHandler = require('../handler/sendEmailHandler');
+// const SendEmailHandler = require('../handler/sendEmailHandler');
 const cron = require('node-cron');
 require('dotenv').config();
 
@@ -47,10 +47,10 @@ async function loadApi (){
     });
 
     // Schedule the task to run every 5 minutes
-    cron.schedule('*/5 * * * *', () => {
-        console.log('Checking for pending emails...');
-        // sendEmailHandler.sendPendingEmails();
-    });
+    // cron.schedule('*/5 * * * *', () => {
+    //     console.log('Checking for pending emails...');
+    //     // sendEmailHandler.sendPendingEmails();
+    // });
     
 }
 

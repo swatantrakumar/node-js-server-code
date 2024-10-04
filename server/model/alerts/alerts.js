@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const path = require('path');
 const IgnoreNull = require('../ignoreNull');
-const AlertType = require('../../enum/alertType');
 const PushNotificationSchema = require('./pushNotificationSchema');
+const AlertAttachmentSchema = require('./AlertAttachmentSchema');
 
 // Creating user schema
 const AlertsSchema = mongoose.Schema({ 
@@ -14,7 +14,9 @@ const AlertsSchema = mongoose.Schema({
     typeList:{type:[String]},
     contentType:String,
     senderMetadata:{type:Map,of:String},    
-    ccList:{type:[String]}
+    ccList:{type:[String]},
+    unsubscribeLink:String,
+    alertAttachmentList:{type:[AlertAttachmentSchema]}
 });
 
 // Add a static property for file path

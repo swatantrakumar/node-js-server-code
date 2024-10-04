@@ -2,13 +2,18 @@ const AlertType = require("../enum/alertType");
 const EmailTemplate = require("../model/generic/emailTemplate");
 const CollectionHandler = require("./collectionHandler");
 const cacheService = require('./../cache/cacheService');
+const commonConstant = require("../enum/commonConstant");
+const Alerts = require("../model/alerts/alerts");
+const Config = require("../enum/config");
+const AttachmentHandler = require("./attachmentHandler");
 
 const collectionHandler = new CollectionHandler();
+const attachmentHandler = new AttachmentHandler();
 
 class EmailTemplateHandler{
     async generateNotificationUsingTemplate(templateName, emailList, textToAppendedToBody){
         let emailTemplate = await this.getTemplate(templateName);
-        let alert = {};
+        let alert = new Alerts();
         alert.unsubscribeLink = await cacheService.getApplicationProperties("DOMAIN_URL");
         alert.title = emailTemplate.title ? emailTemplate.title : "Email Title";
         alert.emailFromMailId = emailTemplate.from;
@@ -24,7 +29,7 @@ class EmailTemplateHandler{
         alert.typeList = alertTypes;
         alert.deliveryDate = new Date();
         alert.status = "PENDING";
-        this.handleSendMail(alert,SYSTEM_EMAIL);
+        await this.handleSendMail(alert,commonConstant.SYSTEM_EMAIL);
     }
     async getTemplate(templateName){  
         let emailTemplate = null;
@@ -38,15 +43,15 @@ class EmailTemplateHandler{
         }
         return emailTemplate;
     }
-    handleSendMail(alert, applicationUserEmail, extraParameters){
+    async handleSendMail(alert, applicationUserEmail, extraParameters){
         try{
             alert.createdDate = new Date();
             alert.createdBy = applicationUserEmail;            
             console.log("Email is sending via direct notifier");
-            // if(alert.getAlertAttachmentList() != null && !alert.getAlertAttachmentList().isEmpty()){
+            // if(alert.alertAttachmentList && Array.isArray(alert.alertAttachmentList) && alert.alertAttachmentList.length > 0){
             //     attachmentHandler.handleAlertAttachement(alert);
             // }
-            // return collectionHandler.insertDocument(alert,notifierDb);            
+            return await collectionHandler.insertDocument(alert,Config.NOTIFIER_DB);            
         }catch (e){
             console.error("Error while send mail " + e.message);
         }

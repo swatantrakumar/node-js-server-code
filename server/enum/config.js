@@ -34,7 +34,8 @@ const Config = {
         ENABLED: false
       }
       
-    }
+    },
+    NOTIFIER_DB:'central_notifier'
   };
   
   // Export the config object

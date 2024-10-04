@@ -95,24 +95,36 @@ class AuthController {
             });           
         }
         let persistedUser = null;
-        if(authMode == 'email'){
-            if(!isUserEnabled){
-                await this.sendVerificationEmail(appUser,isAdmin, signUpRequest.domain, "Email_Verification");
+        try {
+            if(authMode == 'email'){
+                if(!isUserEnabled){
+                    try {
+                        await this.sendVerificationEmail(appUser,isAdmin, signUpRequest.domain, "Email_Verification");
+                    } catch (error) {
+                        return res.status(500).send({
+                            message: "Some error occurred while Sending Mail."
+                        });
+                    }                    
+                }
+                persistedUser = await collectionHandler.findDocument(ApplicationUser,'email',signUpRequest.email,Operators.EQUAL);
+            }else{
+                let otp = twoFactorUtility.sendSmsAutoGenOtp(appUser.mobileNumber);
+                // == If we get status as success then fetch the session id and store it in DB for that user
+                if (otp.get("Status") == "Success") {
+                    appUser.verificationCode = otp.get("Details");
+                    await this.updateAppUser(appUser);
+                    persistedUser = await collectionHandler.findDocument(ApplicationUser,
+                            "mobile1", signUpRequest.mobileNumber,Operators.EQUAL_IGNORE_CASE);
+                } else {
+                    return res.status(500).send({
+                        message: "Some error occurred while generating OTP"
+                    });
+                }
             }
-            persistedUser = await collectionHandler.findDocument(ApplicationUser,'email',signUpRequest.email,Operators.EQUAL);
-        }else{
-            let otp = twoFactorUtility.sendSmsAutoGenOtp(appUser.mobileNumber);
-            // == If we get status as success then fetch the session id and store it in DB for that user
-            if (otp.get("Status") == "Success") {
-                appUser.verificationCode = otp.get("Details");
-                await this.updateAppUser(appUser);
-                persistedUser = await collectionHandler.findDocument(ApplicationUser,
-                        "mobile1", signUpRequest.mobileNumber,Operators.EQUAL_IGNORE_CASE);
-            } else {
-                res.status(500).send({
-                    message: "Some error occurred while generating OTP"
-                });
-            }
+        } catch (error) {
+            return res.status(500).send({
+                message: "Some error occurred while sending mail or generating OTP."
+            });    
         }
         if(persistedUser == null){
             let userObj = {};

@@ -13,7 +13,8 @@ const PushNotificationSchema = mongoose.Schema({
     emailFromMailId:String,
     emailFromName:String,
     ccEmail:String,
-    bccEmail:String  
+    bccEmail:String,
+    clientId:String  
 });
 
 // Add a static property for file path

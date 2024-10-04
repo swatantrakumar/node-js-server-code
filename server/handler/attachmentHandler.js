@@ -248,5 +248,32 @@ class AttachmentHandler {
             return filePath;
         }
     }
+    // handleAlertAttachement(){
+    //     if(alert.attachments && Array.isArray(alert.attachments) && alert.attachments.length > 0) {
+    //         alert.attachment = true;
+    //         let files = [];
+    //         for(let i = 0; i< alert.attachments.length; i++) {
+    //             let attachment = alert.attachments[i];
+    //             let alertAttachment = new AlertAttachment();
+    //             alertAttachment.set_id(new ObjectId().toString());
+    //             alertAttachment.setAlertId(alert.get_id());
+    //             alertAttachment.setDocExtn(attachment.getFileExt());
+    //             alertAttachment.setFileName(attachment.getRollName());
+    //             if(attachment.getUploadData()!=null && attachment.getUploadData().size()>0){
+    //                 if(attachment.getUploadData().get(0).getFileData()!=null) {
+    //                     UploadData data = attachment.getUploadData().get(0);
+    //                     alertAttachment.setDocument(data.getFileData());
+    //                     alertAttachment.setDocExtn(data.getFileExtn());
+    //                     alertAttachment.setFileName(attachment.getFileName()==null?utils.getDateTimeIndia():attachment.getFileName());
+
+    //                 }
+    //             }else if(attachment.getKey()!=null){
+    //                 alertAttachment.setDocument(getByteArrayFromS3ObjectKey(attachment.getKey()));
+    //             }
+    //             files.add(alertAttachment);
+    //         }
+    //         collectionHandler.insertAllDocuments(files,notifierDb);
+    //     }
+    // }
 }
 module.exports = AttachmentHandler;

@@ -52,7 +52,7 @@ class CollectionHandler {
         return model.exists(query);
     }
     async getModelForNewDb(model,dbName){
-        let modelName = model.modelName;
+        let modelName = model.modelName ? model.modelName : model.collection ? model.collection.modelName : '';
         let collectionName = model.collection.name;
         let schema = model.schema;
         let getDbConnection = await this.getDynamicDbConnection(dbName);
@@ -131,9 +131,15 @@ class CollectionHandler {
         const count  = await clazz.countDocuments(query);
         return count;
     }  
-    async insertDocument(object){
+    async insertDocument(object,dbName=''){        
         try {
-            await object.save();
+            if(dbName){
+                let model = await this.getModelForNewDb(object,dbName);
+                let objectWithModel = new model(object);
+                await objectWithModel.save();
+            }else{
+                await object.save();
+            }            
         } catch (error) {
             console.log("Insert Document Issue : =" + error);
         }

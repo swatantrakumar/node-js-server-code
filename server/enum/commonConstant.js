@@ -28,7 +28,7 @@ const commonConstant = {
     CENTRAL_PREFIX:"CENTRAL",
     IS_CENTRAL_APPLICATION:"IS_CENTRAL_APPLICATION",
     API_SOBJ:"/rest/rpts/sobj",
-    SYSTEM_EMAIL:"rajswatantra9@gmail.com",
+    SYSTEM_EMAIL:"swatantrak9122@gmail.com",
 }
 
 module.exports = commonConstant;

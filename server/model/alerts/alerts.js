@@ -16,7 +16,8 @@ const AlertsSchema = mongoose.Schema({
     senderMetadata:{type:Map,of:String},    
     ccList:{type:[String]},
     unsubscribeLink:String,
-    alertAttachmentList:{type:[AlertAttachmentSchema]}
+    // alertAttachmentList:{type:[AlertAttachmentSchema]},
+    obj_id:String
 });
 
 // Add a static property for file path

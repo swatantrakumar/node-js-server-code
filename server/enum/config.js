@@ -35,7 +35,12 @@ const Config = {
       }
       
     },
-    NOTIFIER_DB:'central_notifier'
+    NOTIFIER_DB:'central_notifier',
+    EMAIL : {
+      BATCH : {
+        SIZE : 20
+      }
+    }
   };
   
   // Export the config object

@@ -55,11 +55,14 @@ class CollectionHandler {
         let modelName = model.modelName ? model.modelName : model.collection ? model.collection.modelName : '';
         let collectionName = model.collection.name;
         let schema = model.schema;
-        let getDbConnection = await this.getDynamicDbConnection(dbName);
-        // Create and return the dynamic model
-        let dbModel = getDbConnection.model(modelName, schema, collectionName);
-        if(dbModel){
-            model = dbModel;
+        dbName = dbName ? dbName : model?.db?.name
+        if(dbName){
+            let getDbConnection = await this.getDynamicDbConnection(dbName);
+            // Create and return the dynamic model
+            let dbModel = getDbConnection.model(modelName, schema, collectionName);
+            if(dbModel){
+                model = dbModel;
+            }
         }
         return model;
     }
@@ -144,6 +147,22 @@ class CollectionHandler {
             console.log("Insert Document Issue : =" + error);
         }
     }
+    async updateDocument(object,dbName=''){
+        let result = null;
+        try {
+            const filter = { _id: object._id };  // or any other unique field
+            const update = { $set: object };  // the fields to update
+            const options = { upsert: true, new: true };  // upsert inserts if not found, new returns the updated doc
+            let model = await this.getModelForNewDb(object,dbName);
+            result = await model.findOneAndUpdate(filter, update, options);
+            let jsonObject = JSON.parse(JSON.stringify(object));
+            await this.saveModificationLog(jsonObject);  
+        } catch (e) {
+            console.log(e.stack);
+            console.error("Exception Encountered with Creating Document");
+        }
+        return result;
+    }
     async insertDocumentWithLog(model, jsonObject,  obj){
         let result = null;
         try {
@@ -182,8 +201,8 @@ class CollectionHandler {
         // Create a new connection for the specified database
         const connection = await mongoose.createConnection(Config.MONGODB_URI, { 
             dbName: dbName,
-            connectTimeoutMS: 30000, // Increase timeout to 30 seconds
-            serverSelectionTimeoutMS: 30000 // Increase server selection timeout 
+            connectTimeoutMS: 50000, // Increase timeout to 30 seconds
+            serverSelectionTimeoutMS: 50000 // Increase server selection timeout 
         });
       
         // Cache the connection for future use

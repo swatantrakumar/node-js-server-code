@@ -423,6 +423,53 @@ class CommonUtils {
         };
         return mapObject;
     }
+    calculateDateDifferenceInHours(lastSignInDate) {
+        if (lastSignInDate) {
+            try {
+                // Convert the provided Date (lastSignInDate) to a JavaScript Date object
+                let oldDate = new Date(lastSignInDate);
+    
+                // Get the current date and time
+                let currentDate = new Date();
+    
+                // Calculate the difference in milliseconds
+                let differenceInMillis = currentDate - oldDate;
+    
+                // Convert the difference to hours
+                let differenceInHours = differenceInMillis / (1000 * 60 * 60);
+    
+                return Math.floor(differenceInHours);
+            } catch (error) {
+                console.error("Invalid date format:", lastSignInDate, error);
+            }
+        }
+        return 0;
+    }
+    getCurrentDate(){
+        return new Date();
+    }
+    calculateDateDifferenceInDays(lastSignInDate) {
+        if (lastSignInDate) {
+            try {
+                // Convert the provided lastSignInDate to a JavaScript Date object
+                let oldDate = new Date(lastSignInDate);
+    
+                // Get the current date and time
+                let currentDate = new Date();
+    
+                // Calculate the difference in milliseconds
+                let differenceInMillis = currentDate - oldDate;
+    
+                // Convert the difference to days
+                let differenceInDays = differenceInMillis / (1000 * 60 * 60 * 24);
+    
+                return Math.floor(differenceInDays);
+            } catch (error) {
+                console.error("Invalid date format:", lastSignInDate, error);
+            }
+        }
+        return 0;
+    }
 }
 
 module.exports = CommonUtils;

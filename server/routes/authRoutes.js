@@ -7,11 +7,11 @@ router.post('/signIn', AuthController.login);
 // signin route
 router.post('/signUp', AuthController.signUp);
 // Forgot Password route
-router.post('/fp', AuthController.signUp);
+router.post('/fp', AuthController.forgetPassword);
 // Rest Password route
-router.post('/rp', AuthController.signUp);
+router.post('/rp', AuthController.resetPassword);
 // Change Password route
-router.post('/cp', AuthController.signUp);
+router.post('/cp', AuthController.changePassword);
 // Verify route
 router.post('/verify', AuthController.signUp);
 // Two factor authentication route

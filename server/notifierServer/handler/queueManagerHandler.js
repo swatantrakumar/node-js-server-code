@@ -1,4 +1,9 @@
 const async = require('async');
+const CollectionHandler = require('../../handler/collectionHandler');
+const SendEmailHandler = require('./sendEmailHandler');
+
+const collectionHandler = new CollectionHandler();
+const sendMailHandler = new SendEmailHandler();
 
 class QueueManagerHandler {    
     constructor() {
@@ -10,42 +15,44 @@ class QueueManagerHandler {
 
     // Method to process each task in the queue
     async processTask(task) {
-        logger.info("Alert Data received from queue for Processing! ");
+        console.log("Alert Data received from queue for Processing! ");
 		try {
 			for (let type of task.typeList) {
 				switch (type) {
-				case NOTIFICATION:
-					// sendNotification(inData);
-					break;
-				case SMS:
-					// sendSMS(inData);
-					break;
-				case EMAIL:
-					this.sendEmail(task);
-					break;
-				default:
-					// invalidAlertType(inData, type);
-					break;
+					case "NOTIFICATION":
+						// sendNotification(inData);
+						break;
+					case "SMS":
+						// sendSMS(inData);
+						break;
+					case "EMAIL":
+						await this.sendEmail(task);
+						break;
+					default:
+						// invalidAlertType(inData, type);
+						break;
 				}
 			}
 		} catch (e) {
-			console.error(`Error sending email to ${task.emailList[0]}: ${error}`);
+			console.error(`Error sending email to ${task.emailList[0]}: ${e}`);
 		}
     }
 
     sendEmail = async (alert) => {
         try {
 			if (alert && alert.message) {
-				emailService.sendEmail(alert);
+				await sendMailHandler.sendEmail(alert);
 			} else {
 				let message = "Since message body is empty, therefore Email can not be sent.";
 				alert.remarks(message);
-				customQueryHandler.updateAlert(inData, "INVALID");
+				alert.status = "INVALID";
+				await collectionHandler.updateDocument(alert);
 				console.log(message);
 			}
 		} catch (e) {
 			alert.remarks = e.message;
-			customQueryHandler.updateAlert(inData, "INVALID");
+			alert.status = "INVALID";
+			await collectionHandler.updateDocument(alert);
 			console.error("Exception while sending email" + e);
 		}
     };

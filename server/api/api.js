@@ -7,6 +7,7 @@ const userRoutes = require('../routes/userRoutes');
 const saveRoutes = require('./../routes/saveRoutes');
 const downloadRoutes = require('./../routes/downloadRoutes');
 const versionRoutes = require('./../routes/versionRoutes');
+const restRoutes = require('./../routes/restServiceRoutes');
 const authMiddleware = require('../middleware/authMiddleware');
 const authenticateJWT = require('../middleware/authenticateJWT');
 const Config = require('../enum/config');
@@ -34,6 +35,7 @@ async function loadApi (){
     
 
     // Custom middleware to handle text/plain requests
+    app.use('/rest', restRoutes); // Login route
     app.use('/rest/login',authMiddleware, authRoutes); // Login route
     app.use('/rest/rpts',authenticateJWT, dataRoutes);  // Use the data routes
     app.use('/rest/public/rpts', publicDataRoutes);  // Use the data routes

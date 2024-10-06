@@ -80,7 +80,7 @@ const save = async (req,res) =>{
                         //     const moveModules = mapper.readValue(jsonObject.toString(), MoveModules.class);
                         //     Map<String, Object> previousObject = moveModules.getPrevious_object();
                         //     Map<String, Object> currentObject = moveModules.getCurrent_object();
-                        //     const rootPath = "D:\\elabs\\compare\\" + currentTime;
+                        //     const rootPath = "D:\\cent\\compare\\" + currentTime;
                         //     try {
                         //         new File(rootPath).mkdir();
                         //         new File(rootPath+"\\host2").mkdir();

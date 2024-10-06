@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { genericSearch } = require('../controllers/dataController');
+const RestServiceController = require('../controllers/restServiceController');
 
+const restServiceController = new RestServiceController();
 
-router.post('/sobj', genericSearch);
+router.post('/sobj', restServiceController.genericSearch);
 
 module.exports = router;

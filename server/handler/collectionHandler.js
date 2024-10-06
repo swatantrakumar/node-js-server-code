@@ -13,22 +13,14 @@ class CollectionHandler {
         this.connectionCache = {};
     }
     
-    async findDocumentById(model,id,key,list){
+    async findDocumentById(model,id,key='',list=''){
         let user = null;        
         if(key){
             var query = {};           
-           query[key] = id;
-           if(list){
-            user = await model.findOne(query).select(list);
-           }else{
-            user = await model.findOne(query);
-           }           
+            query[key] = id;
+            user = await model.findOne(query).select(list);                    
         }else{
-            if(list){
-                user = await model.findById(id).select(list);
-            }else{
-                user = await model.findById(id);
-            }
+            user = await model.findById(id).select(list);
         }
         return user;
     }

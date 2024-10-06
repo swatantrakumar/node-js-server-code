@@ -3,7 +3,7 @@ const commonConstant = {
     UNIX:"UNIX",
     WINDOWS:"WINDOWS",
     YES:"YES",
-    ELABS_REFCODE:"ELABS01",
+    REFCODE:"CENT01",
     FORM_TEMPLATE:"form_template",
     GRID:"grid",
     FORM_FIELD:"form_field",

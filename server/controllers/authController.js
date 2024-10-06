@@ -40,7 +40,7 @@ class AuthController {
                             }
                         }
                         if(twoFactoreAuthentication){
-                            return handleTwoFactorAuthenticationResponse(user);
+                            return await this.handleTwoFactorAuthenticationResponse(user,applicationSetting);
                         }else {
                             let responce = await this.handleSigninResponse(this.createJwtToken({ email: body.userId }), this.handleSignin(user, applicationSetting), user);                            
                             return res.status(200).send(responce);
@@ -281,6 +281,93 @@ class AuthController {
             });
         }
     }
+    static verifyUser = async (req,res) => {
+        let verifyRequest = commonUtils.decodeBase64(req.body);
+        let user = null;
+        try {
+            user = await User.findOne({ email: verifyRequest.user });
+            if (user) {
+                if (authMode == "email") {
+                    if(verifyRequest.code == user.verificationCode){                        
+                        user.enabled = true;
+                        await this.updateAppUser(user);
+                        return res.status(200).send({
+                            message: "User has been verified successfully"
+                        });
+                    }else{
+                        return res.status(400).send({
+                            message: "User Verification Failed"
+                        });
+                    }                    
+                } else {
+                    // let otp =  twoFactorUtility.verifySmsOtp(user.verificationCode, verifyRequest.code);
+                    let opt = null;
+                    if (opt && otp.get("Status") == "Success") {
+                        user.enabled = true;
+                        await this.updateAppUser(user);
+                        return res.status(200).send({
+                            message: "User has been verified successfully"
+                        });
+                    } else {
+                        return res.status(400).send({
+                            message: "User Verification Failed, OTP not matched"
+                        });
+                    }
+                }      
+            }else{
+                return res.status(400).send({
+                    message: "UserId Entered is not correct."
+                });
+            }
+        } catch (error) {
+            return res.status(400).send({
+                message: "User not Registered."
+            });
+        }
+    }
+    static twoFactorAuthentication = async (req,res) => {
+        let twoFactorRequest = commonUtils.decodeBase64(req.body);
+        let user = null;
+        let userId = twoFactorRequest.userId;
+        let code = twoFactorRequest.code;
+        try {
+            user = await User.findOne({ email: userId });
+            if (user) {
+                let applicationSettings = await collectionHandler.findAllDocuments(ApplicationSetting);
+                let applicationSetting = applicationSettings[0];
+                let authenticationtype = applicationSetting?.authenticationSettings?.twoFactorAuthenticationType;
+                if (authenticationtype == "email") {
+                    if(code == user.authenticationCode){                        
+                        let responce = await this.handleSigninResponse(this.createJwtToken({ email: userId }), this.handleSignin(user, applicationSetting), user);                            
+                        return res.status(200).send(responce);
+                    }else{
+                        return res.status(400).send({
+                            message: "Verification code is invalid"
+                        });
+                    }                    
+                } else {
+                    // let otp =  twoFactorUtility.verifySmsOtp(user.authenticationCode, code);
+                    let opt = null;
+                    if (opt && otp.get("Status") == "Success") {
+                        let responce = await this.handleSigninResponse(this.createJwtToken({ email: userId }), this.handleSignin(user, applicationSetting), user);                            
+                        return res.status(200).send(responce);
+                    } else {
+                        return res.status(400).send({
+                            message: "Verification code is invalid"
+                        });
+                    }
+                }      
+            }else{
+                return res.status(400).send({
+                    message: "UserId Entered is not correct."
+                });
+            }
+        } catch (error) {
+            return res.status(400).send({
+                message: "User not Registered."
+            });
+        }
+    }    
     static async handleSigninResponse(token,message,appUser){
         appUser.lastLoginTime = commonUtils.getCurrentDate();
         await this.updateAppUser(appUser);
@@ -444,6 +531,31 @@ class AuthController {
         }
 
         return result;
+    }
+    static async handleTwoFactorAuthenticationResponse(user,applicationSetting) {
+        let responce = {
+            message:'two_factor'
+        }
+        let authenticationtype = applicationSetting?.authenticationSettings?.twoFactorAuthenticationType;
+        if (authenticationtype == "email") {
+            user.authenticationCode = this.randomNumeric(8);
+            user.authenticationCodeGenerateTime = commonUtils.getCurrentDate();
+            await this.userDetailsHandler.updateAppUser(user);
+            await this.sendVerificationEmail(user,false, "Your Authentication code is:- ", "Authentication_Code");
+        } else {
+            // implement otp forget password flow
+            // let otp = twoFactorUtility.sendSmsAutoGenOtpWithTemplate(user.mobileNumber,"AUTH_OTP");
+            let otp = null;
+            if (otp && otp.get("Status") == "Success") {
+                appUser.authenticationCode = otp.get("Details");
+                user.authenticationCodeGenerateTime = commonUtils.getCurrentDate();
+                await this.userDetailsHandler.updateAppUser(user);
+            } else {
+                responce.message = "Some error occurred while generating OTP";
+                return res.status(400).send(responce);
+            }
+        }
+        return res.status(200).send(responce);
     }
 }
 

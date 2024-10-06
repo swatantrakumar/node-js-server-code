@@ -13,9 +13,9 @@ router.post('/rp', AuthController.resetPassword);
 // Change Password route
 router.post('/cp', AuthController.changePassword);
 // Verify route
-router.post('/verify', AuthController.signUp);
+router.post('/verify', AuthController.verifyUser);
 // Two factor authentication route
-router.post('/tfa', AuthController.signUp);
+router.post('/tfa', AuthController.twoFactorAuthentication);
 
 
 module.exports = router;

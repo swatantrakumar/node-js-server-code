@@ -1,6 +1,11 @@
 const nunjucks = require('nunjucks');
+const CollectionHandler = require('../handler/collectionHandler');
+const EmailTemplate = require('../model/generic/emailTemplate');
+const Operators = require('../enum/operator');
 
 nunjucks.configure({ autoescape: true });
+
+const collectionHandler = new CollectionHandler();
 
 class NunjucksService {
     constructor() {
@@ -17,33 +22,51 @@ class NunjucksService {
         }
         
         return template;
-    }
+    }    
     getIncludedTemplateBill = async (incomingTemplate) => {
         try {
-            // Create a copy of the incoming template
-            let template = `${incomingTemplate}`;
-            
-            // Regular expression to find patterns like [INCLUDE_TEMPLATE:templateType]
-            const pattern = /\[INCLUDE_TEMPLATE:(.*?)\]/g;
-            
-            // Find all matches for [INCLUDE_TEMPLATE] patterns
-            let listMatches = [...template.matchAll(pattern)].map(match => match[1]);
+            // Clone the incoming template string
+            let template = '' + incomingTemplate;
     
-            // Get the list of EmailTemplate objects from the matches
-            const templateList = await getTemplatesFromINCLUDEText(listMatches);
+            // Use regex to match patterns between square brackets (e.g., [INCLUDE_TEMPLATE:X])
+            const pattern = /\[(.*?)\]/g;
+            let listMatches = [];
+            let match;
     
-            // If templates are found, replace each placeholder with the template body
-            if (templateList) {
-                templateList.forEach((emailTemplate) => {
-                    const placeholder = `[INCLUDE_TEMPLATE:${emailTemplate.type}]`;
-                    incomingTemplate = incomingTemplate.replace(placeholder, emailTemplate.body);
+            // Extract all matches into listMatches (group(2) equivalent in Java)
+            while ((match = pattern.exec(template)) !== null) {
+                listMatches.push(match[1]); // Extract text inside the square brackets
+            }
+    
+            // Get templates based on the matched INCLUDE_TEMPLATE values
+            const templateList = await this.getTemplatesFromINCLUDEText(listMatches);
+    
+            // Iterate through templateList and replace placeholders with actual body content
+            if (templateList && templateList.length > 0) {
+                templateList.forEach(htmlTemplate => {
+                    incomingTemplate = incomingTemplate.replace(`[INCLUDE_TEMPLATE:${htmlTemplate.type}]`, htmlTemplate.body);
                 });
             }
-        } catch (err) {
-            console.error("Error in getIncludedTemplateBill:", err);
+        } catch (e) {
+            console.error(e); // Handle error
         }
     
         return incomingTemplate;
+    };
+    getTemplatesFromINCLUDEText = async (templateStrings) => {
+        if (templateStrings && templateStrings.length > 0) {
+            // Strip 'INCLUDE_TEMPLATE:' from each string in the array
+            const templateNames = templateStrings.map(str => str.replace('INCLUDE_TEMPLATE:', ''));
+    
+            // Query MongoDB to find documents where 'type' matches any of the templateNames
+            let crList = [];
+            crList.push(new QueryCriteria("type","string",Operators.IN, templateNames));
+            let templates = await collectionHandler.findAllDocuments(EmailTemplate, "body type", crList);
+    
+            return templates;
+        } else {
+            return null;
+        }
     };
 }
 

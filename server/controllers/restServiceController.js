@@ -5,11 +5,13 @@ const SearchCriteria = require('../handler/queryHandler/searchCriteria');
 const AttachmentHandler = require('../handler/attachmentHandler');
 const templateHandler = require('../handler/templateHandler');
 const ApplicationHtmlHandler = require('../handler/htmlHandler/applicationHtmlHandler');
+const HtmlTemplateHandler = require('../handler/htmlHandler/htmlTemplateHandler');
 
 const retrievalQueryHandler = new RetrievalQueryHandler();
 const userPermissionHandler = new UserPermissionHandler();
 const attachmentHandler = new AttachmentHandler();
 const applicationHtmlHandler = new ApplicationHtmlHandler();
+const htmlTemplateHandler = new HtmlTemplateHandler();
 
 class RestServiceController {
   genericSearch = async (req, res) =>{
@@ -148,6 +150,21 @@ class RestServiceController {
     }
     res.json(Object.fromEntries(result));
   }
+  getPdf = async (req,res) => {
+    const kvp = req.body;
+    const result  = new Map();
+    let id = req?.params?._id;
+    try {
+      let htmlObject = await applicationHtmlHandler.getHtmlForObject(id,kvp,result);
+      let fileName = htmlObject?.fileName;
+      let additiotnalFiles = htmlObject["supporting_files"];
+      let bytes = htmlTemplateHandler.getPdfBytesArray(htmlObject);
+    } catch (e) {
+      result.set( "error","Error occured while fetching PDF" + e.message);
+    }
+    res.json(Object.fromEntries(result));
+  }
+  
 }
 
 

@@ -15,6 +15,8 @@ router.post('/gsd', restServiceController.getStaticData);
 router.post('/getfl/:viewOrDownload', restServiceController.getFileToView);
 router.post('/get_form/:_id', restServiceController.getForm);
 router.post('/get_html/:_id', restServiceController.getHtml);
+router.post('/get_pdf/:_id', restServiceController.getPdf);
+
 
 
 module.exports = router;

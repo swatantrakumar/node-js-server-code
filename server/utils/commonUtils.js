@@ -103,6 +103,13 @@ class CommonUtils {
         const reportDate = moment(date).format(pattern);
         return reportDate;
     }
+    convertMilliSecondToDate(dateMilliseconds) {
+        // Create a moment object from the milliseconds
+        const date = moment(dateMilliseconds);
+        
+        // Set the timezone to GMT+5:30
+        return date.tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm:ss Z");
+    }
     changeStringDateToSpecificFormat(date, pattern) {
         const parsedDate = moment(date, pattern, true);
         if (!parsedDate.isValid()) {

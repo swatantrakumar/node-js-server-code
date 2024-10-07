@@ -29,6 +29,8 @@ const commonConstant = {
     IS_CENTRAL_APPLICATION:"IS_CENTRAL_APPLICATION",
     API_SOBJ:"/rest/rpts/sobj",
     SYSTEM_EMAIL:"swatantrak9122@gmail.com",
+    CLIENTS_PDF_EVENTS : "CLIENTS_PDF_EVENTS",
+    DIGITAL_SIGNATURE_FOR_REPORTS : "DIGITAL_SIGNATURE_FOR_REPORTS"
 }
 
 module.exports = commonConstant;

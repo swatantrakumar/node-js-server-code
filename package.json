@@ -24,6 +24,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.15",
     "nunjucks": "^3.2.4",
+    "puppeteer": "^23.5.0",
     "redis": "^4.7.0",
     "winston": "^3.13.1"
   }

@@ -6,12 +6,16 @@ const Config = require('../enum/config');
 const s3Handler = require('./s3Handler');
 const FileHandler = require('./fileHandler');
 const CollectionHandler = require('./collectionHandler');
+const AWSHelper = require('./awsHelper');
+const LocalStorageFileHandler = require('./localStorageFileHandler');
 
 
 const utils = new CommonUtils();
 const s3Helper = new s3Handler();
+const awsHelper = new AWSHelper();
 const fileHandler = new FileHandler();
 const collectionHandler = new CollectionHandler();
+const localStorageFileHandler = new LocalStorageFileHandler();
 
 class AttachmentHandler {
     async handleAssociatedFile(collection, jsonObject, field){ 
@@ -275,5 +279,25 @@ class AttachmentHandler {
     //         collectionHandler.insertAllDocuments(files,notifierDb);
     //     }
     // }
+    async getByteArrayFromS3ObjectKey(key){
+        if(Config.FILE_SYSTEM == 'S3') {
+            try {
+                // Retrieve the S3 object using the helper
+                const s3Object = await awsHelper.getS3Object(Config.STORAGE_ROOT_PATH, key);
+    
+                // Call the function to convert the object stream into a byte array (Buffer)
+                const result_bytes = await awsHelper.getObjectBytes(s3Object.Body);
+    
+                // You can now use the resultBytes (Buffer) as needed
+                return result_bytes;
+            } catch (error) {
+                console.error('Error fetching S3 object:', error);
+                throw error; // Handle the error or rethrow it
+            }            
+        }else{
+            return localStorageFileHandler.getFileBytes(Config.STORAGE_ROOT_PATH,key);
+        }
+        return null;
+    }
 }
 module.exports = AttachmentHandler;

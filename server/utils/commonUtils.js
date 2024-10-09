@@ -2,8 +2,32 @@
 const moment = require('moment');
 const Reference = require('../model/reference');
 
-
+// List of date formats
+const dateFormats = [
+    "YYYY-MM-DDTHH:mm:ss.SSSZ",
+    "ddd, DD MMM YYYY HH:mm:ss z",
+    "MMM D, YYYY, HH:mm:ss",
+    "MMM D, YYYY, HH:mm:ss A",
+    "MMM D, YYYY, h:mm:ss A",
+    "MMM D, YYYY, hh:mm:ss A",
+    "YYYY-MM-DDTHH:mm:ss.SS",
+    "YYYY-MM-DDTHH:mm:ss.SSS",
+    "YYYY-MM-DDTHH:mm:ss.SSSX",
+    "DD/MM/YYYY HH:mm:ss",
+    "YYYY-MM-DD HH:mm:ss",
+    "DD.MM.YYYY HH:mm:ss",
+    "DD/MM/YYYY HH:mm:ss.SS",
+    "ddd MMM D HH:mm:ss Z YYYY",
+    "DD/MMM/YYYY",
+    "DD-MMM-YYYY",
+    "DD/MM/YYYY",
+    "YYYY-MM-DD",
+    "YYYY-MM-DD",
+    "D.M.YYYY",
+    "DD-MM-YYYY"
+];
 class CommonUtils {
+    
 // Function to dynamically import models based on path
     
     getFieldList(schema, prefix = '') {
@@ -476,6 +500,52 @@ class CommonUtils {
             }
         }
         return 0;
+    }
+    getDateFormat(value) {
+        for (let i = 0; i < dateFormats.length; i++) {
+            try {
+                // Try parsing the date with the current format
+                const parsedDate = moment(value, dateFormats[i], true); // true ensures strict parsing
+    
+                if (parsedDate.isValid()) {
+                    // Reformat the date and compare it to the original value
+                    const formattedDate = parsedDate.format(dateFormats[i]);
+                    const splittedDate = formattedDate.split(" ");
+    
+                    let valid = true;
+                    splittedDate.forEach(datePart => {
+                        if (!value.includes(datePart)) {
+                            valid = false;
+                        }
+                    });
+    
+                    if (formattedDate === value || valid) {
+                        return dateFormats[i]; // Return the matching format
+                    }
+                }
+            } catch (error) {
+                console.log(`Error parsing date: ${error.message}`);
+            }
+        }
+    
+        // Special cases for specific suffixes
+        if (value.endsWith("+00:00")) {
+            return "YYYY-MM-DDTHH:mm:ss.SSSX";
+        } else if (value.endsWith("T18:30:00.000Z")) {
+            return "YYYY-MM-DDTHH:mm:ss.SSX";
+        }
+    
+        console.log(`Could not identify DateFormat for ${value}`);
+        return null;
+    }
+    convertDateToString(date, format) {
+        return moment(date).format(format);
+    }
+    getStringFromListOfString(stringList, separator) {
+        if (stringList && stringList.length > 0) {
+            return stringList.join(separator);
+        }
+        return null;
     }
 }
 

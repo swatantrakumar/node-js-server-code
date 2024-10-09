@@ -48,6 +48,21 @@ class LocalStorageFileHandler {
             return false;
         }
     }
+    getFileBytes(bucket, key) {
+        try {
+            // Build the full file path using the bucket and key
+            const filePath = path.join(bucket, key);
+    
+            // Read the file synchronously into a buffer
+            const fileContent = fs.readFileSync(filePath);
+    
+            // Return the file content as a byte array (Buffer in Node.js)
+            return fileContent;
+        } catch (error) {
+            console.error('Error reading file:', error);
+            return null; // Return null or throw an error, depending on your use case
+        }
+    }
     
 }
 module.exports = LocalStorageFileHandler;

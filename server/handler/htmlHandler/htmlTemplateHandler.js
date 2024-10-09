@@ -1,8 +1,10 @@
 const commonConstant = require("../../enum/commonConstant");
 const Operators = require("../../enum/operator");
+const ClientConfiguration = require("../../model/generic/clientConfiguration");
 const ClientsPdfEvents = require("../../model/generic/pdf/clientsPdfEvents");
 const SpecialCharacter = require("../../model/generic/pdf/specialCharacter");
 const NunjucksService = require("../../services/nunjucksService");
+const CommonUtils = require("../../utils/commonUtils");
 const CollectionHandler = require("../collectionHandler");
 const QueryCriteria = require("../queryHandler/queryCriteria");
 const cacheService =  require("./../../cache/cacheService");
@@ -14,13 +16,47 @@ const collectionHandler = new CollectionHandler();
 const nunjucksService = new NunjucksService();
 const pdfEventHandler = new PdfEventHandler();
 const htmlToPdf = new HtmlToPdf();
+const commonutil = new CommonUtils();
 
 class HtmlTemplateHandler {
     constructor() {
 
     }
-    prepareHtmlStringReponse(value, htmlObject, emailTemplate, template, object, fileName){
+    async prepareHtmlStringReponse(value, htmlObject, emailTemplate, template, object, fileName){
+        if (object) {
+            let objectMap = commonutil.getReference(object);
+            fileName = objectMap?.code.toString();
+        }
+        if (commonutil.getTrimmedString(fileName) == null) {
+            let objectMap = commonutil.getReference(object);
+            fileName = objectMap?.code.toString();
+            if (objectMap?.name) {
+                fileName = fileName + "_" + objectMap?.name.toString();
+            }
+        }
+        fileName = fileName + ".pdf";
+        try {
+            let preparedObject = JSON.parse(JSON.stringify(object));
+            let branch =  await collectionHandler.findDocument(Branches, "refCode", preparedObject?.refCode.toString());
+            let config =  await collectionHandler.findDocument(ClientConfiguration, "refCode", preparedObject?.refCode.toString());
+            if (branch) preparedObject.MY_BRANCH =  branch;
+            if (config) preparedObject.MY_CONFIG =  config;
+            object = preparedObject;
+        } catch (error) {
+            console.error(error.stack);
+        }
+        let covertedObject = nunjucksService.getConvertedObjectFromFreeMarkerReportingTemplate(emailTemplate, object);
 
+        //// form this check next
+        try {
+            let pdfFileNameObject = staticDataCache.getPDFName(object.refCode.toString(), value);
+            if(pdfFileNameObject){
+                fileName = seriesHandler.getConvertedString(object,pdfFileNameObject.toString()) + ".pdf";
+            }
+        }catch (e){
+            console.log("Error while fetching file name for pdf {}" + e.message);
+        }
+        let html_String = freemarkerTemplateWriter.getHtmlContentForObject(covertedObject, template);
     }
     async getDefaultTemplate(value, object, emailTemplate){
         let pojo = cacheService.getPojoFromCollection(value);

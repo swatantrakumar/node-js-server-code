@@ -61,5 +61,42 @@ class AWSHelper{
             throw error;
         }
     }
+    async getS3Object(bucket, key) {
+        return await s3Client.getObject(bucket, key);
+    }
+    async getS3Object(bucket, key) {
+        try {
+            const params = {
+                Bucket: bucket,
+                Key: key,
+            };
+    
+            // Fetch the object from S3 using the S3Client
+            const command = new GetObjectCommand(params);
+            const s3Object = await s3Client.send(command);
+    
+            return s3Object;
+        } catch (error) {
+            console.error('Error fetching S3 object:', error);
+            throw error;
+        }
+    }
+    async getObjectBytes(objectContentStream) {
+        try {
+            // Convert the stream (Body) into a Buffer (byte array)
+            const chunks = [];
+    
+            for await (const chunk of objectContentStream) {
+                chunks.push(chunk);
+            }
+    
+            const resultBytes = Buffer.concat(chunks);
+    
+            return resultBytes;
+        } catch (error) {
+            console.error('Error converting S3 object stream to bytes:', error);
+            throw error;
+        }
+    }
 }
 module.exports = AWSHelper;

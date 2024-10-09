@@ -34,7 +34,7 @@ class ApplicationHtmlHandler {
                     }
                     break;
             }
-            let html_String = htmlTemplateHandler.prepareHtmlStringReponse(value, htmlObject, emailTemplate, template, object, fileName);
+            let html_String = await htmlTemplateHandler.prepareHtmlStringReponse(value, htmlObject, emailTemplate, template, object, fileName);
             result.put( "success", html_String);
         } catch (error) {
              console.log(e.stack);   

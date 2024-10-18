@@ -1,4 +1,5 @@
 const path = require('path');
+const mongoose = require('mongoose');
 const { pathToFileURL } = require('url');
 const Config = require('../enum/config');
 const ClientConfiguration = require('../model/generic/clientConfiguration');
@@ -6,6 +7,8 @@ const ExportConfiguration = require('../model/generic/exportConfiguration');
 const PojoMaster = require('../model/generic/pojoMaster');
 const CommonUtils = require('../utils/commonUtils');
 const ApplicationProperties = require('../model/generic/applicationProperties');
+const BaseEntity = require('../model/baseEntity');
+const IgnoreNull = require('../model/ignoreNull');
 
 const commonUtil = new CommonUtils();
 
@@ -119,28 +122,57 @@ class CacheService {
         return collection;
     }
     async getModel(collectionName) {
-      const modelPath = this.getModulePath(collectionName);
-      let model = null;
-      if(modelPath){
-          const filePath = Config.PACKAGE_PATH + modelPath +'.js';
-          const projectRoot = process.cwd();
-          const absolutePath = path.resolve(projectRoot, filePath);
+      let collection = this.getPojoFromCollection(collectionName);
+      if(collection?.schemaDefinition && typeof collection?.schemaDefinition == 'object' && Object.keys(collection?.schemaDefinition).length > 0){
+        return await this.getDynamicModel(collection);
+      }else{
+        const modelPath = this.getModulePath(collectionName);
+        let model = null;
+        if(modelPath){
+            const filePath = Config.PACKAGE_PATH + modelPath +'.js';
+            const projectRoot = process.cwd();
+            const absolutePath = path.resolve(projectRoot, filePath);
 
-          // Validate the file path and extension
-          if (!absolutePath.endsWith('.js') && !absolutePath.endsWith('.mjs')) {
-              throw new Error('The file path must end with .js or .mjs');
-          }
+            // Validate the file path and extension
+            if (!absolutePath.endsWith('.js') && !absolutePath.endsWith('.mjs')) {
+                throw new Error('The file path must end with .js or .mjs');
+            }
 
-          // Convert the absolute path to a file URL
-          const fileUrl = pathToFileURL(absolutePath).href;
-          try {
-            const file = await import(fileUrl);
-            model =  file.default;
-          } catch (error) {
-            console.log(error);
-          }    
+            // Convert the absolute path to a file URL
+            const fileUrl = pathToFileURL(absolutePath).href;
+            try {
+              const file = await import(fileUrl);
+              model =  file.default;
+            } catch (error) {
+              console.log(error);
+            }    
+        }
+        return model;
       }
-      return model;
+    }
+    // Function to dynamically create a model
+    async getDynamicModel(modelRecord) {      
+      // Create a Mongoose schema
+      const schema = this.createShema(modelRecord);
+
+      try {
+        // Create a Mongoose model
+        return mongoose.model(modelRecord.level, schema, modelRecord.collection_name);
+      } catch (error) {
+        console.error(error.message);
+        return null;
+      }
+    }
+    createShema(object){
+      let schemaFields = object.schemaDefinition;
+      let schema = new mongoose.Schema({
+        ...(!object.baseEntity ? BaseEntity.schema.obj : {}), // Include BaseEntity fields if baseEntity is true
+        ...schemaFields // Include fields from the fetched schemaDefinition
+      });
+      // Add a static property for file path
+      schema.statics.modelFilePath = path.relative(process.cwd(), __filename);
+      schema.plugin(IgnoreNull);
+      return schema;
     }
     getModulePath(colName){
       let modulePath = null;

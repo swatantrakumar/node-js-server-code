@@ -73,7 +73,8 @@ const PojoMasterSchema = mongoose.Schema({
     report_tab_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
     report_grid_name:{ type: mongoose.Schema.Types.ObjectId, ref: 'Reference' },
     sqsFlow:{type:Boolean,default:false},
-    autoSync:{type:Boolean,default:false}
+    autoSync:{type:Boolean,default:false},
+    schemaDefinition:{type:Map,of:String}
 }, { versionKey: '__v' });
 // Add a static property for file path
 PojoMasterSchema.statics.modelFilePath = path.relative(process.cwd(), __filename);

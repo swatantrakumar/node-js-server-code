@@ -618,7 +618,7 @@ reduceRight()  /// this is similar ot reduce but some of this value pattern is r
         var numbers = [1, 2, 3, 4, 5];
 
         // Reverse the array
-        const reversed = numbers.reduceRight((accumulator, currentValue) => {
+        var reversed = numbers.reduceRight((accumulator, currentValue) => {
           accumulator.push(currentValue);
           return accumulator;
         }, []);
@@ -631,9 +631,69 @@ reduceRight()  /// this is similar ot reduce but some of this value pattern is r
         console.log(sentence); // Output: "! World Hello"
 //similar method
 reverse()  /// this method use for revers the array vlaue last to first or first to lase
+        // change the original array also
+        syntex:- array.reverse()
+        //example
+        let numbers = [1, 2, 3, 4, 5];
+        console.log("Before reverse:", numbers);  // [ 1, 2, 3, 4, 5 ]
+        // Reversing the array
+        var reversed = console.reverse();
+        console.log("Reversed Array:", reversed); //[ 5, 4, 3, 2, 1 ]
+        console.log("Origin Array:", numbers); //[ 5, 4, 3, 2, 1 ]
+
+        //Note :- return  reversed array
+
 toReversed()  // 
+        syntex:- array.toReversed()
+        //Example
+        let numbers = [1, 2, 3, 4, 5];
+        console.log("Original Array:", numbers);
+
+        // Using toReversed() to reverse the array
+        let reversedNumbers = numbers.toReversed();
+        console.log("Reversed Array:", reversedNumbers);
+
+        // Original array remains unchanged
+        console.log("Original Array After toReversed:", numbers);
+
+        //Returns: A new array with the elements reversed.
+        //note:- Does not modify the original array.
+
 sort()  // this method is use for sort a array value in assending or desendig order
+        syntex:- array.sort([compareFunction])
+        //Example
+        // change the original array also
+        let fruits = ["banana", "apple", "cherry", "date"];
+        console.log("Before sort:", fruits); //[ 'banana', 'apple', 'cherry', 'date' ]
+
+        fruits.sort();
+        console.log("After sort:", fruits); //[ 'apple', 'banana', 'cherry', 'date' ]
+
+        let numbers = [40, 5, 8, 100, 1];
+        console.log("Before sort:", numbers); // [ 40, 5, 8, 100, 1 ]
+
+        // Ascending order
+        numbers.sort((a, b) => a - b);
+        console.log("Ascending:", numbers); //[ 1, 5, 8, 40, 100 ]
+
+        // Descending order
+        numbers.sort((a, b) => b - a);
+        console.log("Descending:", numbers); //[ 100, 40, 8, 5, 1 ]
 toSorted()  // 
+        syntex:- array.toSorted([compareFunction])
+        //Example
+        const fruits = ["banana", "apple", "cherry", "date"];
+        console.log("Original Array:", fruits);
+
+        // Using toSorted()
+        const sortedFruits = fruits.toSorted();
+        console.log("Sorted Array:", sortedFruits);
+
+        // Original array remains unchanged
+        console.log("Original Array After toSorted:", fruits);
+        //Returns: A new array with the elements sorted.
+        //note:- Does not modify the original array.
+
 //similar method
 
 

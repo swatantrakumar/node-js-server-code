@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const BaseEntity = require("../baseEntity");
+const BaseEntity = require("../../baseEntity");
 
 // Creating user schema
 const SpecialCharacterSchema = mongoose.Schema({ 

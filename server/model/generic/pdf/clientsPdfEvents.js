@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const BaseEntity = require("../baseEntity");
+const BaseEntity = require("../../baseEntity");
 const PdfEventSchema = require('./pdfEventSchema');
 
 // Creating user schema

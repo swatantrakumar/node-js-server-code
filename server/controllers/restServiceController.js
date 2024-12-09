@@ -20,7 +20,7 @@ class RestServiceController {
       let orderBy = req?.params?.orderBy; 
       let employee = null; 
       try {
-        console.log("sobj call receved for {} from Ip {}, Crlist : {}", kvp.value, getClientIp(req),kvp.crList);
+        console.log("sobj call receved for {} from Ip {}, Crlist : {}", kvp.value, this.getClientIp(req),kvp.crList);
         if(req && req.user) employee = await userPermissionHandler.getApplicationUser(req);
         if(!orderBy) {
           orderBy = retrievalQueryHandler.getDefaultSortByString(kvp.value);
@@ -28,7 +28,7 @@ class RestServiceController {
         result = await retrievalQueryHandler.processApplicationSobjCall(employee,orderBy, kvp);
       }catch (e) {
         console.log("Error while Generic call 'sobj' : " + e.message);
-        res.status(500).json({ error: 'Failed to Get Template ' + req.body.value  + er});
+        res.status(500).json({ error: 'Failed to Get Template ' + req.body.value  + e.message});
       }
       res.json(result);
   }

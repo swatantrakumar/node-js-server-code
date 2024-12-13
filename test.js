@@ -52,3 +52,207 @@ function createFlatArray(array,newArray=[]){
 let array = [6,[2,[1,9],[7]],6,10,7];
 let flatArray = createFlatArray(array);
 console.log(flatArray);
+
+//find missing number form this array [3, 0, 1,5,7,9]
+function findMissingNumber(list){
+    let min = Math.min(...list);
+    let max = Math.max(...list);
+    let missingNumber= [];
+    for(var i = min;i<=max;i++){
+        if(!list.includes(i)){
+           missingNumber.push(i); 
+        }
+    }
+    console.log(`Origin Array = ${list}`);
+    console.log(`Missing Number In This Array = ${missingNumber}`);
+}
+
+
+findMissingNumber([3, 0, 1,5,7,9]) 
+
+//Useing recursion get factorial of any number
+// function factorial(n){
+//     if(n === 0 || n === 1){
+//         return 1;
+//     }
+//     return n * factorial(n - 1);
+// }
+let factorial = factorial(6);
+console.log(factorial);
+
+//Useing normal function get factorial of any number
+function factorial(n){
+    let result = 1;
+    for(var i=1;i<=n;i++){
+        result *= i;
+    }
+    return result;
+}
+
+
+//
+function printLeftTrangle(n){
+    for(let i=0; i < n; i++){
+        let star = "";
+        for(let j=0; j < n;j++){
+            if(j > (n-1)-i){
+                star += "  "
+            }else{
+                star += "* "
+            }            
+        }
+        console.log(star);
+    }
+}
+printLeftTrangle(5);
+//out put
+// * * * * * 
+// * * * *   
+// * * *     
+// * *       
+// *  
+//
+function printLeftTrangle(n){
+    for(let i=0; i < n; i++){
+        let star = "";
+        for(let j=0; j < n;j++){
+            if(j < (n-1)-i){
+                star += "  "
+            }else{
+                star += "* "
+            }            
+        }
+        console.log(star);
+    }
+}
+printLeftTrangle(5);
+//out put
+//         * 
+//       * * 
+//     * * * 
+//   * * * * 
+// * * * * * 
+
+//In this function also second loop change only if condition less then to grater then
+function printLeftTrangle(n){
+    for(let i=0; i < n; i++){
+        let star = "";
+        for(let j=n; j > 0;j--){
+            if(j > n-i){
+                star += "  "
+            }else{
+                star += "* "
+            }            
+        }
+        console.log(star);
+    }
+}
+printLeftTrangle(5);
+//out put
+// * * * * * 
+//   * * * * 
+//     * * * 
+//       * * 
+//         *
+
+//
+function printLeftTrangle(n){
+    for(let i=0; i < n; i++){
+        let star = "";
+        for(let j=n; j > 0;j--){
+            if(j < n-i){
+                star += "  "
+            }else{
+                star += "* "
+            }            
+        }
+        console.log(star);
+    }
+}
+printLeftTrangle(5);
+//out put
+// *         
+// * *       
+// * * *     
+// * * * *   
+// * * * * * 
+//
+function printPattern(n) {
+    for (let i = 0; i < n; i++) {
+      let line = '';
+      for (let j = 0; j < 2 * n; j++) {
+        if (j < n - i || j >= n + i) {
+          line += '* ';
+        } else {
+          line += '  '; 
+        }
+      }
+      console.log(line);      
+    }
+}
+printPattern(5);
+//Out Put
+// * * * * * * * * * * 
+// * * * *     * * * * 
+// * * *         * * * 
+// * *             * * 
+// *                 * 
+//
+function printPattern(n) {
+    for (let i = 0; i < n; i++) {
+      let line = '';
+      for (let j = 0; j < 2 * n; j++) {
+         if (j < i + 1 || j >= 2 * n - (i + 1)) {
+          line += '* ';
+        } else {
+          line += '  '; // Add spaces in the center
+        }
+      }
+      console.log(line);      
+    }
+}
+printPattern(5);
+//Out Put
+// *                 * 
+// * *             * * 
+// * * *         * * * 
+// * * * *     * * * * 
+// * * * * * * * * * *
+//pattern for star
+function printPattern(n) {
+    for (let i = 0; i < n; i++) {
+      let line = '';
+      for (let j = 0; j < 2 * n; j++) {
+        if (j < n - i || j >= n + i) {
+          line += '* ';
+        } else {
+          line += '  '; 
+        }
+      }
+      console.log(line);      
+    }
+    for (let i = 0; i < n; i++) {
+      let line = '';
+      for (let j = 0; j < 2 * n; j++) {
+         if (j < i + 1 || j >= 2 * n - (i + 1)) {
+          line += '* ';
+        } else {
+          line += '  '; 
+        }
+      }
+      console.log(line);      
+    }
+}
+printPattern(5);
+//Out Put
+// * * * * * * * * * * 
+// * * * *     * * * * 
+// * * *         * * * 
+// * *             * * 
+// *                 * 
+// *                 * 
+// * *             * * 
+// * * *         * * * 
+// * * * *     * * * * 
+// * * * * * * * * * * 
+//

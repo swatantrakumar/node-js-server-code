@@ -1,0 +1,70 @@
+//Default middleware of express
+1.>express.static
+    Purpose: Serves static files such as HTML, CSS, images, JavaScript, etc.
+    Content-Type: Serves files directly without parsing the request body.
+    Usage:
+        app.use(express.static('public')); // Serve static files from the 'public' directory
+
+2.>express.json()
+    Purpose: Parses incoming requests with a JSON payload and makes the data available in req.body.
+    Content-Type: application/json
+    Usage:
+        app.use(express.json());
+3.>express.urlencoded()
+    Purpose: Parses incoming requests with URL-encoded payloads (e.g., data from HTML forms) and makes the data available in req.body.
+    Content-Type: application/x-www-form-urlencoded
+    Options:
+        extended: true (default) - Supports complex objects and arrays.
+        extended: false - Supports simpler key-value pairs.
+    Usage:
+        app.use(express.urlencoded({ extended: true }));
+4.>express.raw()
+    Purpose: Parses incoming requests with raw binary data and makes it available in req.body.
+    Content-Type: application/octet-stream
+    Usage:
+        app.use(express.raw());
+5.>express.text()
+    Purpose: Parses incoming requests with plain text data and makes it available in req.body.
+    Content-Type: text/plain
+    Usage:
+        app.use(express.text());
+6.>express.Router
+    Purpose: A modular and mountable middleware that allows you to define routes separately.
+    Usage:
+        const router = express.Router();
+        router.get('/example', (req, res) => {
+            res.send('Example route');
+        });
+        app.use('/api', router); // Mount router on the '/api' path
+7.>Error Handling Middleware
+    Purpose: Catches errors that occur in the app. Must have four arguments (err, req, res, next).
+    Usage:
+        app.use((err, req, res, next) => {
+            console.error(err.stack);
+            res.status(500).send('Something broke!');
+        });
+
+const express = require('express');
+const app = express();
+
+// Use built-in middlewares
+app.use(express.static('public')); // Serve static files
+app.use(express.json());           // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse form data
+app.use(express.text());           // Parse plain text
+app.use(express.raw());            // Parse raw binary data
+
+// Example route
+app.post('/data', (req, res) => {
+  res.send({ body: req.body });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  res.status(500).send({ error: 'Server error', details: err.message });
+});
+
+// Start server
+app.listen(3000, () => {
+  console.log('Server running on http://localhost:3000');
+});

@@ -1,0 +1,25 @@
+1. What is Node.js? Why is it popular?
+Answer:
+    Node.js is a JavaScript runtime built on Chrome's V8 engine. It allows developers to run JavaScript on the server side.
+
+    Popularity reasons:
+        Non-blocking I/O for scalability.
+        Single-threaded, event-driven architecture.
+        Fast and lightweight for real-time applications.
+
+2.>What is the difference between setImmediate() and process.nextTick()?
+Answer:
+
+    setImmediate(): Executes code after the current event loop.
+    process.nextTick(): Executes code before the next event loop begins.
+
+3.>Explain the event loop in Node.js.
+    Answer:
+    The event loop is the mechanism that handles asynchronous operations in Node.js. It allows non-blocking I/O by processing events and callbacks in phases, 
+    such as:
+        Timers (e.g., setTimeout).
+        Pending callbacks.
+        Idle/Prepare.
+        Poll (retrieving new I/O events).
+        Check (e.g., setImmediate).
+        Close callbacks.

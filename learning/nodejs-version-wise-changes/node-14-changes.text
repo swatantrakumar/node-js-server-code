@@ -1,0 +1,116 @@
+1. ECMAScript Modules (ESM) - Stable Support
+    Node.js 14 marked ECMAScript modules as stable.
+
+    Feature: You can use import and export syntax natively.
+
+    Example: File: app.mjs
+
+
+    import { greet } from './helper.mjs';
+    greet('Node.js 14');
+    File: helper.mjs
+
+
+    export function greet(name) {
+    console.log(`Hello, ${name}!`);
+    }
+    Run:
+
+    bash
+    Copy code
+    node app.mjs
+2. Diagnostic Report (Stable)
+    Feature: Generate reports on unexpected errors, crashes, or performance issues.
+
+    Usage: Generate a diagnostic report by enabling the --report option or programmatically.
+
+    Example:
+
+
+    process.report.writeReport('./diagnostic-report.json');
+    console.log('Diagnostic report generated.');
+    Run:
+
+    bash
+    Copy code
+    node --report-on-fatalerror app.js
+3. Optional Chaining and Nullish Coalescing
+    Feature: JavaScript language features supported in Node.js 14.
+    Optional Chaining (?.): Avoids errors when accessing properties on null or undefined.
+    Nullish Coalescing (??): Provides a default value if the left operand is null or undefined.
+    Example:
+
+
+    const user = { profile: { name: 'John' } };
+    console.log(user.profile?.name); // John
+    console.log(user.profile?.age); // undefined
+
+    const age = user.profile?.age ?? 30;
+    console.log(age); // 30
+4. V8 Engine Upgrade to 8.1
+    Feature: Introduced new JavaScript features, such as Intl.DateTimeFormat and String.prototype.matchAll.
+    Example: matchAll:
+
+    const regex = /t(e)(st(\d?))/g;
+    const str = 'test1test2test3';
+    for (const match of str.matchAll(regex)) {
+    console.log(match);
+    }
+5. Stream API Improvements
+    Feature: Improved compatibility and better implementation of stream module.
+    Example:
+
+    const { Readable } = require('stream');
+
+    const stream = Readable.from(['Node.js', '14', 'Stream']);
+    stream.on('data', (chunk) => console.log(chunk.toString()));
+6. fs Module Promises API (Stable)
+    Feature: Promises-based API in the fs module became stable.
+    Example:
+
+    const fs = require('fs/promises');
+
+    async function readFile() {
+    try {
+        const data = await fs.readFile('./example.txt', 'utf-8');
+        console.log(data);
+    } catch (err) {
+        console.error('Error reading file:', err);
+    }
+    }
+
+    readFile();
+7. Intl.DisplayNames
+    Feature: Added to Intl API for localizing region, language, and script display names.
+    Example:
+
+    const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    console.log(displayNames.of('US')); // United States
+    console.log(displayNames.of('FR')); // France
+8. TLS Improvements
+    Feature: Added support for TLS 1.3 by default and other improvements.
+    Usage: TLS performance is better with enhanced security by default.
+    9. Worker Threads - MessagePort.prototype.unref
+    Feature: Allows the worker to keep the event loop alive only when necessary.
+    Example:
+
+    const { Worker } = require('worker_threads');
+
+    const worker = new Worker('./worker.js');
+    worker.unref(); // Allows the program to exit if this is the only active worker
+10. Deprecations
+    Deprecated:
+    process.binding()
+    REPLServer.rli and REPLServer.clearBufferedCommand()
+    These APIs are now discouraged in favor of better alternatives.
+11. Other Notable Updates
+    AbortController: Added experimental support.
+    Http2 module improvements.
+    Performance: Startup and memory usage optimizations.
+    Test Example for Feature Check
+    Run the following code to check support for some new features:
+
+
+console.log('Optional Chaining:', { profile: null }?.profile?.name ?? 'Not Supported');
+console.log('Intl DisplayNames:', new Intl.DisplayNames(['en'], { type: 'region' }).of('IN'));
+Node.js 14 laid the foundation for future innovations with robust JavaScript feature support and improved developer tools. It became an LTS version in October 2020.

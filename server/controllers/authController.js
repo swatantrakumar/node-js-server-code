@@ -35,7 +35,7 @@ class AuthController {
                     if (user.validPassword(body.password)) {
                         let twoFactoreAuthentication = applicationSetting?.authenticationSettings?.twoFactorAuthentication;
                         if(twoFactoreAuthentication){
-                            if(appUser.disableTwoFactorAuthentication){
+                            if(user.disableTwoFactorAuthentication){
                                 twoFactoreAuthentication = false;
                             }
                         }
@@ -417,7 +417,7 @@ class AuthController {
         }
         return  message;
     }
-    static handleLockedAccount(){
+    static handleLockedAccount(appUser,hour){
         let lockTime = appUser.lockTime;
         if(lockTime){
             let accountLockTimeInHours = commonUtils.calculateDateDifferenceInHours(lockTime);
@@ -429,7 +429,7 @@ class AuthController {
         }
         return "Your Account is Locked, Connect to Admin!!!";
     }
-    static handleLastLogin(){
+    static handleLastLogin(appUser){
         let message="";
         appUser.accountStatus = AccountStatus.LOCKED;
         appUser.lockTime = null;

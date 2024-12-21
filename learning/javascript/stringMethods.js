@@ -63,6 +63,8 @@ toUpperCase()
     var stri = "test";
     var b = str.toUpperCase();
     console.log(b) // TEST
+toLocaleUpperCase()
+    //Same as toLocalLowerCase but in this convert into UPPER CASE return
 toLowerCase()
     //syntex
     string.toLowerCase();
@@ -70,6 +72,15 @@ toLowerCase()
     var stri = "SWRyt";
     var b = str.toLowerCase();
     console.log(b) // swryt
+toLocaleLowerCase()
+    //This method returns a string of lowercase letters. 
+    //syntex
+    str.toLocaleLowerCase()
+    str.toLocaleLowerCase(locale) 
+    //Example
+    str = "Istanbul";
+    console.log(str.toLowerCase());                // Output: "istanbul" (default behavior)
+    console.log(str.toLocaleLowerCase("tr"));       // Output: "ıstanbul" (Turkish-specific)
 trim()
     //remove white space form start or end of stirng
     //syntex
@@ -168,6 +179,16 @@ anchor()
     //Example
     str = "GFG";
     console.log(str.anchor("anchorname")); //<a name="anchorname">GFG</a>
+startsWith()
+    //syntex
+    str.startsWith( searchString , position )
+    //Example
+    str = 'Geeks for Geeks';
+    value = str.startsWith('Gee');
+    console.log(value); //true
+    str = 'Geeks for Geeks';
+    value = str.startsWith('For',6); //for Geeks   after cut 6 char from start
+    console.log(value); //true
 endsWith()
     //syntex
     str.endsWith(searchString, length)
@@ -198,4 +219,158 @@ includes()
 indexOf()
     //syntex
     str.indexOf(searchValue , index);
-    //
+    //Example
+    str = 'Departed Train';
+    index = str.indexOf('Train');
+    console.log(index); //9
+    //method is case-sensitive. 
+    str = 'Departed Train';
+    index = str.indexOf('train');
+    console.log(index); // -1
+    str = 'Departed Train before another Train';
+    index = str.indexOf('Train',12);
+    console.log(index); //30
+search()
+    // return:- This method returns the index of the first match string in between the regular expression and the given 
+    // string object and returns -1 if no match is found.
+    //syntex
+    string.search( A )
+    //Example
+    // Taking input a string.
+    string = "GeeksforGeeks";
+    // Taking a regular expression.
+    re1 = /G/;
+    re2 = /e/;
+    re3 = /s/;
+    // Printing the index of matching alphabets
+    console.log(string.search(re1)); //0
+    console.log(string.search(re2)); //1
+    console.log(string.search(re3)); //4
+    //above both indexof or search are same common difference index of only support substring or search support regex express or substring both 
+lastIndexOf()
+    //Case-sensitive Search with JavaScript’s lastIndexOf()
+    //syntex
+    str.lastIndexOf(searchValue , index)
+    //Example
+    str = 'Departed Train before another Train';
+    index = str.lastIndexOf('Train');
+    console.log(index); // 30
+localeCompare()
+    //syntex
+    referenceString.localeCompare(compareString);
+    //Example
+    str1 = "apple";
+    str2 = "banana";
+    result = str1.localeCompare(str2);
+    console.log(result);
+    //jis se hum compare kar rahe hai jisko wo agar chhota hai to -1 return kareaga or bara hai to 1 return karega or agar barabar hai to 0 ye bara or chhota length se check nahi karna hai ye hum alphabetically check karna hai like b bara hai a se 
+    console.log("apple" < "banana");  // true (A comes before B)
+    console.log("dog" < "cat");       // false (D comes after C)
+    console.log("bat" < "bath");      // true (shorter prefix is smaller)
+    console.log("Apple" < "apple");   // true (uppercase A < lowercase a)
+match()
+    //return search value in array
+    //syntex
+    string.match(regExp);
+    //Example
+    string = "Welcome to geeks for geeks";
+    result = string.match(/eek/g);
+    console.log(result); // ["eek",eek]
+    const string = "std*dgae(/4%dsfdkd";
+    const test = string.match(/[a-zA-Z0-9]/g);
+    console.log(test); // ['s', 't', 'd', 'd','g', 'a', 'e','4', 'd','s', 'f', 'd', 'k','d']
+matchAll()
+    //Returns an iterator (not an array)
+    //Requires the g flag on the regex. Without it, matchAll will throw an error.
+    //syntex
+    string.matchAll(regex)
+    //Example
+    regex = /e(xam)(ple(\d?))/g;
+    str = 'example1example2example3';
+    array = str.matchAll(regex);
+    console.log(Array.from(array)); 
+    //Output
+    //[
+    //     [
+    //       'example1',
+    //       'xam',
+    //       'ple1',
+    //       '1',
+    //       index: 0,
+    //       input: 'example1example2example3',
+    //       groups: undefined
+    //     ],
+    //     [
+    //       'example2',
+    //       'xam',
+    //       'ple2',
+    //       '2',
+    //       index: 8,
+    //       input: 'example1example2example3',
+    //       groups: undefined
+    //     ],
+    //     [
+    //       'example3',
+    //       'xam',
+    //       'ple3',
+    //       '3',
+    //       index: 16,
+    //       input: 'example1example2example3',
+    //       groups: undefined
+    //     ]
+    //   ]
+    //above case convert iterator to array useing Array.form
+normalize()
+    //syntex
+    string.normalize([form])
+    //Example
+    //form place bottom key
+    // "NFC": Canonical Composition (default).
+    // "NFD": Canonical Decomposition.
+    // "NFKC": Compatibility Composition.
+    // "NFKD": Compatibility Decomposition.
+    let a = "Geeks For Geeks";
+    b = a.normalize('NFC')
+    c = a.normalize('NFD')
+    d = a.normalize('NFKC')
+    e = a.normalize('NFKD')
+    console.log(b, c, d, e); //Geeks For Geeks Geeks For Geeks Geeks For Geeks Geeks For Geeks
+
+repeat()
+    //syntex
+    string.repeat(count);
+    //Example
+    str = "forGeeks";
+    repeatCount = str.repeat(2);
+    console.log(repeatCount); //forGeeksforGeeks
+    str = "gfg";
+    // Repeating the string 2.9 times i.e, 2 times
+    // because 2.9 converted into 2
+    repeatCount = str.repeat(2.9);
+    console.log(repeatCount);///gfggfg
+toString()
+    //syntex
+    string.toString()
+    //Example
+    a = new String("GfG");
+    console.log(a) // [String: 'GfG']
+    console.log(a.toString()); //GfG
+    number = 42;
+    result = number.toString();
+    console.log(result); //"42"
+    console.log(typeof(result)); //string
+valueOf()
+    //Purpose: Returns the primitive value of an object.
+    //syntex
+    string.valueOf()
+    //Example
+    num = 42;
+    console.log(num.valueOf()); // 42
+    bool = true;
+    console.log(bool.valueOf()); // true
+raw()
+    //syntex
+    String.raw(callSite, ...substitutions) 
+    //Example
+    const path = String.raw(`C:\Users\John\Desktop\file.txt`);
+    console.log(path); //C:\Users\John\Desktop\file.txt

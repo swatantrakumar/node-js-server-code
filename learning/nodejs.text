@@ -68,3 +68,55 @@ app.use((err, req, res, next) => {
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
 });
+
+*middleware Types
+1.>Application-Level Middleware
+    Ex:- 
+        app.use((req, res, next) => {
+            console.log('Application-level middleware');
+            next();
+        });
+2.>Router-Level Middleware
+    Ex:-        
+        const router = express.Router();
+        router.use((req, res, next) => {
+            console.log('Router-level middleware');
+            next();
+        });
+3.>Built-In Middleware
+    Ex:-
+        app.use(express.json());
+        app.use(express.static('public'));
+4.>Third-Party Middleware
+    Ex:-
+        const cors = require('cors');
+        const helmet = require('helmet');
+
+        app.use(cors());
+        app.use(helmet());
+5.>Error-Handling Middleware
+    Ex:-
+        app.use((err, req, res, next) => {
+            console.error(err.stack);
+            res.status(500).send('Something went wrong!');
+        });
+6.>Custom Middleware
+    Ex:-
+        app.use((req, res, next) => {
+            console.log(`Request Method: ${req.method}, URL: ${req.url}`);
+            next();
+        });
+7.>Request-Level Middleware
+    Ex:-
+        app.get('/user', (req, res, next) => {
+            console.log('Request-level middleware for /user');
+            next();
+        }, (req, res) => {
+            res.send('User route');
+        });
+8.>Global Middleware
+    Ex:-
+        app.use((req, res, next) => {
+            console.log('Global middleware');
+            next();
+        });

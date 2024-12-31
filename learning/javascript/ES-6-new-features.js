@@ -147,66 +147,67 @@
     }
 //9.>Distructuring
     //Array Distructuring
-    //pahle hame agar kisi array ke value ko use karna hota tha to hame array ke index pe se value ko nikal ke kisi variable pe assign karna parta tha lakin es 6 me new feature aaya hai distructuring esme hum direct variable me array se value ko assign kar sakte hai wo bhi 1 line me exmapme me dkhte hai
-    var disArray = [5,6,7,8];
-    var [a,b,c] = disArray;
-    console.log(a,b,c); // 5 6 7  kebal 3 value ko nikala array ke starting point se agar ahme use aary ke sirf do hi value ko nikalna hota to sirf hum a or b hi distruct karte left side me ab hame kya hai array ke last vlau ko use karna hai or hame pata hai kitne value hai to hum use karte 
-    var [,,,d] = disArray;
-    console.log(d); // 8
-    //array distructuring ko hum value swaping ke liye bhi use kar sakte hai examplem me dekhte hai
-    var x = 89;         var p = 65;
-    var y = 87;         var q = 55;
-    var [x,y] = [y,x]   [p,q] = [q,p]
-    console.log(x,y) // 87 89   console.log(p,q) // 55 65
-    //distructureing me defalut value ko bhi use kar skate hai example se dekhte hai
-    var [x,y,z=78] = disArray;
-    console.log(x,y,z) // 5 6 7
-    //lakin us array me koi tisra value nahi hota phir
-    var [x,y,z,w,c=98] = disArray;
-    console.log(c) // 98
-    //rest operator bhi hum use kar sakte hai array distructuring me example se dekhte hai
-    var [x,...args] = disArray;
-    console.log(args); //[ 6, 7, 8 ] ye ek rest parameter ke tarah kam karta hai esko hum last varaibal ke tarh hi use kar sakte hai
-    //agar kisi function me hum array return karte hai to us se bhi hum esko array distructuring me use kar sakte hai example me dekhte hsi
-    function getArray(){
-        return [5,7,8,9];
-    }
-    var [a,b] = getArray();
-    console.log(a,b) // 5 7
-    //array distructuring ko hum parameter me bhi declear kar sakte hai agar aap koi array pass kar rahe kisi function ke argument me or hame function me 2 hi value ko use karna hai arary se to hum array distructuring se use kar sakte hai 
-    function sum([a,b]){
-        return a + b;
-    }
-    var arrayVal = [8,9,0,6,5];
-    console.log(sum(arrayVal)); // 17
+        //pahle hame agar kisi array ke value ko use karna hota tha to hame array ke index pe se value ko nikal ke kisi variable pe assign karna parta tha lakin es 6 me new feature aaya hai distructuring esme hum direct variable me array se value ko assign kar sakte hai wo bhi 1 line me exmapme me dkhte hai
+        var disArray = [5,6,7,8];
+        var [a,b,c] = disArray;
+        console.log(a,b,c); // 5 6 7  kebal 3 value ko nikala array ke starting point se agar ahme use aary ke sirf do hi value ko nikalna hota to sirf hum a or b hi distruct karte left side me ab hame kya hai array ke last vlau ko use karna hai or hame pata hai kitne value hai to hum use karte 
+        var [,,,d] = disArray;
+        console.log(d); // 8
+        //array distructuring ko hum value swaping ke liye bhi use kar sakte hai examplem me dekhte hai
+        var x = 89;         var p = 65;
+        var y = 87;         var q = 55;
+        var [x,y] = [y,x]   [p,q] = [q,p]
+        console.log(x,y) // 87 89   console.log(p,q) // 55 65
+        //distructureing me defalut value ko bhi use kar skate hai example se dekhte hai
+        var [x,y,z=78] = disArray;
+        console.log(x,y,z) // 5 6 7
+        //lakin us array me koi tisra value nahi hota phir
+        var [x,y,z,w,c=98] = disArray;
+        console.log(c) // 98
+        //rest operator bhi hum use kar sakte hai array distructuring me example se dekhte hai
+        var [x,...args] = disArray;
+        console.log(args); //[ 6, 7, 8 ] ye ek rest parameter ke tarah kam karta hai esko hum last varaibal ke tarh hi use kar sakte hai
+        //agar kisi function me hum array return karte hai to us se bhi hum esko array distructuring me use kar sakte hai example me dekhte hsi
+        function getArray(){
+            return [5,7,8,9];
+        }
+        var [a,b] = getArray();
+        console.log(a,b) // 5 7
+        //array distructuring ko hum parameter me bhi declear kar sakte hai agar aap koi array pass kar rahe kisi function ke argument me or hame function me 2 hi value ko use karna hai arary se to hum array distructuring se use kar sakte hai 
+        function sum([a,b]){
+            return a + b;
+        }
+        var arrayVal = [8,9,0,6,5];
+        console.log(sum(arrayVal)); // 17
     //Object distructuring 
-    //esme sab kuchh array distructuring jaise hi hota ha bus jaha pe hum big bracket use karte hai waha pe curly bracket use karenge or hum array distructuring me value ke accordig variable pass kare the lakin object me aisa nahi or array me hum varaible name kuchh bhi rakh sakte the lakin object me aisa nahi object me hame key ko bhi variable bana na hota hai esko example se dekhte hai
-    var object = {name:"Swatantra Kumar",email:"rajswatantra9@gmail.com",age:30,mobile:9122160962};
-    var {name,age} = object;
-    console.log(name,age); // Swatantra kumar 30
-    //jaisa ki hame extra comma nahi lagana para 3 number ke value ke liye waise or hame yaha pe key ke object ko hi variable bana na para 
-    //object distructurin ko bhi hum parameter me use kar sakte hi or kisi function se hame object return mil raha ho waha pe bhi object distructuring use kar sakte hai
-    function sum({name,age}){
-        return `${name}   ${age}`;
-    }
-    console.log(sum(object)); // Swatantra Kumar 30
-    //yaha pe bhi hame object ke key hi pass karne hote hai
-    let name,email;
-    ({name,email} = object);
-    console.log(name,email); //Swatantra Kumar rajswatantra9@gmail.com
-    //Lakin agar hame variable name dusra rakhna hai jo object key hai usko use nahi karna hi kahi apne function me to hum esko kaise karenge
-    var {name:sName,age:sAge} = object;
-    console.log(sName,sAge) // Swatantra Kumar 30
-    //ab aap object me bhi kuchh bhi variable ka name rakh sakte hai object distructuring me
-    //function me bhi chahe to hum parameter name dusra rakh sakte hai 
-    function sum({name:a,age:b,address:ad="Barahsher"}){
-        return `${a}   ${b} ${ad}`;
-    }
-    console.log(sum(object)); // Swatantra Kumar   30 Barahsher
-    //hum default value bhi assign kar sakte hai object distructuring me
-    //nested object ko hum kaise distructuring me use karenge
-    object['address'] = {};
-    object['address']['at'] = "Barahsher";
-    object['address']['ps'] = "Bihra";
-    var {address:{at:AT,ps:PoliceStation}} = object;
-    console.log(AT,PoliceStation) // Barahsher Bihra
+        //esme sab kuchh array distructuring jaise hi hota ha bus jaha pe hum big bracket use karte hai waha pe curly bracket use karenge or hum array distructuring me value ke accordig variable pass kare the lakin object me aisa nahi or array me hum varaible name kuchh bhi rakh sakte the lakin object me aisa nahi object me hame key ko bhi variable bana na hota hai esko example se dekhte hai
+        var object = {name:"Swatantra Kumar",email:"rajswatantra9@gmail.com",age:30,mobile:9122160962};
+        var {name,age} = object;
+        console.log(name,age); // Swatantra kumar 30
+        //jaisa ki hame extra comma nahi lagana para 3 number ke value ke liye waise or hame yaha pe key ke object ko hi variable bana na para 
+        //object distructurin ko bhi hum parameter me use kar sakte hi or kisi function se hame object return mil raha ho waha pe bhi object distructuring use kar sakte hai
+        function sum({name,age}){
+            return `${name}   ${age}`;
+        }
+        console.log(sum(object)); // Swatantra Kumar 30
+        //yaha pe bhi hame object ke key hi pass karne hote hai
+        //Jab hum variable declear karne ke bad us variable ko distructuring me dalte hai to hame usko paranthesis bracket me dalna hota hai niche exmaple me jaise dala hua hai.
+        let name,email;
+        ({name,email} = object);
+        console.log(name,email); //Swatantra Kumar rajswatantra9@gmail.com
+        //Lakin agar hame variable name dusra rakhna hai jo object key hai usko use nahi karna hi kahi apne function me to hum esko kaise karenge
+        var {name:sName,age:sAge} = object;
+        console.log(sName,sAge) // Swatantra Kumar 30
+        //ab aap object me bhi kuchh bhi variable ka name rakh sakte hai object distructuring me
+        //function me bhi chahe to hum parameter name dusra rakh sakte hai 
+        function sum({name:a,age:b,address:ad="Barahsher"}){
+            return `${a}   ${b} ${ad}`;
+        }
+        console.log(sum(object)); // Swatantra Kumar   30 Barahsher
+        //hum default value bhi assign kar sakte hai object distructuring me
+        //nested object ko hum kaise distructuring me use karenge
+        object['address'] = {};
+        object['address']['at'] = "Barahsher";
+        object['address']['ps'] = "Bihra";
+        var {address:{at:AT,ps:PoliceStation}} = object;
+        console.log(AT,PoliceStation) // Barahsher Bihra

@@ -34,5 +34,25 @@ Math.asinh()
     console.log("Output : " + Math.asinh(0));  //Output : 0
     console.log("Output : " + Math.asinh(1)); //Output : 0.881373587019543
     console.log("Output : " + Math.asinh(-1)); //Output : -0.881373587019543
+//ES6 Methods starts
+Math.trunc()
+    //syntex
+    Math.trunc(value)
+    //Example
+    console.log(Math.trunc(15.56));  // 15
+    console.log(Math.trunc(-15.56)); // -15
+    console.log(Math.trunc(0.236)); // 0
+
+Math.sign()
+    //syntex
+    Math.sign(number)
+    //Example
+    console.log(Math.sign(2)); // 1
+    console.log(Math.sign(-2)); //-1
+    console.log(Math.sign(0)); // 0
+    console.log(Math.sign(-0)); // -0
+    console.log(Math.sign(haa)); // NaN
+//ES6 Methods Ends
+
 
 

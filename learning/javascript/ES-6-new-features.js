@@ -192,7 +192,7 @@
         console.log(sum(object)); // Swatantra Kumar 30
         //yaha pe bhi hame object ke key hi pass karne hote hai
         //Jab hum variable declear karne ke bad us variable ko distructuring me dalte hai to hame usko paranthesis bracket me dalna hota hai niche exmaple me jaise dala hua hai.
-        let name,email;
+        var name,email;
         ({name,email} = object);
         console.log(name,email); //Swatantra Kumar rajswatantra9@gmail.com
         //Lakin agar hame variable name dusra rakhna hai jo object key hai usko use nahi karna hi kahi apne function me to hum esko kaise karenge
@@ -211,3 +211,401 @@
         object['address']['ps'] = "Bihra";
         var {address:{at:AT,ps:PoliceStation}} = object;
         console.log(AT,PoliceStation) // Barahsher Bihra
+//10.>Object Property Enhancement && new object methods
+        //es 6 me object creation advance ho gaya hai jaise ki pahle hum object create karte the to key phir vlaue dalte the or obj ke aage bari bracket laga key usme key ka name deke koi propery add karte the object me abhi bhi wo kar sakte hai lkin kuchh or new features aa gaya hai jaise ki hum kisi variable ko direct object me rakh sakte to variable name jo hai wo object ka key ho jayega or use variable ka value us key ka value ban jayega pahle hum object ke ander koi function banate the to key ke sath collon laga ke functio key ka arrow function likhte the lakin ab direct comma laga ke function name ke sath likhe sakte hai ye sare chij mei example me de raha hu or jaise ki koi variable bana hai usme kya value aayega hame nahi pata lakin hum chahte hai ki usme jo value aaye wo hamare objec ka key bane or value aap definc kar lo uske aage to wo ye new enhancement me possible hai 
+        var name = "Swatantra Kumar";
+        var email = "rajswatantra9@gmail.com";
+        var mobileKey = "mobileNo"
+        var obj = {
+            name,
+            email,
+            [mobileKey]:9122160962,
+            getMyName(){
+                return `Your name is ${this.name}`
+            }
+        }
+        console.log(obj.getMyName()); // Your name is Swatantra kumar
+
+        //Object.assign() 
+        //es method me hum ek object me kitna bhi object ke property or value ko copy kar sakte hai jais ki hamare pass ek object hai uske obj or mere pass 2 or object hai or hum chahte hai obj object me rest jo 2 object hai uske property or value copy ho jaye 
+
+        var obj = {name:'Swatantra',age:30};
+        var obj1 = {email:"rajswatantra9@gmail.com"};
+        var obj2 = {address:{at:"Barahser",po:"Barahser",ps:"Bihra"}};
+        var newObj={};
+        Object.assign(newObj,obj,obj1,obj2);
+        obj2.mobile = 9122160962;
+        console.log(newObj); 
+        //output
+        //{
+        //     name: 'Swatantra',
+        //     age: 30,
+        //     email: 'rajswatantra9@gmail.com',
+        //     address: { at: 'Barahser', po: 'Barahser', ps: 'Bihra' }
+        //   }
+        //jo kaam hum Object.assign method se kiye hai wo hum sprade operator se bhi kar sakte hai 
+        var newObj = {...obj,...obj2};
+        console.log(newObj);
+        //outPut
+        // {
+        //     name: 'Swatantra',
+        //     age: 30,
+        //     address: { at: 'Barahser', po: 'Barahser', ps: 'Bihra' }
+        //   }
+
+        //object ko assign karen ke bad hum mobile ke add kiye hai obj2 me but wo value usme nahi aaya copy kiye objec tme but aap obj2 ko print kar ke dekhenge to woha pe add ho gaya hai.
+        console.log(obj2);
+        // output
+        // {
+        //     address: { at: 'Barahser', po: 'Barahser', ps: 'Bihra' },
+        //     mobile: 9122160962
+        //   }
+//11.>Symbol Data type 
+    //ye primitive data type es data type se hum koi value crate karte hai to to unique create hota hai or ue new key se create nahi hota hai kyo ki ye koi constructor nahi hai hum global symbol value bhi create kar sakte hai jo ki unique nahi hota hai or wo global ragistry me stor hota hai uske create karne ke liye hum symbole.for method ka use karte hai or global symble ke vlaue ko nikalne ke liye hum symbol.keyFor method ka use kart hai
+
+    var first = Symbol("Test");
+    var second = Symbol("Test");
+    console.log(first == second); // false
+    console.log(first === second); // false
+
+    let name = Symbol.for("Swatantra Kumar");
+    console.log(Symbol.keyFor(name)); // Swatantra Kumar
+    console.log(Symbol.keyFor(first)); // undefined
+    //agar hum symbol se koi objec key banate hai to hum usko itrate nahi kar payenge object me jaise ki niche ke exampme me hum kiye hai ek id name se symbol key bnaya usko objec me key pe assign kiye hai phir usko hum for loop me uske access karne ke kosis kiye to nahi hua 
+
+    var id = Symbol("_id");
+    var obj = {
+        [id]:1,
+        name : "Swatantra",
+        email : "rajswatantra9@gmail.com"
+    }
+
+    for(let [key,value] of Object.entries(obj)){
+        console.log(`${key} -> ${value}`);
+    }
+    //out put
+    // name -> Swatantra
+    // email -> rajswatantra9@gmail.com
+
+    //Object.getOwnPropertySymbols() es method se hum symbol key ko nikal sakte hai object se jitne bhi symbol type key honge wo humko list me return karne ke mil jayege phir us key ko hum object se value nikal sakte hai
+
+    var id = Symbol("_id");
+    const api = Symbol("api");
+    let obj = {
+        [id]:1,
+        [api] : "/test/getData",
+        name : "Swatantra",
+        email : "rajswatantra9@gmail.com"
+    }
+    console.log(Object.getOwnPropertySymbols(obj));  // [ Symbol(_id), Symbol(api) ]
+    Object.getOwnPropertySymbols(obj).forEach((key)=>{
+        console.log(`${key.toString()} -> ${obj[key]}`);
+    })
+    //output
+    // Symbol(_id) -> 1
+    // Symbol(api) -> /test/getData   
+    
+    //.description  key se hum symbole type variable se value nikal sakte hai 
+    var id = Symbol("_id");
+    console.log(id.description); // _id
+//12.>Set or Map
+        //Set => set type ke variable create karne ke liye hum new Set() se inislize karte hai or initialize ke time pe bhi hum value assing kar sakte hai array format me or single or double quote me bhi hum value pass kar skate hai to wo har ek balue char or number ko array ke tarah or unique value rakhta hai jaise ki gar hum new Set("Swatantra") 's','w','a','t','n','r' rest a or t dublicate hai to usko add nahi kiye to set ko hum unique value rakhne ke liye bhi use karte hai 
+        let setlist = new Set();
+
+        //set variable ko use karne ke liye kuchh methods bhi hai.
+        //1.>add() 2.>size 3.>delete() 4.>has() 5.>clear() or 6.>sprade operator ko use kar ke hum esko plane array me bhi convert kar sakte hai
+
+        setlist.add(2).add(3).add(4);
+        console.log(setlist) //Set(3) { 2, 3, 4 }
+        console.log(setlist.size) // 3
+        setlist.delete(3);
+        console.log(setlist);  //Set(2) { 2, 4 }
+        console.log(setlist.has(2));  //true
+        console.log([...setlist])  //[ 2, 4 ]
+        //set list pe hum direct forEach loop chala sakte hai lakin hum espe for loop nahi chal sakte hai kyo ki loop to chala lenge lekin set se value nahi nikal payenge kyo ki set se hum square bracket se value nahi nikal sakte jaise ki hum normal array se nikal lete hai.
+        //set value itration 
+        //1.>for...of 2.>forEach() 3.>set.values() 4.>set.keys() 5.>set.entries()  se hum set value ko itrate kar satke hai 
+        for(let val of setlist){
+            console.log(val);  ////it is working but let i = 0;i<setlist.size is not working.
+        }
+        setlist.clear();
+        console.log(setlist) // Set(0) {}
+
+        //Map
+        //map ka use hum key value paise ko store karne ke liye karte hai esme hum kisi bhi type ke key or kisi bhi type ke vlaue ko store kar sakte hai esko create karne ke liye hum new Map() se create karte hai or map me value set karne ke liye hum set method ka use karte hai map me bhi utne hi mehtod hote hai jitna ki hum se me use kiye use se 1 jayede map me hota hai jaise ki get karne kel liye hum get method ka use karethe 
+        let maplist = new Map();
+        //methods 
+        //1.>set() 2.>size 3.>delete() 4.>has() 5.>get() 6.> or 7.>sprade operator ko use kar ke hum esko plane array me bhi convert kar sakte hai
+        maplist.set(name,"swatantra Kumar").set("email","rajswatantra9@gmail.com").set("age",30);
+        console.log(maplist); 
+                                    //  Map(3) {
+                                    //         'name' => 'swatantra Kumar',
+                                    //         'email' => 'rajswatantra9@gmail.com',
+                                    //         'age' => 30
+                                    //     }
+        console.log(maplist.size); //3
+        console.log(maplist.has("age")); //true
+        maplist.delete("email");
+        console.log(maplist); //Map(2) { 'name' => 'swatantra Kumar', 'age' => 30 }
+        maplist.clear();
+        console.log(maplist); // Map(0) {}
+        //map itration
+        //1.>for...of 2.>forEach() 3.>map.values() 4.>map.keys() 5.>map.entries()  se hum map value ko itrate kar satke hai 
+        for(let [key,value] of maplist){
+            console.log(`${key} => ${value}`)
+        }
+        maplist.forEach((value,key)=>{
+            console.log(`${key} => ${value}`)
+       })
+//13.>weakSet or weakMap 
+       //ye dono set or map ke tarh nahi hai kyo ki aap esme primitive data nahi store kar skte hai only array or object hi sotre kar sakte hai or sare method esme work bhi nahi karte hai jsie ki set me sirf add(),delete(),has() yahi method work karte hai or map me set(),get(),has() or delete() methods work karte hai dono me se kisi ko bhi aap itrate nahi kar sakte hai kisi bhi itrator se like for or foreach.
+       //weakset or weakmap me object weakly referenced होते हैं  or ye dono garbage collection ko support karta hai grabage collection ek process hai javascript me, jo jab hum koi reference weakset or weakmap me value dalte hai use karne ke liye phir hum use value ko delete kar dete hai uske bad lkin weakset or weakmap ke us value ko delete nahi karte hai to garbage collection usko hata dete hai memory ko free kar dete hai automatically esliye esko weakliy refrenced kahte hai or esliey esko hum itrate nahi kar sakte hai.
+       //weakset or weakmap se hum memory leak se bachte hai memory leak kya hota hai ki hum unused object memory me rah jata hai or kabhi release nahi hote hai lkin weakset or weakmap ye insure karte hai ki jab object ki jarurat nahi hote hai to ye usko memory se delete kar dete hai.
+       //weakset or weakmap me hum secure data rakh sakte hai lakin usko globally accessable nahi banate hai.
+        let tempObjects = new WeakSet();
+        let obj = { data: 123 };
+        tempObjects.add(obj);
+        console.log(tempObjects.has(obj)); // true
+        obj = null; // Object is garbage collected.
+        //jsie ki obj ka use hum weakset me kiye or niche us object ko null kar diye but ye obj hamare weakset me hai lkin uska use nahi hai ab to garbage collection esko delete kar dega automatically jis se hame esko memory management nahi karna parta hai or hum memory leak se bach jate hai.
+//14.>Array Methods
+    //1.>
+    of()  /// create a array with passed value in this method  ES6 Methods
+    syntex:- Array.of(element1, element2,  elementN);
+    //Example
+    var array = Array.of(1, 2, 3, 4, 5);
+    console.log(array); // Output: [1, 2, 3, 4, 5]
+    //Difference Between Array.of() and new Array()
+    //The Array.of() method treats single numeric arguments as elements, not a length.
+
+    //2.>
+    from()  /// string to array convert
+    syntex:- Array.from(arrayLike, mapFunction, thisArg);
+    //Example
+    var str = "hello";
+    var arr = Array.from(str);
+    console.log(arr); // Output: ['h', 'e', 'l', 'l', 'o']
+    //with map function
+    var numbers = [1, 2, 3, 4];
+    var doubled = Array.from(numbers, num => num * 2);
+    console.log(doubled); // Output: [2, 4, 6, 8]
+    //with map or args
+    var multiplier = {
+        factor: 2,
+        multiply(x) {
+          return x * this.factor;
+        }
+      };
+      
+      var numbers = [1, 2, 3];
+      var multiplied = Array.from(numbers, function(num) {
+        return this.multiply(num);
+      }, multiplier);
+      
+      console.log(multiplied); // Output: [2, 4, 6]
+
+      //3.>
+      fill()  //  ih this method pass value or this value are fill in this array when passed position start to end postion
+      syntex:- array.fill(value, start, end);
+      //Example
+      var array = [1, 2, 3, 4, 5];
+      // Fill the entire array with 0
+      array.fill(0);
+      console.log(array); // Output: [0, 0, 0, 0, 0]
+
+        var array = [1, 2, 3, 4, 5];
+        // Fill starting from index 2 with 7
+        array.fill(7, 2);
+        console.log(array); // Output: [1, 2, 7, 7, 7]
+        const array = [1, 2, 3, 4, 5];
+        // Fill from index 1 to 3 (end is non-inclusive) with 9
+        array.fill(9, 1, 3);
+        console.log(array); // Output: [1, 9, 9, 4, 5]
+
+        //4.>
+        find() // this method is filter this data form array or return fiterd first data from this fitered list.
+        syntex:- array.find(callback(element, index, array), thisArg);
+        //Example
+        //without arg
+        var numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        var firstEven = numbers.find(num => num % 2 === 0);
+        console.log(firstEven); // Output: 2
+        //with arg
+        var obj = { threshold: 5 };
+        var numbers = [2, 3, 6, 8, 10];
+        var filteredNumbers = numbers.find(function(num) {
+            return num > this.threshold;
+        }, obj);
+        console.log(filteredNumbers); // Output: 6
+        //return a first value from filtered array
+
+        //5.>
+        findIndex() // this method is filter this data form array or return fiterd first data index from this fitered list.
+        syntex:- array.findIndex(callback(element, index, array), thisArg)
+        //Example
+        //without arg
+        var numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        var indexOfFirstEven = numbers.findIndex(num => num % 2 === 0);
+        console.log(indexOfFirstEven); // Output: 1 (index of number 2)
+        //with arg
+        var obj = { threshold: 5 };
+        var numbers = [2, 3, 6, 8, 10];
+        var filteredNumbers = numbers.findIndex(function(num) {
+            return num > this.threshold;
+        }, obj);
+        console.log(filteredNumbers); // Output: 2 (index of number 6);
+        //return a first value index from filtered array
+
+        ///6.>
+        copyWithin()  // almost similar the methos this method is work for copy this valu in this array or pest ih this arrya with target position
+        syntex:- array.copyWithin(target, start, end);
+        //Example
+        var array = [1, 2, 3, 4, 5];
+        // Copy elements starting from index 0 to index 3
+        array.copyWithin(3, 0);
+        console.log(array); // Output: [1, 2, 3, 1, 2]
+        var array = [10, 20, 30, 40, 50, 60];
+        // Copy elements from index 1 to index 4 (non-inclusive) to index 0
+        array.copyWithin(0, 1, 4);
+        console.log(array); // Output: [20, 30, 40, 40, 50, 60]
+
+        //7.>
+        entries()  // this methos also itrate this array or return liste of nestd array because of every value covert in a array keyvalue paire
+        syntex:- array.entries();
+        //example
+        const array = ['a', 'b', 'c'];
+        // Get an iterator
+        const iterator = array.entries();
+        // Access each key/value pair
+        console.log(iterator.next().value); // Output: [0, 'a']
+
+        const array = ['x', 'y', 'z'];
+        for (const [index, value] of array.entries()) {
+            console.log(`Index: ${index}, Value: ${value}`);
+        }
+//15.>String Methods
+    //1.>
+    repeat()
+    //syntex
+    string.repeat(count);
+    //Example
+    str = "forGeeks";
+    repeatCount = str.repeat(2);
+    console.log(repeatCount); //forGeeksforGeeks
+    str = "gfg";
+    // Repeating the string 2.9 times i.e, 2 times
+    // because 2.9 converted into 2
+    repeatCount = str.repeat(2.9);
+    console.log(repeatCount);///gfggfg
+
+    //2.>
+    startsWith()
+    //syntex
+    str.startsWith( searchString , position )
+    //Example
+    str = 'Geeks for Geeks';
+    value = str.startsWith('Gee');
+    console.log(value); //true
+    str = 'Geeks for Geeks';
+    value = str.startsWith('For',6); //for Geeks   after cut 6 char from start
+    console.log(value); //true
+
+    //3.>
+    endsWith()
+    //syntex
+    str.endsWith(searchString, length)
+    //Es function me dusra parameter jo hai wo length hai ye kya karta hai ki pahle string to utna pe cut kar leta hai phir check karta hai jo aap first parameter jo pass kiye wo end me hai ki nahi 
+    //Example
+    str = 'It is a great day.';
+    value = str.endsWith('day.'); 
+    value1 = str.endsWith('a', 7);
+            // It is a 
+            //esme pahle wo cut kiye phir check kiye a last me hai ki nahi to tha  to return true kiya hai.
+    value2 = str.endsWith('great'); 
+    //bina length ke jab hum call karte hai to jo string hota hai uske last me check karta hai first parameter ko wo hai ki nahi agar nahi to false return karta hai.
+    console.log(value); //true
+    console.log(value1); //true
+    console.log(value2); //false
+    
+    //4.>
+    includes()
+    //syntex
+    string.includes(searchvalue, start)
+    //Example
+    str = "Welcome to GeeksforGeeks.";
+    check = str.includes("Geeks");
+    console.log(check); // true
+    check = str.includes("com",6);
+    console.log(check); // false
+    //the position from which the search will begin is less than 0, the entire array will be searched. 
+    check = str.includes("com",-1);
+    console.log(check); // true
+
+//16.>Number methods
+        //1.>
+        isNaN()
+        //syntex
+        Number.isNaN(value)
+        //Example
+        console.log(isNaN(NaN));             // true
+        console.log(isNaN("hello"));         // true (cannot be converted to a number)
+        console.log(isNaN(undefined));       // true (undefined is not a number)
+        console.log(isNaN("123"));           // false (can be converted to number 123)
+        console.log(isNaN(123));             // false (already a number)
+        console.log(isNaN(null));            // false (null coerces to 0)
+        console.log(isNaN(""));             // false (empty string coerces to 0)
+        
+        //2.>
+        isFinite()
+        //syntex
+        isFinite(value)
+        //Return
+        // true: If the value is a finite number.
+        // false: Otherwise (if the value is Infinity, -Infinity, NaN, or not a number).
+        //Example
+        isFinite(10);        // true (10 is a finite number)
+        isFinite(-10);       // true (-10 is a finite number)
+        isFinite(0);         // true (0 is a finite number)
+        isFinite(Infinity);  // false
+        isFinite(-Infinity); // false
+        isFinite(NaN);       // false
+
+        //3.>
+        Number.isSafeInteger()
+        //Syntex
+        Number.isSafeInteger(value)
+        // Return Value
+        // true: If the value is a safe integer.
+        // false: Otherwise (if the value is not an integer, is NaN, is outside the safe range, or is not of type number).
+        //Example
+        Number.isSafeInteger(10);           // true (10 is a safe integer)
+        Number.isSafeInteger(-9007199254740991); // true (-2^53 + 1)
+        Number.isSafeInteger(9007199254740991);  // true (2^53 - 1)
+
+        Number.isSafeInteger(9007199254740992);  // false (exceeds safe range)
+        Number.isSafeInteger(-9007199254740992); // false (below safe range)
+        Number.isSafeInteger(10.5);              // false (not an integer)
+        Number.isSafeInteger(NaN);               // false
+        Number.isSafeInteger(Infinity);          // false
+
+        //4.>
+        Math.trunc()
+            //syntex
+            Math.trunc(value)
+            //Example
+            console.log(Math.trunc(15.56));  // 15
+            console.log(Math.trunc(-15.56)); // -15
+            console.log(Math.trunc(0.236)); // 0
+
+        //5.>
+        Math.sign()
+            //syntex
+            Math.sign(number)
+            //Example
+            console.log(Math.sign(2)); // 1
+            console.log(Math.sign(-2)); //-1
+            console.log(Math.sign(0)); // 0
+            console.log(Math.sign(-0)); // -0
+            console.log(Math.sign(haa)); // NaN
+//17.>Classes
+        

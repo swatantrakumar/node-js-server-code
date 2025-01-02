@@ -271,7 +271,7 @@ Array.isArray() // check the passed vlaue is array or not or return boolean valu
     var isArray = Array.isArray(arr);
     console.log(isArray); // Output: true
 
-//similar method
+//similar method  ES6 Methods
 from()  /// string to array convert
     syntex:- Array.from(arrayLike, mapFunction, thisArg);
     //Example
@@ -402,7 +402,7 @@ new Array()  /// create a new array with passed elements..// Array(1,2,3,4,5,6) 
       const mappedArray = new Array(5).fill(0).map((_, index) => index + 1);
       console.log(mappedArray);  // Output: [1, 2, 3, 4, 5]
 
-of()  /// create a array with passed value in this method
+of()  /// create a array with passed value in this method  ES6 Methods
       syntex:- Array.of(element1, element2,  elementN);
       //Example
       var array = Array.of(1, 2, 3, 4, 5);

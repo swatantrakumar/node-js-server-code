@@ -1,0 +1,201 @@
+1. What is Node.js? Why is it popular?
+Answer:
+    Node.js is a JavaScript runtime built on Chrome's V8 engine. It allows developers to run JavaScript on the server side.
+
+    Popularity reasons:
+        Non-blocking I/O for scalability.
+        Single-threaded, event-driven architecture.
+        Fast and lightweight for real-time applications.
+
+2.>What is the difference between setImmediate() and process.nextTick()?
+Answer:
+
+    setImmediate(): Executes code after the current event loop.
+    process.nextTick(): Executes code before the next event loop begins.
+
+3.>Explain the event loop in Node.js.
+    Answer:
+    The event loop is the mechanism that handles asynchronous operations in Node.js. It allows non-blocking I/O by processing events and callbacks in phases, 
+    such as:
+        Timers (e.g., setTimeout).
+        Pending callbacks.
+        Idle/Prepare.
+        Poll (retrieving new I/O events).
+        Check (e.g., setImmediate).
+        Close callbacks.
+    Example :
+        console.log('1: Start of the script');
+
+        // Phase: Timers
+        setTimeout(() => {
+        console.log('2: setTimeout callback');
+        }, 0);
+
+        // Phase: Next Tick Queue
+        process.nextTick(() => {
+        console.log('3: process.nextTick callback');
+        });
+
+        // Phase: Immediate
+        setImmediate(() => {
+        console.log('4: setImmediate callback');
+        });
+
+        // Phase: Synchronous Code
+        console.log('5: End of the script');
+        Output Explanation
+        The above code outputs the following (order might vary slightly depending on the environment):
+
+        
+        1: Start of the script
+        5: End of the script
+        3: process.nextTick callback
+        2: setTimeout callback
+        4: setImmediate callback
+
+        What Happens in Each Phase?
+            Synchronous Code Execution (First Phase):
+
+            Node.js first executes all synchronous code, so "1: Start of the script" and "5: End of the script" are logged immediately.
+            process.nextTick() (Next Tick Queue):
+
+            process.nextTick() callbacks are executed before any other asynchronous callbacks in the event loop.
+            setTimeout() (Timers Phase):
+
+            The setTimeout callback is executed in the Timers phase. Since the timer delay is 0, it executes as soon as the event loop enters this phase.
+            setImmediate() (Check Phase):
+
+            setImmediate callbacks are executed after the Poll phase, regardless of any setTimeout() delay. If the event loop is idle, setImmediate might execute before setTimeout.
+
+        Visualizing the Event Loop
+            Order of Operations:
+            Execute synchronous code.
+            Process process.nextTick() callbacks.
+            Handle Timers (setTimeout, setInterval).
+            Handle I/O callbacks.
+            Handle setImmediate.
+            Handle close events (if any).
+
+Code and Practical Questions
+4. How do you handle errors in Node.js?
+    Answer:
+
+    Use try-catch blocks for synchronous code.
+    Use .catch() with promises or async/await.
+    Use process.on('uncaughtException') or process.on('unhandledRejection') for unhandled errors.
+    Example:
+
+        try {
+            // some code
+        } catch (error) {
+            console.error(error.message);
+        }
+5. How do you read and write files in Node.js?
+    Answer:
+    Using the fs module:
+
+    Read file:
+
+        const fs = require('fs');
+        fs.readFile('file.txt', 'utf8', (err, data) => {
+            if (err) throw err;
+            console.log(data);
+        });
+    Write file:
+
+        fs.writeFile('file.txt', 'Hello, World!', (err) => {
+            if (err) throw err;
+            console.log('File written successfully');
+        });
+6. What is middleware in Express.js?
+    Answer:
+    Middleware functions are functions that have access to the request (req), response (res), and next (next) in an Express.js application.
+
+    Example:
+
+    app.use((req, res, next) => {
+        console.log('Request URL:', req.url);
+        next(); // Pass control to the next middleware
+    });
+
+Advanced and Scenario-based Questions
+7. How do you handle asynchronous operations in Node.js?
+    Answer:
+
+    Callbacks:
+
+    fs.readFile('file.txt', (err, data) => {
+        if (err) throw err;
+        console.log(data);
+    });
+    Promises:
+
+        fs.promises.readFile('file.txt', 'utf8').then(console.log).catch(console.error);
+    Async/Await:
+
+    const readFile = async () => {
+        try {
+            const data = await fs.promises.readFile('file.txt', 'utf8');
+            console.log(data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+8. How do you implement caching in Node.js?
+    Answer:
+        Use a caching library like redis:
+
+
+    const redis = require('redis');
+    const client = redis.createClient();
+
+    client.set('key', 'value', (err, reply) => {
+        console.log(reply); // OK
+    });
+
+    client.get('key', (err, reply) => {
+        console.log(reply); // value
+    });
+9. What are streams in Node.js?
+    Answer:
+    Streams are used to handle continuous data flow efficiently. Types of streams:
+
+    Readable: For reading operations.
+    Writable: For writing operations.
+    Duplex: For both reading and writing.
+    Transform: For modifying or transforming data.
+    Example of reading a stream:
+
+
+    const fs = require('fs');
+    const readStream = fs.createReadStream('file.txt');
+    readStream.on('data', (chunk) => {
+            console.log(chunk.toString());
+        });
+Database Questions
+10. How do you connect to MongoDB in Node.js?
+    Answer:
+    Using mongoose:
+
+
+    const mongoose = require('mongoose');
+    mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('Connection failed', err));
+11. How do you implement pagination in MongoDB with Node.js?
+    Answer:
+
+
+    const page = 1; // Current page
+    const limit = 10; // Items per page
+    const skip = (page - 1) * limit;
+
+    Model.find().skip(skip).limit(limit).then((result) => {
+        console.log(result);
+    });
+
+13. What is the difference between synchronous and asynchronous programming in Node.js?
+    Answer:
+
+    Synchronous: Executes one task at a time, blocking the event loop.
+    Asynchronous: Non-blocking; tasks can execute in parallel using callbacks, promises, or async/await.

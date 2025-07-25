@@ -1,0 +1,118 @@
+1.>SOLID Principles.
+Ans:- The SOLID principles are a set of five design principles that help software developers create more understandable, flexible, and maintainable object-oriented software.
+    SOLID
+    i.>S - Single Responsibility Principle (SRP)
+        Definition: A class should have only one reason to change, meaning it should have only one job or responsibility.
+        Example: A class that handles both logging and processing data should be split into two separate classes, one for logging and another for processing data.
+    ii.>O - Open/Closed Principle (OCP)
+        Definition: A class should be open for extension but closed for modification. This means that you should be able to add new functionality to a class without changing its existing code.
+        Example: Instead of modifying an existing class to add new behavior, create a new subclass or use interfaces and polymorphism to extend functionality.
+    
+    iii.>L - Liskov Substitution Principle (LSP)
+         Definition: Objects of a superclass should be replaceable with objects of a subclass without affecting the correctness of the program.
+         Example: If you have a class Bird with a method fly(), a subclass Penguin should not override fly() to throw an exception, as penguins can't fly. Instead, they should provide an appropriate implementation of the move() method.
+    iv.>I - Interface Segregation Principle (ISP)
+        Definition: Clients should not be forced to depend on interfaces they do not use.
+        Example: Instead of creating a single Machine interface with methods like print(), scan(), and fax(), break it down into smaller, more specific interfaces like Printer, Scanner, and Fax interfaces, allowing clients to implement only the interfaces they need.
+    v.>D - Dependency Inversion Principle (DIP)
+        Definition: High-level modules should not depend on low-level modules. Both should depend on abstractions (e.g., interfaces). Abstractions should not depend on details. Details should depend on abstractions.
+        Example: Instead of a Car class directly depending on a GasEngine class, the Car class should depend on an abstract Engine interface, and various types of engines like GasEngine or ElectricEngine can be implemented separately.
+          
+    Summary of SOLID Principles:
+        * Single Responsibility Principle (SRP): One class = one responsibility.
+        * Open/Closed Principle (OCP): Classes should be open for extension but closed for modification.
+        * Liskov Substitution Principle (LSP): Subtypes must be substitutable for their base types.
+        * Interface Segregation Principle (ISP): Prefer small, specific interfaces over large, general ones.
+        * Dependency Inversion Principle (DIP): Depend on abstractions, not concrete classes.
+
+2.>Design patterns
+Ans.>Design patterns are reusable solutions to common problems in software design. They provide templates for solving issues that arise frequently during software development, helping developers write more efficient, maintainable, and scalable code. 
+
+Design patterns are divided into three main categories:
+    i.>Creational Design Patterns
+        These focus on object creation mechanisms, trying to create objects in a way that suits the situation.
+
+        Examples:
+            Singleton:
+                Ensures a class has only one instance and provides a global point of access to it.
+                Example: Database connection pool.
+            Factory Method:
+                Defines an interface for creating objects but allows subclasses to alter the type of objects created.
+                Example: Shape factory creating circles, rectangles, etc.
+            Builder:
+                Separates the construction of a complex object from its representation.
+                Example: Building a car with various configurations.
+            Prototype:
+                Creates new objects by copying an existing object (clone).
+                Example: Copying an object with predefined properties.
+            Abstract Factory:
+                Provides an interface for creating families of related objects without specifying their concrete classes.
+                Example: UI kits that can produce buttons, checkboxes, and text fields for different platforms (Windows, macOS).
+    ii.>Structural Design Patterns
+        These deal with the composition of objects and classes to form larger structures.
+        
+        Examples:
+            Adapter:
+                Converts the interface of a class into another interface clients expect.
+                Example: Connecting incompatible systems like legacy code with modern APIs.
+            Bridge:
+                Separates an object’s abstraction from its implementation so that they can vary independently.
+                Example: Decoupling a remote control (abstraction) from various devices (TV, radio).
+            Composite:
+                Composes objects into tree structures to represent part-whole hierarchies.
+                Example: A file system with files and directories.
+            Decorator:
+                Adds behavior or responsibilities to an object dynamically.
+                Example: Adding scrollbars to a text view.
+            Facade:
+                Provides a simplified interface to a larger body of code.
+                Example: A single class simplifying access to a complex subsystem like media players.
+            Flyweight:
+                Reduces the memory usage by sharing common parts of objects.
+                Example: Reusing character glyphs in a text editor.
+            Proxy:
+                Provides a placeholder for another object to control access to it.
+                Example: A proxy for database connections.
+    iii.>Behavioral Design Patterns
+         These focus on communication between objects and the delegation of responsibilities.
+
+        Examples:
+            Chain of Responsibility:
+                Passes requests along a chain of handlers until one of them handles the request.
+                Example: Logging with multiple levels (INFO, DEBUG, ERROR).
+            Command:
+                Encapsulates a request as an object, allowing you to parameterize and queue requests.
+                Example: Undo/redo functionality in text editors.
+            Interpreter:
+                Implements a specialized language or grammar.
+                Example: Parsing mathematical expressions.
+            Iterator:
+                Provides a way to access elements of a collection sequentially without exposing its underlying structure.
+                Example: Iterating through a list or an array.
+            Mediator:
+                Reduces direct communication between objects by introducing a mediator object.
+                Example: Chatroom managing communication between users.
+            Memento:
+                Captures an object’s state so it can be restored later.
+                Example: Saving and restoring a document’s state in a text editor.
+            Observer:
+                Defines a dependency between objects so that when one object changes, others are notified.
+                Example: Event handling in GUI frameworks.
+            State:
+                Allows an object to alter its behavior when its internal state changes.
+                Example: ATM changing behavior based on available cash.
+            Strategy:
+                Defines a family of algorithms and allows them to be interchangeable.
+                Example: Payment methods like credit card, PayPal, etc.
+            Template Method:
+                Defines the skeleton of an algorithm, deferring steps to subclasses.
+                Example: Implementing a game loop with customizable rules.
+            Visitor:
+                Separates operations from objects on which they operate.
+                Example: Operations on a file system like file size calculation.
+
+* Why Use Design Patterns?
+    Code Reusability: They solve common design problems, making solutions reusable across projects.
+    Maintainability: Patterns lead to cleaner and more organized code, simplifying debugging and enhancements.
+    Scalability: They ensure code structure can handle increasing demands without drastic changes.
+    Standardization: They establish a common vocabulary among developers for problem-solving.

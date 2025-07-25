@@ -1,0 +1,154 @@
+1. fs (File System)
+    Purpose: Handles file system operations like reading, writing, and modifying files.
+    Common Methods:
+        fs.readFile, fs.writeFile, fs.appendFile, fs.mkdir,
+        fs.unlink, fs.stat, fs.readdir, fs.watch,
+        fs.promises.readFile, fs.promises.writeFile
+    Example:
+        const fs = require('fs');
+        fs.readFile('./file.txt', 'utf8', (err, data) => {
+            if (err) throw err;
+            console.log(data);
+        });
+    
+2. path
+    Purpose: Provides utilities for handling and transforming file paths.
+    Common Methods:
+        path.basename, path.dirname, path.extname, path.join,
+        path.resolve, path.normalize, path.parse, path.format
+    Example:
+        const path = require('path');
+        console.log(path.join(__dirname, 'file.txt')); // Outputs full path
+
+3. http
+    Purpose: Creates HTTP servers and handles HTTP requests and responses.
+    Common Methods:
+        http.createServer, http.request, http.get
+    Example:
+        const http = require('http');
+        http.createServer((req, res) => {
+            res.write('Hello World');
+            res.end();
+        }).listen(3000);
+
+4. https
+    Purpose: Provides HTTPS server and client capabilities.
+    Common Methods:
+        https.request, https.get
+
+5. os
+    Purpose: Provides operating system-related utilities.
+    Common Methods:
+        os.type, os.platform, os.arch, os.cpus,
+        os.freemem, os.totalmem, os.uptime, os.homedir
+    Example:
+        const os = require('os');
+        console.log(os.platform()); // Outputs the platform, e.g., 'linux'
+
+6. events
+    Purpose: Implements the event-driven programming pattern.
+    Common Methods:
+        EventEmitter.on, EventEmitter.emit, EventEmitter.once
+    Examples:
+        const EventEmitter = require('events');
+        const emitter = new EventEmitter();
+        emitter.on('event', () => console.log('Event fired!'));
+        emitter.emit('event');
+
+7. stream
+    Purpose: Handles streaming data (readable, writable, duplex, transform streams).
+    Common Methods:
+        stream.pipe, stream.read, stream.write, stream.end
+    Examle:
+        const fs = require('fs');
+        const readStream = fs.createReadStream('./file.txt');
+        readStream.pipe(process.stdout);
+
+8. crypto
+    Purpose: Provides cryptographic functionalities.
+    Common Methods:
+        crypto.createHash, crypto.createCipheriv, crypto.randomBytes
+    Example:
+        const crypto = require('crypto');
+        const hash = crypto.createHash('sha256').update('data').digest('hex');
+        console.log(hash);
+
+9. url
+    Purpose: Parses and formats URLs.
+    Common Methods:
+        url.parse, url.format, url.resolve, new URL()
+    Example:
+        const url = require('url');
+        const myURL = new URL('https://example.com/path?name=value');
+        console.log(myURL.pathname); // '/path'
+10. querystring
+    Purpose: Parses and formats query strings.
+    Common Methods:
+        querystring.parse, querystring.stringify
+    Example:
+        const querystring = require('querystring');
+        const qs = querystring.parse('name=John&age=30');
+        console.log(qs); // { name: 'John', age: '30' }
+
+11. util
+    Purpose: Provides utility functions.
+    Common Methods:
+        util.promisify, util.format, util.inspect
+    Examples:
+        const util = require('util');
+        const timeout = util.promisify(setTimeout);
+        timeout(1000).then(() => console.log('Done!'));
+
+12. buffer
+    Purpose: Handles binary data.
+    Common Methods:
+
+        Buffer.alloc, Buffer.from, Buffer.concat
+    Example:
+
+        const buf = Buffer.from('Hello');
+        console.log(buf.toString()); // Hello
+13. child_process
+    Purpose: Spawns child processes.
+    Common Methods:
+
+        child_process.exec, child_process.spawn, child_process.fork
+    Example:
+
+        const { exec } = require('child_process');
+        exec('ls', (err, stdout) => console.log(stdout));
+14. timers
+    Purpose: Schedules functions for execution.
+    Common Methods:
+
+        setTimeout, setInterval, setImmediate, clearInterval
+15. dns
+    Purpose: Performs DNS lookups and name resolution.
+    Common Methods:
+
+        dns.lookup, dns.resolve, dns.reverse
+    Example:
+
+        const dns = require('dns');
+        dns.lookup('example.com', (err, address) => console.log(address));
+16. zlib
+    Purpose: Compresses and decompresses data.
+    Common Methods:
+
+        zlib.gzip, zlib.unzip, zlib.deflate
+    Example:
+
+        const zlib = require('zlib');
+        const input = 'Hello World';
+        zlib.gzip(input, (err, buffer) => console.log(buffer));
+17. readline
+    Purpose: Creates interactive command-line interfaces.
+    Common Methods:
+        readline.createInterface
+    Example:
+        const readline = require('readline');
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        rl.question('What is your name? ', (name) => {
+            console.log(`Hello, ${name}`);
+            rl.close();
+        });

@@ -3,6 +3,8 @@ const Config = {
     // MongoDB connection settings
     MONGODB_URI: 'mongodb://127.0.0.1:27017',
     DATABASE_NAME: 'central-elabs-prod',
+    // MONGODB_URI: 'mongodb+srv://rajswatantra9:ynnyYnfcPJ-U5yA@cluster0.mkite.mongodb.net',
+    // DATABASE_NAME: 'central_builder',
     COLLECTION_NAME: 'yourCollectionName',
     
     // Other configuration values

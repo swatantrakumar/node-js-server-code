@@ -6,7 +6,10 @@ const mongoose = require('mongoose');
 
 const connectToDatabase = async () => {
   try {
-    await mongoose.connect(Config.MONGODB_URI,{"dbName":Config.DATABASE_NAME});
+    const uri = `mongodb://${Config.DB_USER}:${Config.DB_PASSWORD}` +
+      `@${Config.DB_HOST}:27017/${Config.DATABASE_NAME}?authSource=admin`;
+    // await mongoose.connect(Config.MONGODB_URI,{"dbName":Config.DATABASE_NAME});
+    await mongoose.connect(uri);
     loadApi();
     console.log('Connected successfully to MongoDB');
   } catch (err) {

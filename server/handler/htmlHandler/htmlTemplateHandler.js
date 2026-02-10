@@ -9,7 +9,7 @@ const CollectionHandler = require("../collectionHandler");
 const QueryCriteria = require("../queryHandler/queryCriteria");
 const cacheService =  require("./../../cache/cacheService");
 const HtmlToPdf = require("./htmlToPdf");
-const PdfEventHandler = require("./PdfEventHandler");
+const PdfEventHandler = require("./pdfEventHandler");
 const PdfProperties = require("./pdfProperties");
 
 const collectionHandler = new CollectionHandler();

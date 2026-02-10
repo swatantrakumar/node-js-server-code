@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  node-js-server:
+    image: swatantrakumarthakuar/node-js-server-code:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node-js-server-code
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      # Connecting to Mongo running on the host machine (Windows/Mac)
+      - DB_HOST=host.docker.internal
+    env_file:
+      - .env

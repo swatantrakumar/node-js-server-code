@@ -1,19 +1,19 @@
 // Enum for various constant values in your project
 const Config = {
   // MongoDB connection settings
-  MONGODB_URI: 'mongodb://127.0.0.1:27017',
-  DB_HOST:'127.0.0.1',
-  DATABASE_NAME: 'central-elabs-prod',
+  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017',
+  DB_HOST: process.env.DB_HOST || '127.0.0.1',
+  DATABASE_NAME: process.env.DATABASE_NAME || 'central-elabs-prod',
   // MONGODB_URI: 'mongodb+srv://rajswatantra9:ynnyYnfcPJ-U5yA@cluster0.mkite.mongodb.net',
   // DATABASE_NAME: 'central_builder',
-  COLLECTION_NAME: 'yourCollectionName',
+  COLLECTION_NAME: process.env.COLLECTION_NAME || 'yourCollectionName',
 
   // Other configuration values
-  PORT: 8080,
+  PORT: process.env.PORT || 8080,
 
   // User credentials (note: sensitive data like passwords should be handled carefully)
-  DB_USER: 'admin',
-  DB_PASSWORD: 'admin123',
+  DB_USER: process.env.DB_USER || 'admin',
+  DB_PASSWORD: process.env.DB_PASSWORD || 'admin123',
 
   // Other enums and constant values
   STATUS_ACTIVE: 'active',

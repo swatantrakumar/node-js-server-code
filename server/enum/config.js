@@ -1,11 +1,12 @@
 // Enum for various constant values in your project
+const user = encodeURIComponent(process.env.DB_USER);
+const pass = encodeURIComponent(process.env.DB_PASSWORD);
 const Config = {
   // MongoDB connection settings
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017',
+  // MONGODB_URI: `mongodb://${user}:${pass}` + `@127.0.0.1:27017`,
   DB_HOST: process.env.DB_HOST || '127.0.0.1',
   DATABASE_NAME: process.env.DATABASE_NAME || 'central-elabs-prod',
-  // MONGODB_URI: 'mongodb+srv://rajswatantra9:ynnyYnfcPJ-U5yA@cluster0.mkite.mongodb.net',
-  // DATABASE_NAME: 'central_builder',
+  MONGODB_URI: `mongodb+srv://${user}:${pass}@cluster0.mkite.mongodb.net`, 
   COLLECTION_NAME: process.env.COLLECTION_NAME || 'yourCollectionName',
 
   // Other configuration values

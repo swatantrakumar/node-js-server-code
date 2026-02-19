@@ -16,7 +16,7 @@ const PermissionHandler = require('../handler/permissionHandler');
 const templateHandler = require('../handler/templateHandler');
 // const SendEmailHandler = require('../handler/sendEmailHandler');
 const cron = require('node-cron');
-require('dotenv').config();
+// require('dotenv').config();
 
 
 const permissionHandler = new PermissionHandler();

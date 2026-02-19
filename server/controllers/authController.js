@@ -376,18 +376,18 @@ class AuthController {
         await this.updateAppUser(appUser);
         let responce = {}
         if (appUser.accountStatus && appUser.accountStatus.toLowerCase() == "locked") {
-            response = { message: message };
+            responce = { message: message };
         } else if (message) {
-            response = { token: token, message: message };
+            responce = { token: token, message: message };
         } else {
             if (appUser.wrongLoginAttempt && appUser.wrongLoginAttempt > 0) {
                 appUser.wrongLoginAttempt = 0;
                 appUser.wrongLoginAttemptTime = null;
                 this.updateAppUser(appUser);
             }
-            response = { token: token };
+            responce = { token: token };
         }
-        return response;
+        return responce;
     }
     static handleSignin(appUser, applicationSetting) {
         let lastPasswordResetDate = appUser.lastPasswordResetDate;

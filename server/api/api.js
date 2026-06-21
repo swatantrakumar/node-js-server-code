@@ -32,6 +32,10 @@ async function loadApi (){
     await LoadCache.refreshCache();
     await templateHandler.prepareTemplates();
     await permissionHandler.fetAppRoleAndAppRoleBindingAndAppUsersGroupAndProcessData();
+
+    app.use('/health_check', (req, res) => {
+        res.json({ message: 'API is working!' });
+    });
     
 
     // Custom middleware to handle text/plain requests

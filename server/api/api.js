@@ -23,8 +23,28 @@ const permissionHandler = new PermissionHandler();
 // const sendEmailHandler = new SendEmailHandler();
 
 const app = express();
-// Use CORS middleware
-app.use(cors());
+
+// Use CORS middleware with credentials support for HttpOnly cookies
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
+
+// Lightweight cookie parser middleware
+app.use((req, res, next) => {
+    const cookieHeader = req.headers?.cookie;
+    req.cookies = {};
+    if (cookieHeader) {
+        cookieHeader.split(';').forEach(cookie => {
+            const parts = cookie.split('=');
+            const name = parts[0]?.trim();
+            if (name) {
+                req.cookies[name] = decodeURIComponent(parts.slice(1).join('=').trim());
+            }
+        });
+    }
+    next();
+});
 
 async function loadApi (){
     // Middleware to parse JSON data

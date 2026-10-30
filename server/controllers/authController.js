@@ -43,7 +43,12 @@ class AuthController {
                         if (twoFactoreAuthentication) {
                             return await this.handleTwoFactorAuthenticationResponse(user, applicationSetting);
                         } else {
-                            let response = await this.handleSigninResponse(this.createJwtToken({ email: body.userId }), this.handleSignin(user, applicationSetting), user);
+                            const accessToken = this.createJwtToken({ email: body.userId });
+                            const refreshToken = this.createRefreshToken({ email: body.userId });
+                            this.setRefreshTokenCookie(res, refreshToken);
+
+                            let response = await this.handleSigninResponse(accessToken, this.handleSignin(user, applicationSetting), user);
+                            response.expiresIn = 900; // 15 minutes standard
                             return res.status(200).send(response);
                         }
                     } else {
@@ -61,7 +66,8 @@ class AuthController {
                 });
             }
         } catch (error) {
-            console.log("login error" + error);
+            console.error("login error:", error);
+            return res.status(500).send({ message: "Internal server error during login." });
         }
     }
     static signUp = async (req, res) => {
@@ -339,10 +345,19 @@ class AuthController {
                 let applicationSettings = await collectionHandler.findAllDocuments(ApplicationSetting);
                 let applicationSetting = applicationSettings[0];
                 let authenticationtype = applicationSetting?.authenticationSettings?.twoFactorAuthenticationType;
+                const sendAuthSuccess = async () => {
+                    const accessToken = this.createJwtToken({ email: userId });
+                    const refreshToken = this.createRefreshToken({ email: userId });
+                    this.setRefreshTokenCookie(res, refreshToken);
+
+                    let response = await this.handleSigninResponse(accessToken, this.handleSignin(user, applicationSetting), user);
+                    response.expiresIn = 900;
+                    return res.status(200).send(response);
+                };
+
                 if (authenticationtype == "email") {
                     if (code == user.authenticationCode) {
-                        let response = await this.handleSigninResponse(this.createJwtToken({ email: userId }), this.handleSignin(user, applicationSetting), user);
-                        return res.status(200).send(response);
+                        return await sendAuthSuccess();
                     } else {
                         return res.status(400).send({
                             message: "Verification code is invalid"
@@ -352,8 +367,7 @@ class AuthController {
                     // let otp =  twoFactorUtility.verifySmsOtp(user.authenticationCode, code);
                     let opt = null;
                     if (opt && otp.get("Status") == "Success") {
-                        let response = await this.handleSigninResponse(this.createJwtToken({ email: userId }), this.handleSignin(user, applicationSetting), user);
-                        return res.status(200).send(response);
+                        return await sendAuthSuccess();
                     } else {
                         return res.status(400).send({
                             message: "Verification code is invalid"
@@ -439,9 +453,26 @@ class AuthController {
         message = "Your Account is Locked, Connect to Admin!!!";
         return message;
     }
+    static setRefreshTokenCookie(res, refreshToken) {
+        const isProd = process.env.NODE_ENV === 'production';
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms (standard format)
+            path: '/'
+        });
+    }
+
     static createJwtToken(payload) {
-        // Generate JWT token
-        const token = jwt.sign(payload, secretKey.key, { expiresIn: '24h' });
+        // Generate short-lived Access Token (15 minutes standard)
+        const token = jwt.sign({ ...payload, type: 'access' }, secretKey.key, { expiresIn: '15m' });
+        return token;
+    }
+
+    static createRefreshToken(payload) {
+        // Generate long-lived Refresh Token (7 days standard)
+        const token = jwt.sign({ ...payload, type: 'refresh' }, secretKey.key, { expiresIn: '7d' });
         return token;
     }
     static async userExists(userId) {
@@ -560,6 +591,66 @@ class AuthController {
         }
         return res.status(200).send(response);
     }
+
+    static refreshToken = async (req, res) => {
+        try {
+            const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+            if (!refreshToken) {
+                return res.status(401).send({ message: "Refresh token not found." });
+            }
+
+            let decoded;
+            try {
+                decoded = jwt.verify(refreshToken, secretKey.key);
+            } catch (err) {
+                return res.status(401).send({ message: "Invalid or expired refresh token." });
+            }
+
+            if (decoded.type && decoded.type !== 'refresh') {
+                return res.status(401).send({ message: "Invalid token type for refresh." });
+            }
+
+            const user = await User.findOne({ email: decoded.email });
+            if (!user) {
+                return res.status(401).send({ message: "User not found." });
+            }
+            if (!user.enabled) {
+                return res.status(401).send({ message: "User is disabled." });
+            }
+            if (user.accountStatus && user.accountStatus.toLowerCase() === 'locked') {
+                return res.status(401).send({ message: "Account is locked." });
+            }
+
+            // Issue fresh 15-minute access token and rotate 7-day refresh token
+            const newAccessToken = this.createJwtToken({ email: user.email });
+            const newRefreshToken = this.createRefreshToken({ email: user.email });
+            this.setRefreshTokenCookie(res, newRefreshToken);
+
+            return res.status(200).send({
+                token: newAccessToken,
+                expiresIn: 900,
+                message: "Token refreshed successfully."
+            });
+        } catch (error) {
+            console.error("refreshToken error:", error);
+            return res.status(500).send({ message: "Internal server error during token refresh." });
+        }
+    };
+
+    static signOut = async (req, res) => {
+        try {
+            const isProd = process.env.NODE_ENV === 'production';
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: isProd ? 'none' : 'lax',
+                path: '/'
+            });
+            return res.status(200).send({ message: "Signed out successfully." });
+        } catch (error) {
+            return res.status(500).send({ message: "Sign out failed." });
+        }
+    };
 }
 
 module.exports = AuthController;

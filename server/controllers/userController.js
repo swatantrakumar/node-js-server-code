@@ -19,7 +19,8 @@ class UserController {
             console.timeEnd('getPermission');
             res.send(result); 
         } catch (error) {
-            console.log(error);
+            console.error("validateUser error:", error);
+            return res.status(500).send({ message: "Failed to validate user permissions." });
         }      
     }
 }

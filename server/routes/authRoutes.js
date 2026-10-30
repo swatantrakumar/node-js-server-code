@@ -16,6 +16,9 @@ router.post('/cp', AuthController.changePassword);
 router.post('/verify', AuthController.verifyUser);
 // Two factor authentication route
 router.post('/tfa', AuthController.twoFactorAuthentication);
-
+// Refresh token route
+router.post('/refreshToken', AuthController.refreshToken);
+// Sign out route
+router.post('/signOut', AuthController.signOut);
 
 module.exports = router;

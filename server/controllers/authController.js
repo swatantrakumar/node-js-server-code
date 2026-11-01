@@ -255,8 +255,11 @@ class AuthController {
     static changePassword = async (req, res) => {
         const changePasswordRequest = commonUtils.decodeBase64(req.body);
         let oldPassword = changePasswordRequest.currentPassword;
-        let newPassword = changePasswordRequest.newPassword
-        const userId = req.user.email;
+        let newPassword = changePasswordRequest.newPassword;
+        const userId = req.user?.email;
+        if (!userId) {
+            return res.status(401).send({ message: "Unauthorized. Valid token required to change password." });
+        }
         let user = null;
         try {
             user = await User.findOne({ email: userId });
@@ -265,14 +268,14 @@ class AuthController {
                 const isValidOld = await user.validPassword(oldPassword);
                 if (isValidNew) {
                     return res.status(400).send({
-                        message: "New Password and Old Password can not be same."
+                        message: "New Password and Old Password cannot be same."
                     });
                 } else if (isValidOld) {
                     await user.setPassword(newPassword);
                     user.lastPasswordResetDate = commonUtils.getCurrentDate();
                     await this.updateAppUser(user);
                     return res.status(200).send({
-                        message: "Your Password has been updates successfully"
+                        message: "Your password has been updated successfully."
                     });
                 } else {
                     return res.status(400).send({
